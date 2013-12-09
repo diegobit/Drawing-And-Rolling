@@ -18,6 +18,7 @@
 		F11DFEB018560DE9001A17AA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F11DFE8F18560DE8001A17AA /* Cocoa.framework */; };
 		F11DFEB818560DE9001A17AA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F11DFEB618560DE9001A17AA /* InfoPlist.strings */; };
 		F11DFEBA18560DE9001A17AA /* DrawingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFEB918560DE9001A17AA /* DrawingTests.m */; };
+		F11DFEC518560E36001A17AA /* DRRMyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFEC418560E36001A17AA /* DRRMyViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +51,8 @@
 		F11DFEB518560DE9001A17AA /* DrawingTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "DrawingTests-Info.plist"; sourceTree = "<group>"; };
 		F11DFEB718560DE9001A17AA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F11DFEB918560DE9001A17AA /* DrawingTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DrawingTests.m; sourceTree = "<group>"; };
+		F11DFEC318560E36001A17AA /* DRRMyViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRMyViewController.h; sourceTree = "<group>"; };
+		F11DFEC418560E36001A17AA /* DRRMyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRMyViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +121,8 @@
 				F11DFEA118560DE8001A17AA /* DRRAppDelegate.h */,
 				F11DFEA218560DE8001A17AA /* DRRAppDelegate.m */,
 				F11DFEA418560DE8001A17AA /* MainMenu.xib */,
+				F11DFEC318560E36001A17AA /* DRRMyViewController.h */,
+				F11DFEC418560E36001A17AA /* DRRMyViewController.m */,
 				F11DFEA718560DE8001A17AA /* Images.xcassets */,
 				F11DFE9618560DE8001A17AA /* Supporting Files */,
 			);
@@ -254,6 +259,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11DFE9C18560DE8001A17AA /* main.m in Sources */,
+				F11DFEC518560E36001A17AA /* DRRMyViewController.m in Sources */,
 				F11DFEA318560DE8001A17AA /* DRRAppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
