@@ -7,17 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-
-@interface DRRPointObj : NSObject {
-    NSPoint point;
-}
-
-- (id)initWithPoint:(NSPoint *)p;
-//- (BOOL)isEmpty;
-- (NSPoint)getPoint;
-- (void)setPoint:(NSPoint *)p;
-
-@end
+#import "DRRPointObj.h"
 
 
 
@@ -26,9 +16,8 @@ NSRect computeRect(CGFloat x, CGFloat y, CGFloat w, CGFloat h, NSInteger border)
 
 
 @interface DRRMyViewController : NSView {
-    
+
     NSPoint prevmouseXY;
-    //    NSRect prevbounds;
     
     NSMutableArray * linesContainer;
     NSInteger last;
@@ -38,9 +27,41 @@ NSRect computeRect(CGFloat x, CGFloat y, CGFloat w, CGFloat h, NSInteger border)
     
 }
 
+- (id)initWithFrame:(NSRect)frameRect;
+- (void)addEmptyLine;
+- (void)addPointToLatestLine:(NSPoint*)p;
+
+- (void)mouseDown:(NSEvent *)theEvent;
+- (void)mouseDragged:(NSEvent *)theEvent;
+- (void)mouseUp:(NSEvent *)theEvent;
+
+- (void)drawRect:(NSRect)dirtyRect;
+
 @end
 
 
-@interface DRRMyCustomView
+
+@interface DRRMyControl : NSObjectController {
+    
+    NSSize size;
+    
+}
+
+- (id)initWithSize:(NSSize)rectSize;
+- (NSSize)getSize;
+//- (NSPoint)getFrameOrigin; //- (NSRect)getFrame; //- (void)setFrameOrigin:(NSPoint)o; //- (void)setFrame:(NSRect)r;
+- (void)setSize:(NSSize)rectSize;
+
+
 
 @end
+
+
+
+
+
+
+
+
+
+

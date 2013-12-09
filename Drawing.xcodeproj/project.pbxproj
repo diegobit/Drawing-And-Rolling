@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F106B33018564AC8009804A8 /* DRRPointObj.m in Sources */ = {isa = PBXBuildFile; fileRef = F106B32F18564AC8009804A8 /* DRRPointObj.m */; };
 		F11DFE9018560DE8001A17AA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F11DFE8F18560DE8001A17AA /* Cocoa.framework */; };
 		F11DFE9A18560DE8001A17AA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F11DFE9818560DE8001A17AA /* InfoPlist.strings */; };
 		F11DFE9C18560DE8001A17AA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFE9B18560DE8001A17AA /* main.m */; };
@@ -32,6 +33,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F106B32E18564AC8009804A8 /* DRRPointObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRPointObj.h; sourceTree = "<group>"; };
+		F106B32F18564AC8009804A8 /* DRRPointObj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRPointObj.m; sourceTree = "<group>"; };
 		F11DFE8C18560DE8001A17AA /* Drawing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Drawing.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F11DFE8F18560DE8001A17AA /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		F11DFE9218560DE8001A17AA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -120,10 +123,12 @@
 			children = (
 				F11DFEA118560DE8001A17AA /* DRRAppDelegate.h */,
 				F11DFEA218560DE8001A17AA /* DRRAppDelegate.m */,
-				F11DFEA418560DE8001A17AA /* MainMenu.xib */,
 				F11DFEC318560E36001A17AA /* DRRMyViewController.h */,
 				F11DFEC418560E36001A17AA /* DRRMyViewController.m */,
+				F106B32E18564AC8009804A8 /* DRRPointObj.h */,
+				F106B32F18564AC8009804A8 /* DRRPointObj.m */,
 				F11DFEA718560DE8001A17AA /* Images.xcassets */,
+				F11DFEA418560DE8001A17AA /* MainMenu.xib */,
 				F11DFE9618560DE8001A17AA /* Supporting Files */,
 			);
 			path = Drawing;
@@ -259,6 +264,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11DFE9C18560DE8001A17AA /* main.m in Sources */,
+				F106B33018564AC8009804A8 /* DRRPointObj.m in Sources */,
 				F11DFEC518560E36001A17AA /* DRRMyViewController.m in Sources */,
 				F11DFEA318560DE8001A17AA /* DRRAppDelegate.m in Sources */,
 			);
@@ -471,6 +477,7 @@
 				F11DFEBF18560DE9001A17AA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		F11DFEC018560DE9001A17AA /* Build configuration list for PBXNativeTarget "DrawingTests" */ = {
 			isa = XCConfigurationList;
@@ -479,6 +486,7 @@
 				F11DFEC218560DE9001A17AA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

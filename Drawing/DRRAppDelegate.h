@@ -8,8 +8,11 @@
 
 #import <Cocoa/Cocoa.h>
 
+
+
 @interface DRRAppDelegate : NSObject <NSApplicationDelegate>
 
+//- (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag;
 @property (assign) IBOutlet NSWindow *window;
 
 @end
