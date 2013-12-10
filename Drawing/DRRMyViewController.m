@@ -26,6 +26,12 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
 - (void)awakeFromNib {
     [self setItemPropertiesToDefault];
     NSLog(@"awakeFromNib");
+    
+    
+    
+    
+    
+    
 }
 
 - (id)initWithFrame:(NSRect)frameRect {
@@ -48,12 +54,7 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
     /////TODO più proprietà?
 }
 
-
-
-//- (void)setLayoutDefault {
-//    [self setBounds:[super bounds]];
-//    [self setFrame:[super frame]];
-//}
+//- (void)setLayoutDefault {    //    [self setBounds:[super bounds]];  //    [self setFrame:[super frame]]; //}
 
 
 
@@ -93,7 +94,7 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
     
     [self addPointToLatestLine:(&pview)];
-    NSRect dirtyRect = computeRect(prevmouseXY.x, prevmouseXY.y, pwindow.x, pwindow.y, 1);
+    NSRect dirtyRect = computeRect(prevmouseXY.x, prevmouseXY.y, pwindow.x, pwindow.y, 2);
     [self setNeedsDisplayInRect:dirtyRect];
     
     prevmouseXY = pwindow;
@@ -107,7 +108,7 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
     
     [self addPointToLatestLine:(&pview)];
-    NSRect dirtyRect = computeRect(prevmouseXY.x, prevmouseXY.y, pwindow.x, pwindow.y, 1);
+    NSRect dirtyRect = computeRect(prevmouseXY.x, prevmouseXY.y, pwindow.x, pwindow.y, 2);
     [self setNeedsDisplayInRect:dirtyRect];
     
     prevmouseXY = pwindow;
@@ -121,20 +122,20 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
     //        [self setLayoutDefault];
     //    }
     NSLog(@"draw");
+    NSColor * black = [NSColor blackColor];
+    NSColor * white = [NSColor whiteColor];
+    NSColor * red = [NSColor redColor];
     
-    [[NSColor whiteColor] set];
+    [white set];
     NSRectFill(dirtyRect);
-    
-    //rettangolo DELETE
-    [[NSColor redColor] set];
-    NSRect r = NSMakeRect(5, 5, 30, 30);
-    NSRectFill(r);
     
     //    NSGraphicsContext * g = [NSGraphicsContext currentContext];
     //    CGContextRef gport = [g graphicsPort];
-    NSBezierPath * path = [NSBezierPath bezierPath];
-    [path setLineWidth: 2];
-    [[NSColor blackColor] set];
+//    NSBezierPath *path = [NSBezierPath bezierPath];
+    pathLines = [NSBezierPath bezierPath];
+    if (DEBUGMODE) { pathSinglePoint = [NSBezierPath bezierPath]; }
+    [pathLines setLineWidth: 2];
+    [black set];
     
 //    srand(time(NULL));
     
@@ -144,26 +145,36 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
             if ([line count] > 0) {
                 // aggiungo ogni punto della linea al path
                 [line enumerateObjectsUsingBlock:^(id point, NSUInteger ipoint, BOOL *stop2) {
+                    NSPoint p = [point getPoint];
+                    if (DEBUGMODE) {
+                        [pathSinglePoint appendBezierPathWithOvalInRect:NSMakeRect(p.x - 1.5, p.y - 1.5, 3, 3)];
+                    }
+                    
                     if (ipoint == 0)
-                        [path moveToPoint:[point getPoint]];
+                        [pathLines moveToPoint:p];
                     else {
 //                        NSPoint p = [point getPoint];
 //                        NSInteger r1 = rand() % 20; NSInteger r2 = rand() % 20;
 //                        NSPoint pc1 = NSMakePoint(p.x + r1, p.y - r2);
 //                        NSPoint pc2 = NSMakePoint(p.x - r1, p.y + r2);
 //                        [path curveToPoint:p controlPoint1:pc1 controlPoint2:pc2];
-                        [path lineToPoint:[point getPoint]];
+                        [pathLines lineToPoint:[point getPoint]];
                     }
                 }];
                 
-                [path stroke];
-                [path removeAllPoints];
+                [black set];
+                [pathLines stroke];
+                if (DEBUGMODE) {
+                    [red set];
+                    [pathSinglePoint fill];
+                    [pathSinglePoint removeAllPoints];
+                }
+                [pathLines removeAllPoints];
+//                [self setNeedsDisplay:YES];
             }
         }];
     }
 
-//    [self setNeedsDisplay:NO];
-//    [super setNeedsDisplay:NO];
     [super drawRect:dirtyRect];
     
 //      prevbounds = [self bounds];
@@ -174,49 +185,6 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
 
 
 
-@implementation DRRMyControl
-
-// inizializza il controllo con un rettangolo
-- (id)initWithFrame:(NSRect)frameRect {
-    self = [super init];
-    if (self) {
-        [self setFrame:frameRect];
-    }
-    return self;
-}
-
-// metodi per ricevere e settare il rettangolo del controllo oppure la sua origine e le dimensioni
-- (NSPoint)getFrameOrigin { return rect.origin; }
-- (NSSize)getFrameSize { return rect.size; }
-- (NSRect)getFrame { return rect; }
-- (void)setFrameOrigin:(NSPoint)o { rect.origin = o; }
-- (void)setFrameSize:(NSSize)s { rect.size = s; }
-- (void)setFrame:(NSRect)r { rect = r; }
-
-// metodo che restituisce true se il punto passato è dentro al rettangolo del controllo
-- (BOOL)hitTest:(NSPoint)p {
-    return NSPointInRect(p, rect);
-}
-
-- (void)mouseDown {
-    
-}
-
-- (void)mouseDragged {
-    
-}
-
-- (void)mouseUp {
-    
-}
 
 
-
-- (void)drawRect:(NSRect)dirtyRect {
-    
-}
-
-
-
-@end
 
