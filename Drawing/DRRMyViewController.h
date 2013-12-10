@@ -19,10 +19,11 @@ NSRect computeRect(CGFloat x, CGFloat y, CGFloat w, CGFloat h, NSInteger border)
 
     NSPoint prevmouseXY;
     
+    NSMutableArray * controls;
+    
     NSMutableArray * linesContainer;
     NSInteger last;
     NSMutableArray * BezierPathsToDraw;
-    
     BOOL linesNeedDisplay;
     
 }
@@ -43,15 +44,27 @@ NSRect computeRect(CGFloat x, CGFloat y, CGFloat w, CGFloat h, NSInteger border)
 
 @interface DRRMyControl : NSObjectController {
     
-    NSSize size;
+    NSRect rect;
+//    NSPoint origin;
+//    NSSize size;
     
 }
 
 - (id)initWithSize:(NSSize)rectSize;
-- (NSSize)getSize;
-//- (NSPoint)getFrameOrigin; //- (NSRect)getFrame; //- (void)setFrameOrigin:(NSPoint)o; //- (void)setFrame:(NSRect)r;
-- (void)setSize:(NSSize)rectSize;
 
+- (NSPoint)getFrameOrigin;
+- (NSSize)getFrameSize;
+- (NSRect)getFrame;
+- (void)setFrameOrigin:(NSPoint)o;
+- (void)setFrameSize:(NSSize)s;
+- (void)setFrame:(NSRect)r;
+
+- (BOOL)hitTest:(NSPoint)p;
+- (void)mouseDown:(NSEvent *)theEvent;
+- (void)mouseDragged:(NSEvent *)theEvent;
+- (void)mouseUp:(NSEvent *)theEvent;
+
+- (void)drawRect:(NSRect)dirtyRect;
 
 
 @end

@@ -12,7 +12,10 @@
 
 @interface DRRAppDelegate : NSObject <NSApplicationDelegate>
 
-//- (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag;
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
+
+- (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag;
+
 @property (assign) IBOutlet NSWindow *window;
 
 @end

@@ -23,21 +23,30 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
 
 @implementation DRRMyViewController
 
+- (void)awakeFromNib {
+    [self setItemPropertiesToDefault];
+    NSLog(@"awakeFromNib");
+}
+
 - (id)initWithFrame:(NSRect)frameRect {
     self = [super initWithFrame:frameRect];
     if (self) {
-        //        [self setItemPropertiesToDefault];
+        NSLog(@"initWithFrame myViewController");
+        /////TODO array controlli?      // inizializzo l'array dei controlli e li alloco
+        
+        // inizializzo l'array di linee disegnate e le proprietà
         linesContainer = [[NSMutableArray alloc] init];
         last = -1;
-        //      lineToDraw = [[NSMutableArray alloc] init];
+        [self setItemPropertiesToDefault];
     }
     return self;
 }
 
 
-//- (void)setItemPropertiesToDefault {
-//    // FIXME troppe proprietà
-//}
+
+- (void)setItemPropertiesToDefault {
+    /////TODO più proprietà?
+}
 
 
 
@@ -84,7 +93,7 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
     
     [self addPointToLatestLine:(&pview)];
-    NSRect dirtyRect = computeRect(prevmouseXY.x, prevmouseXY.y, pwindow.x, pwindow.y, 0);
+    NSRect dirtyRect = computeRect(prevmouseXY.x, prevmouseXY.y, pwindow.x, pwindow.y, 1);
     [self setNeedsDisplayInRect:dirtyRect];
     
     prevmouseXY = pwindow;
@@ -98,7 +107,7 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
     
     [self addPointToLatestLine:(&pview)];
-    NSRect dirtyRect = computeRect(prevmouseXY.x, prevmouseXY.y, pwindow.x, pwindow.y, 0);
+    NSRect dirtyRect = computeRect(prevmouseXY.x, prevmouseXY.y, pwindow.x, pwindow.y, 1);
     [self setNeedsDisplayInRect:dirtyRect];
     
     prevmouseXY = pwindow;
@@ -111,6 +120,7 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
     //    if (!NSEqualRects(prevbounds, [self bounds])) {
     //        [self setLayoutDefault];
     //    }
+    NSLog(@"draw");
     
     [[NSColor whiteColor] set];
     NSRectFill(dirtyRect);
@@ -147,12 +157,13 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
                 }];
                 
                 [path stroke];
-                [self setNeedsDisplay:YES];
                 [path removeAllPoints];
             }
         }];
     }
-    
+
+//    [self setNeedsDisplay:NO];
+//    [super setNeedsDisplay:NO];
     [super drawRect:dirtyRect];
     
 //      prevbounds = [self bounds];
@@ -165,22 +176,44 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
 
 @implementation DRRMyControl
 
-- (id)initWithSize:(NSSize)rectSize {
+// inizializza il controllo con un rettangolo
+- (id)initWithFrame:(NSRect)frameRect {
     self = [super init];
     if (self) {
-        [self setSize:rectSize];
+        [self setFrame:frameRect];
     }
     return self;
 }
 
+// metodi per ricevere e settare il rettangolo del controllo oppure la sua origine e le dimensioni
+- (NSPoint)getFrameOrigin { return rect.origin; }
+- (NSSize)getFrameSize { return rect.size; }
+- (NSRect)getFrame { return rect; }
+- (void)setFrameOrigin:(NSPoint)o { rect.origin = o; }
+- (void)setFrameSize:(NSSize)s { rect.size = s; }
+- (void)setFrame:(NSRect)r { rect = r; }
 
-- (NSSize)getSize {
-    return size;
+// metodo che restituisce true se il punto passato è dentro al rettangolo del controllo
+- (BOOL)hitTest:(NSPoint)p {
+    return NSPointInRect(p, rect);
+}
+
+- (void)mouseDown {
+    
+}
+
+- (void)mouseDragged {
+    
+}
+
+- (void)mouseUp {
+    
 }
 
 
-- (void)setSize:(NSSize)rectSize {
-    size = rectSize;
+
+- (void)drawRect:(NSRect)dirtyRect {
+    
 }
 
 
