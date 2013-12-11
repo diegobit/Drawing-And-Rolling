@@ -8,12 +8,12 @@
 
 #import "DRRMyViewController.h"
 
+///// TODO il doubleidx non serve :(
 
-
-NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger border) {
+NSRect computeRect(NSPoint p1, NSPoint p2, NSInteger border) {
     
-    CGFloat x = MIN(x1, x2) - border; CGFloat y = MIN(y1, y2) - border;
-    CGFloat raww = x2 - x1; CGFloat rawh = y2 - y1;
+    CGFloat x = MIN(p1.x, p2.x) - border; CGFloat y = MIN(p1.y, p2.y) - border;
+    CGFloat raww = p2.x - p1.x; CGFloat rawh = p2.y - p1.y;
     CGFloat w = ABS(raww) + 2*border; CGFloat h = ABS(rawh) + 2*border;
     
     return NSMakeRect(x, y, w, h);
@@ -21,18 +21,109 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
 
 
 
+NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
+    __block NSPoint doubleidx;
+    __block BOOL found = NO;
+    if (linesarr != NULL) {
+        if ([linesarr count] > 0) {
+            // comincio il ciclo: per ogni oggetto dell'array (NSMutableArray di NSPoint)...
+            [linesarr enumerateObjectsWithOptions:NSEnumerationReverse
+                                    usingBlock:^(id line, NSUInteger idx, BOOL *stop) {
+                                        
+                                        // ...cerco i punti i cui indici sono il primo e l'ultimo della linea
+                                        NSInteger endidx = [line count] - 1;
+                                        NSPoint startp = [line[0] getPoint];
+                                        NSPoint endp = [line[endidx] getPoint];
+                                        
+                                        // e controllo la loro distanza dal mio punto: punto finale...
+                                        if ((abs(endp.x - pt.x) <= PTDISTANCE) && (abs(endp.y - pt.y) <= PTDISTANCE)) {
+                                            *stop = YES; found = YES;
+                                            doubleidx = NSMakePoint(idx, endidx);
+                                        }
+                                        // ...e punto iniziale
+                                        else if ((abs(startp.x - pt.x) <= PTDISTANCE) && (abs(startp.y - pt.y) <= PTDISTANCE)) {
+                                            *stop = YES; found = YES;
+                                            
+                                            // rigiro l'array in modo da poter continuare la linea aggiungendo punti alla fine
+                                            DRRPointObj * temp;
+                                            NSInteger i, j;
+                                            for (i = 0, j = [line count] - 1; i < j; i++, j--) {
+                                                temp = line[i];
+                                                line[i] = line[j];
+                                                line[j] = temp;
+                                            }
+                                            
+                                            doubleidx = NSMakePoint(idx, endidx);
+                                        }
+                                    }];
+        }
+        
+        // arrivo qui solo se l'array delle linee è vuoto oppure se non ho trovato un punto adiacente al mio
+        if (!found) doubleidx.x = NOTFOUND;
+        return doubleidx;
+
+    }
+    else {
+        doubleidx.x = ARGERROR;
+        errno = 0; ///// TODO errno
+        return doubleidx;
+    }
+}
+
+
 @implementation DRRMyViewController
+
+
+- (NSSize)screenSize {
+    
+    NSRect screenRect;
+    NSArray *screenArray = [NSScreen screens];
+    NSInteger screenCount = [screenArray count];
+    NSInteger i  = 0;
+    
+    for (i = 0; i < screenCount; i++)
+    {
+        NSScreen *screen = [screenArray objectAtIndex: i];
+        screenRect = [screen visibleFrame];
+    }
+    
+    return screenRect.size;
+}
+
+//NSRect frameRelativeToWindow = [self convertRect:myView.bounds toView:nil];
+//NSRect frameRelativeToScreen = [self.window convertRectToScreen:frameInWindow];
+
+//- (NSPoint)convertToScreenFromLocalPoint:(NSPoint)point relativeToView:(NSView *)view {
+//	NSPoint windowPoint = [view convertPoint:point toView:nil];
+//    NSPoint screenPoint = [[view window] convertBaseToScreen:windowPoint];
+//	
+//	return screenPoint;
+//}
+
+//- (void)moveMouseToScreenPoint:(NSPoint)point
+//{
+//	CGPoint cgPoint = NSPointToCGPoint(point);
+//    
+//	CGSetLocalEventsSuppressionInterval(0.0);
+//	CGWarpMouseCursorPosition(cgPoint);
+//	CGSetLocalEventsSuppressionInterval(0.25);
+//}
+
+
 
 - (void)awakeFromNib {
     [self setItemPropertiesToDefault];
     NSLog(@"awakeFromNib");
-    
+
+    ///// TODO bottoni !
     
     
     
     
     
 }
+
+
 
 - (id)initWithFrame:(NSRect)frameRect {
     self = [super initWithFrame:frameRect];
@@ -51,7 +142,7 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
 
 
 - (void)setItemPropertiesToDefault {
-    /////TODO più proprietà?
+    ///// TODO più proprietà di default?
 }
 
 //- (void)setLayoutDefault {    //    [self setBounds:[super bounds]];  //    [self setFrame:[super frame]]; //}
@@ -67,11 +158,23 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
 
 
 - (void)addPointToLatestLine:(NSPoint*)p {
-    //    if (pt != NULL) {
-    DRRPointObj * pobj = [[DRRPointObj alloc] initWithPoint:p];
-    
-    [linesContainer[last] addObject:pobj];
-    //    }
+    if (p != NULL) {
+        DRRPointObj * pobj = [[DRRPointObj alloc] initWithPoint:p];
+        
+        [linesContainer[last] addObject:pobj];
+    }
+    else
+        errno = 0; ///// TODO errno
+}
+
+
+- (void)addPointToIdxLine:(NSPoint*)p idxLinesArray:(NSInteger)idx {
+    if (p != NULL) {
+        DRRPointObj * pobj = [[DRRPointObj alloc] initWithPoint:p];
+        [linesContainer[idx] addObject:pobj];
+    }
+    else
+        errno = 0; ///// TODO errno
 }
 
 
@@ -81,8 +184,34 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
     prevmouseXY = pwindow;
     
-    [self addEmptyLine];
-    [self addPointToLatestLine:(&pview)];
+    // controllo se il mouse è vicino ad un punto precedente...
+    nearpointIdx = findAdiacentVertex(linesContainer, pview);
+    
+    // ...si! Ancoro la nuova linea a quella.
+    if (nearpointIdx.x != ARGERROR && nearpointIdx.x != NOTFOUND) {
+        thisIsANewLine = NO;
+        NSPoint nearpoint = [linesContainer[(NSInteger)nearpointIdx.x][(NSInteger)nearpointIdx.y] getPoint];
+        prevmouseXY = nearpoint;
+        
+        // sposto il puntatore del mouse nella nuova posizione (coordinate schermo)
+        NSRect frameRelativeToScreen = [self.window convertRectToScreen:self.frame];
+        NSPoint newpos = NSMakePoint(frameRelativeToScreen.origin.x + nearpoint.x,
+                                     frameRelativeToScreen.origin.y + self.window.frame.size.height - nearpoint.y);
+        CGWarpMouseCursorPosition(newpos);
+    }
+    
+    // ...no! Aggiungo una nuova linea e il punto ad essa.
+    else if (nearpointIdx.x == NOTFOUND) {
+        thisIsANewLine = YES;
+        [self addEmptyLine];
+        [self addPointToLatestLine:(&pview)];
+    }
+    
+    else
+        perror("myViewController: mouseDown: findAdiacentVertex");
+    
+    
+    
     //    [self drawRect:([self bounds])];
     
 }
@@ -93,10 +222,17 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
     NSPoint pwindow = [theEvent locationInWindow];
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
     
-    [self addPointToLatestLine:(&pview)];
-    NSRect dirtyRect = computeRect(prevmouseXY.x, prevmouseXY.y, pwindow.x, pwindow.y, 2);
-    [self setNeedsDisplayInRect:dirtyRect];
+    // Devo aggiungere i punti a quella linea ancorata nella mouseDown senza crearne una nuova
+    if (!thisIsANewLine)
+        [self addPointToIdxLine:(&pview) idxLinesArray:nearpointIdx.x];
     
+    // Creo nuova linea.
+    else
+        [self addPointToLatestLine:(&pview)];
+
+    NSRect dirtyRect = computeRect(prevmouseXY, pwindow, 2);
+    [self setNeedsDisplayInRect:dirtyRect];
+        
     prevmouseXY = pwindow;
     
 }
@@ -108,7 +244,7 @@ NSRect computeRect(CGFloat x1, CGFloat y1, CGFloat x2, CGFloat y2, NSInteger bor
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
     
     [self addPointToLatestLine:(&pview)];
-    NSRect dirtyRect = computeRect(prevmouseXY.x, prevmouseXY.y, pwindow.x, pwindow.y, 2);
+    NSRect dirtyRect = computeRect(prevmouseXY, pwindow, 2);
     [self setNeedsDisplayInRect:dirtyRect];
     
     prevmouseXY = pwindow;

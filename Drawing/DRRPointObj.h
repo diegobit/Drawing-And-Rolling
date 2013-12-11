@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 
 
-
 @interface DRRPointObj : NSObject {
     NSPoint point;
 }
@@ -20,3 +19,12 @@
 - (void)setPoint:(NSPoint *)p;
 
 @end
+
+
+//typedef enum DRREndToEndPosition {Start, End} DRREndPosition;
+
+
+//typedef struct _DRRDoubleIndex {
+//    NSInteger index;
+//    DRREndPosition position;
+//} DRRDoubleIndex;

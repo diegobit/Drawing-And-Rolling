@@ -9,14 +9,37 @@
 #import <Cocoa/Cocoa.h>
 #import "DRRPointObj.h"
 
-#define DEBUGMODE 0
+#define DEBUGMODE 1
+
+// costanti per indicare se una funzione: (1) non ha trovato l'elemento cercato; (2) parametro non valido
+#define NOTFOUND -11
+#define ARGERROR -10
+
+// distanza tra due punti per essere considerati adiacenti
+#define PTDISTANCE 30.0
 
 
+/**
+ *  Restituisce il rettangolo che ha come vertici i due punti passati come parametro
+ */
+NSRect computeRect(NSPoint p1, NSPoint p2, NSInteger border);
 
-NSRect computeRect(CGFloat x, CGFloat y, CGFloat w, CGFloat h, NSInteger border);
+
+/**
+ *  Funzione che cerca nell'array di linee passato come parametro un punto che sia adiacente a pt.
+ *  I punti tra cui si cerca sono i vertici di ogni linea dell'array.
+ *  Per "adiacenti" si intende che i due punti sono ad una certa distanza limitata da PTDISTANCE
+ *
+ *  Restituisce una coppia di indici dentro un NSPoint:
+ *      "x" è l'indice nell'array linesarr.
+ *      "y" è l'indice del punto nella linea.
+ */
+NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
 
 
-
+/**
+ *  Parte principale dell'applicazione.
+ */
 @interface DRRMyViewController : NSView {
 
     // coordinata precedente mouse per mouseDragged (ridisegno solo zona cambiata)
@@ -31,10 +54,17 @@ NSRect computeRect(CGFloat x, CGFloat y, CGFloat w, CGFloat h, NSInteger border)
     NSMutableArray * BezierPathsToDraw;
     BOOL linesNeedDisplay;
     
+    // Variabile booleana che indica se la linea che sto disegnando è nuova o verrà ancorata ad una vecchia
+    BOOL thisIsANewLine;
+    // Coppia di indici per individuare il punto a cui si ancorerà la nuova linea. Valido solo se vale thisIsANewLine
+    NSPoint nearpointIdx;
+    
     // path che contengono le linee da disegnare e i punti in cui viene rilevato il mouse
     NSBezierPath * pathLines, * pathSinglePoint;
     
 }
+
+- (NSPoint)convertToScreenFromLocalPoint:(NSPoint)point relativeToView:(NSView *)view;
 
 - (id)initWithFrame:(NSRect)frameRect;
 - (void)addEmptyLine;
