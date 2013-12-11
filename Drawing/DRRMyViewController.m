@@ -74,21 +74,21 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 @implementation DRRMyViewController
 
 
-- (NSSize)screenSize {
-    
-    NSRect screenRect;
-    NSArray *screenArray = [NSScreen screens];
-    NSInteger screenCount = [screenArray count];
-    NSInteger i  = 0;
-    
-    for (i = 0; i < screenCount; i++)
-    {
-        NSScreen *screen = [screenArray objectAtIndex: i];
-        screenRect = [screen visibleFrame];
-    }
-    
-    return screenRect.size;
-}
+//- (NSSize)screenSize {
+//    
+//    NSRect screenRect;
+//    NSArray *screenArray = [NSScreen screens];
+//    NSInteger screenCount = [screenArray count];
+//    NSInteger i  = 0;
+//    
+//    for (i = 0; i < screenCount; i++)
+//    {
+//        NSScreen *screen = [screenArray objectAtIndex: i];
+//        screenRect = [screen visibleFrame];
+//    }
+//    
+//    return screenRect.size;
+//}
 
 //NSRect frameRelativeToWindow = [self convertRect:myView.bounds toView:nil];
 //NSRect frameRelativeToScreen = [self.window convertRectToScreen:frameInWindow];
@@ -160,7 +160,6 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 - (void)addPointToLatestLine:(NSPoint*)p {
     if (p != NULL) {
         DRRPointObj * pobj = [[DRRPointObj alloc] initWithPoint:p];
-        
         [linesContainer[last] addObject:pobj];
     }
     else
@@ -200,17 +199,14 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
         CGWarpMouseCursorPosition(newpos);
     }
     
-    // ...no! Aggiungo una nuova linea e il punto ad essa.
-    else if (nearpointIdx.x == NOTFOUND) {
+    // ...no! Aggiungo una nuova linea e il punto ad essa. Includo il caso in cui la funzione abbia restituito un errore
+    // per camuffarlo a runtime
+    else {
         thisIsANewLine = YES;
         [self addEmptyLine];
         [self addPointToLatestLine:(&pview)];
-    }
-    
-    else
         perror("myViewController: mouseDown: findAdiacentVertex");
-    
-    
+    }
     
     //    [self drawRect:([self bounds])];
     
@@ -243,7 +239,14 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     NSPoint pwindow = [theEvent locationInWindow];
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
     
-    [self addPointToLatestLine:(&pview)];
+    // Devo aggiungere i punti a quella linea ancorata nella mouseDown senza crearne una nuova
+    if (!thisIsANewLine)
+        [self addPointToIdxLine:(&pview) idxLinesArray:nearpointIdx.x];
+    
+    // Creo nuova linea.
+    else
+        [self addPointToLatestLine:(&pview)];
+    
     NSRect dirtyRect = computeRect(prevmouseXY, pwindow, 2);
     [self setNeedsDisplayInRect:dirtyRect];
     

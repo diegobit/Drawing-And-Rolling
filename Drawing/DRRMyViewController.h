@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "DRRPointObj.h"
 
-#define DEBUGMODE 1
+#define DEBUGMODE 0
 
 // costanti per indicare se una funzione: (1) non ha trovato l'elemento cercato; (2) parametro non valido
 #define NOTFOUND -11
@@ -64,7 +64,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
     
 }
 
-- (NSPoint)convertToScreenFromLocalPoint:(NSPoint)point relativeToView:(NSView *)view;
+//- (NSPoint)convertToScreenFromLocalPoint:(NSPoint)point relativeToView:(NSView *)view;
 
 - (id)initWithFrame:(NSRect)frameRect;
 - (void)addEmptyLine;
