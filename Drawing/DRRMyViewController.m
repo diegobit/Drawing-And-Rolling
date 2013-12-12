@@ -8,8 +8,6 @@
 
 #import "DRRMyViewController.h"
 
-///// TODO il doubleidx non serve :(
-
 NSRect computeRect(NSPoint p1, NSPoint p2, NSInteger border) {
     
     CGFloat x = MIN(p1.x, p2.x) - border; CGFloat y = MIN(p1.y, p2.y) - border;
@@ -36,12 +34,12 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
                                         NSPoint endp = [line[endidx] getPoint];
                                         
                                         // e controllo la loro distanza dal mio punto: punto finale...
-                                        if ((abs(endp.x - pt.x) <= PTDISTANCE) && (abs(endp.y - pt.y) <= PTDISTANCE)) {
+                                        if ((abs(endp.x - pt.x) <= PTDISTANCE) && (abs(endp.y - pt.y) <= PTDISTANCE) && !((abs(endp.x - pt.x) > PTDISTANCE*0.7) && (abs(endp.y - pt.y) > PTDISTANCE*0.7))) {
                                             *stop = YES; found = YES;
                                             doubleidx = NSMakePoint(idx, endidx);
                                         }
                                         // ...e punto iniziale
-                                        else if ((abs(startp.x - pt.x) <= PTDISTANCE) && (abs(startp.y - pt.y) <= PTDISTANCE)) {
+                                        else if ((abs(startp.x - pt.x) <= PTDISTANCE) && (abs(startp.y - pt.y) <= PTDISTANCE) && !((abs(startp.x - pt.x) > PTDISTANCE*0.7) && (abs(startp.y - pt.y) > PTDISTANCE*0.7))) {
                                             *stop = YES; found = YES;
                                             
                                             // rigiro l'array in modo da poter continuare la linea aggiungendo punti alla fine
@@ -65,7 +63,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     }
     else {
         doubleidx.x = ARGERROR;
-        errno = 0; ///// TODO errno
+        errno = EINVAL;
         return doubleidx;
     }
 }
@@ -116,6 +114,8 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     NSLog(@"awakeFromNib");
 
     ///// TODO bottoni !
+    NSCell * btnDrawFreely = [[NSCell alloc] init];
+    
     
     
     
@@ -129,7 +129,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     self = [super initWithFrame:frameRect];
     if (self) {
         NSLog(@"initWithFrame myViewController");
-        /////TODO array controlli?      // inizializzo l'array dei controlli e li alloco
+        controls = [[NSMutableArray alloc] init];
         
         // inizializzo l'array di linee disegnate e le proprietà
         linesContainer = [[NSMutableArray alloc] init];
@@ -145,15 +145,12 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     ///// TODO più proprietà di default?
 }
 
-//- (void)setLayoutDefault {    //    [self setBounds:[super bounds]];  //    [self setFrame:[super frame]]; //}
-
 
 
 - (void)addEmptyLine {
-    NSMutableArray * line = [[NSMutableArray alloc] init];
+    NSMutableArray * line = [[NSMutableArray alloc] init];     ///// TODO andranno   le alloc??
     [linesContainer addObject:line];
     last++;
-    // controllare alloc? FIXME
 }
 
 
@@ -163,7 +160,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
         [linesContainer[last] addObject:pobj];
     }
     else
-        errno = 0; ///// TODO errno
+        errno = EINVAL;
 }
 
 
@@ -173,7 +170,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
         [linesContainer[idx] addObject:pobj];
     }
     else
-        errno = 0; ///// TODO errno
+        errno = EINVAL;
 }
 
 
@@ -205,7 +202,8 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
         thisIsANewLine = YES;
         [self addEmptyLine];
         [self addPointToLatestLine:(&pview)];
-        perror("myViewController: mouseDown: findAdiacentVertex");
+        if (nearpointIdx.x == ARGERROR)
+            perror("myViewController: mouseDown: findAdiacentVertex");
     }
     
     //    [self drawRect:([self bounds])];
@@ -260,7 +258,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     //    if (!NSEqualRects(prevbounds, [self bounds])) {
     //        [self setLayoutDefault];
     //    }
-    NSLog(@"draw");
+    if(DEBUGMODE) NSLog(@"draw");
     NSColor * black = [NSColor blackColor];
     NSColor * white = [NSColor whiteColor];
     NSColor * red = [NSColor redColor];

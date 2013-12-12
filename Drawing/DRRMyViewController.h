@@ -16,7 +16,7 @@
 #define ARGERROR -10
 
 // distanza tra due punti per essere considerati adiacenti
-#define PTDISTANCE 30.0
+#define PTDISTANCE 20.0
 
 
 /**
@@ -40,7 +40,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
 /**
  *  Parte principale dell'applicazione.
  */
-@interface DRRMyViewController : NSView {
+@interface DRRMyViewController : NSControl {
 
     // coordinata precedente mouse per mouseDragged (ridisegno solo zona cambiata)
     NSPoint prevmouseXY;
