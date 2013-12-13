@@ -8,6 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "DRRPointObj.h"
+#import "DRRMyControl.h"
 
 #define DEBUGMODE 0
 
@@ -47,6 +48,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
     
     // array dei bottoni dell'interfaccia
     NSMutableArray * controls;
+    NSSize ctrlsize;
     
     // array e altro per contenere i punti del mouse da convertire in linee
     NSMutableArray * linesContainer;

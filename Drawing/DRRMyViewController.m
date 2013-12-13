@@ -114,8 +114,17 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     NSLog(@"awakeFromNib");
 
     ///// TODO bottoni !
-    NSCell * btnDrawFreely = [[NSCell alloc] init];
+    DRRbuttonDrawFreely * btnDrawFreely = [[DRRbuttonDrawFreely alloc] initWithFrame:NSMakeRect(0, self.frame.size.height - ctrlsize.height, ctrlsize.width, ctrlsize.height)];
+//    NSCell * btnDrawLine = [[DRRbuttonDrawLine alloc] init];
+//    NSCell * btnMoveView = [[DRRbuttonMoveView alloc] init];
+//    NSCell * btnPlay = [[DRRbuttonDrawPlay alloc] init];
+//    NSCell * btnZoomSlider = [[DRRbuttonZoomSlider alloc] init];
     
+    
+    
+    
+    [controls addObject:btnDrawFreely];
+
     
     
     
@@ -130,6 +139,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     if (self) {
         NSLog(@"initWithFrame myViewController");
         controls = [[NSMutableArray alloc] init];
+        ctrlsize = NSMakeSize(32, 32);
         
         // inizializzo l'array di linee disegnate e le proprietà
         linesContainer = [[NSMutableArray alloc] init];
@@ -312,9 +322,9 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
         }];
     }
 
-    [super drawRect:dirtyRect];
+
     
-//      prevbounds = [self bounds];
+    [(controls[0]) drawRect:([controls[0] frame])];
     
 }
 

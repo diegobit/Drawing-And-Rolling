@@ -20,7 +20,7 @@
 		F11DFEB818560DE9001A17AA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F11DFEB618560DE9001A17AA /* InfoPlist.strings */; };
 		F11DFEBA18560DE9001A17AA /* DrawingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFEB918560DE9001A17AA /* DrawingTests.m */; };
 		F11DFEC518560E36001A17AA /* DRRMyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFEC418560E36001A17AA /* DRRMyViewController.m */; };
-		F1FF8F3A18575A99003D9E71 /* DRROLDobjectcontroller.m in Sources */ = {isa = PBXBuildFile; fileRef = F1FF8F3918575A99003D9E71 /* DRROLDobjectcontroller.m */; };
+		F1FF8F3A18575A99003D9E71 /* DRRMyControl.m in Sources */ = {isa = PBXBuildFile; fileRef = F1FF8F3918575A99003D9E71 /* DRRMyControl.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,8 +57,8 @@
 		F11DFEB918560DE9001A17AA /* DrawingTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DrawingTests.m; sourceTree = "<group>"; };
 		F11DFEC318560E36001A17AA /* DRRMyViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRMyViewController.h; sourceTree = "<group>"; };
 		F11DFEC418560E36001A17AA /* DRRMyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRMyViewController.m; sourceTree = "<group>"; };
-		F1FF8F3818575A99003D9E71 /* DRROLDobjectcontroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRROLDobjectcontroller.h; sourceTree = "<group>"; };
-		F1FF8F3918575A99003D9E71 /* DRROLDobjectcontroller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRROLDobjectcontroller.m; sourceTree = "<group>"; };
+		F1FF8F3818575A99003D9E71 /* DRRMyControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRMyControl.h; sourceTree = "<group>"; };
+		F1FF8F3918575A99003D9E71 /* DRRMyControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRMyControl.m; sourceTree = "<group>"; };
 		F1FF8F3C18575FF3003D9E71 /* Base */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Base; path = Base.lproj/DRRButtons.h; sourceTree = "<group>"; };
 		F1FF8F3E18575FF3003D9E71 /* Base */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = Base; path = Base.lproj/DRRButtons.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -132,8 +132,8 @@
 				F1FF8F3D18575FF3003D9E71 /* DRRButtons.m */,
 				F11DFEC318560E36001A17AA /* DRRMyViewController.h */,
 				F11DFEC418560E36001A17AA /* DRRMyViewController.m */,
-				F1FF8F3818575A99003D9E71 /* DRROLDobjectcontroller.h */,
-				F1FF8F3918575A99003D9E71 /* DRROLDobjectcontroller.m */,
+				F1FF8F3818575A99003D9E71 /* DRRMyControl.h */,
+				F1FF8F3918575A99003D9E71 /* DRRMyControl.m */,
 				F106B32E18564AC8009804A8 /* DRRPointObj.h */,
 				F106B32F18564AC8009804A8 /* DRRPointObj.m */,
 				F11DFEA718560DE8001A17AA /* Images.xcassets */,
@@ -274,7 +274,7 @@
 			files = (
 				F11DFE9C18560DE8001A17AA /* main.m in Sources */,
 				F106B33018564AC8009804A8 /* DRRPointObj.m in Sources */,
-				F1FF8F3A18575A99003D9E71 /* DRROLDobjectcontroller.m in Sources */,
+				F1FF8F3A18575A99003D9E71 /* DRRMyControl.m in Sources */,
 				F11DFEC518560E36001A17AA /* DRRMyViewController.m in Sources */,
 				F11DFEA318560DE8001A17AA /* DRRAppDelegate.m in Sources */,
 			);
