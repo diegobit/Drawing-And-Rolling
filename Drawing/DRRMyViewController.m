@@ -107,52 +107,106 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 //	CGSetLocalEventsSuppressionInterval(0.25);
 //}
 
-
-
-- (void)awakeFromNib {
-    [self setItemPropertiesToDefault];
-    NSLog(@"awakeFromNib");
-
-    ///// TODO bottoni !
-    DRRbuttonDrawFreely * btnDrawFreely = [[DRRbuttonDrawFreely alloc] initWithFrame:NSMakeRect(0, self.frame.size.height - ctrlsize.height, ctrlsize.width, ctrlsize.height)];
-//    NSCell * btnDrawLine = [[DRRbuttonDrawLine alloc] init];
-//    NSCell * btnMoveView = [[DRRbuttonMoveView alloc] init];
-//    NSCell * btnPlay = [[DRRbuttonDrawPlay alloc] init];
-//    NSCell * btnZoomSlider = [[DRRbuttonZoomSlider alloc] init];
-    
-    
-    
-    
-    [controls addObject:btnDrawFreely];
-
-    
-    
-    
-    
-    
-}
-
-
-
 - (id)initWithFrame:(NSRect)frameRect {
+    NSLog(@"initWithFrame myViewController"); // REMOVE
+    
     self = [super initWithFrame:frameRect];
     if (self) {
-        NSLog(@"initWithFrame myViewController");
-        controls = [[NSMutableArray alloc] init];
-        ctrlsize = NSMakeSize(32, 32);
         
-        // inizializzo l'array di linee disegnate e le proprietà
-        linesContainer = [[NSMutableArray alloc] init];
-        last = -1;
-        [self setItemPropertiesToDefault];
+//        controls = [[NSMutableArray alloc] init];
+        
+//        ctrlsz = NSRegularControlSize;
+        
+        
+        
+        [self setItemPropertiesToDefault]; ///// TODO proprietà?
     }
     return self;
 }
 
+- (void)awakeFromNib {
+    NSLog(@"awakeFromNib"); // REMOVE
+    
+    [super awakeFromNib];
+    [self setItemPropertiesToDefault];
+    
+    [dock setCellClass:[DRRButton class]];
+    [dock setFrameOrigin:NSMakePoint(0, 0)];
+    [dock setCellSize:cellsize];
+    [dock renewRows:1 columns:1];
+    
+    cellpaths = [[NSMutableArray alloc] init];
+    cellmodes = [[NSMutableArray alloc] init];
+    makeDrawFreeButton(NSMakeRect(dock.frame.origin.x, dock.frame.origin.y, 1 * dock.cellSize.width, 1 * dock.cellSize.height), roundness, linewidth, cellpaths, cellmodes);
+//    [cellpaths addObject:cellpaths];
+//    [cellmodes addObject:cellmodes];
+    DRRButton * btnDrawFree = [[DRRButton alloc] initWithSize:cellsize paths:cellpaths typeOfDrawing:cellmodes];
+    [dock putCell:btnDrawFree atRow:1 column:1];
+    [dock sizeToCells];
+    
+    
+    
 
+    
+    
+//    cellpaths = [[NSMutableArray alloc] init];
+//    cellmodes = [[NSMutableArray alloc] init];
+//    // altri bottoni TODO
+    
+    
+//    NSArray * cells = [[NSArray alloc] init];
+//    [cells arrayByAddingObject:<#(id)#>
+    
+//    [dock addRowWithCells:<#(NSArray *)#>];
+    
+    
+    
+    
+    //    NSCell * btnDrawLine = [[DRRbuttonDrawLine alloc] init];
+    //    NSCell * btnMoveView = [[DRRbuttonMoveView alloc] init];
+    //    NSCell * btnPlay = [[DRRbuttonDrawPlay alloc] init];
+    //    NSCell * btnZoomSlider = [[DRRbuttonZoomSlider alloc] init];
+    
+    //    DRRbuttonDrawFreely * btnDrawFreely = [self cell];
+//    DRRbuttonDrawFreely * btnDrawFreely = [[DRRbuttonDrawFreely alloc] initWithFrame:NSMakeRect(0, self.frame.size.height - ctrlsize.height, ctrlsize.width, ctrlsize.height)];
+//    
+//    [btnDrawFreely setControlView:self];
+//    [btnDrawFreely setFrame:NSMakeRect(0, self.frame.size.height - ctrlsize.height, ctrlsize.width, ctrlsize.height)];
+//    [btnDrawFreely setEnabled:YES];
+//    [btnDrawFreely setControlSize:ctrlsz];
+//    
+//    btn1 = [[DRRbuttonDrawFreely alloc] initWithFrame:NSMakeRect(0, self.frame.size.height - ctrlsize.height, ctrlsize.width, ctrlsize.height)];
+//    [btn1 setControlView:self];
+//    [btn1 setFrame:NSMakeRect(0, self.frame.size.height - ctrlsize.height, ctrlsize.width, ctrlsize.height)];
+//    [btn1 setEnabled:YES];
+//    [btn1 setControlSize:ctrlsz];
+//    [self sizeToFit];
+//    
+//    [controls addObject:btnDrawFreely];
+    
+    
+}
+
+
+
+
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+    self = [super initWithCoder:aDecoder];
+//    if (self) { }
+    return self;
+}
 
 - (void)setItemPropertiesToDefault {
-    ///// TODO più proprietà di default?
+    // inizializzo l'array di linee disegnate e le proprietà
+    linesContainer = [[NSMutableArray alloc] init];
+    last = -1;
+    
+    // Dimensione bottoni della dock, spessore line del disegno interno. Rotondità tasti.
+    cellsize = NSMakeSize(32, 32);
+    linewidth = (cellsize.width + cellsize.height) / 32;
+    if (linewidth < 1) { linewidth = 1; }
+    roundness = 5;
 }
 
 
@@ -184,8 +238,17 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 }
 
 
+//- (IBAction)cellPressed:(id)sender {
+//    [sender setState:NSOnState];
+//}
+//
+//- (IBAction)cellPressedNoMore:(id)sender {
+//    [sender setState:NSOffState];
+//}
+
 - (void)mouseDown:(NSEvent *)theEvent {
     
+    ////// [controller start:self];
     NSPoint pwindow = [theEvent locationInWindow];
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
     prevmouseXY = pwindow;
@@ -263,6 +326,23 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 }
 
 
+- (void)setNeedsDisplay {
+    [super setNeedsDisplay];
+    [dock setNeedsDisplay];
+    
+}
+
+
+- (void)setNeedsDisplayInRect:(NSRect)invalidRect {
+    [super setNeedsDisplayInRect:invalidRect];
+    
+    if (CGRectIntersectsRect(dock.frame, invalidRect)) {
+        [dock setNeedsDisplay];
+    }
+}
+
+
+
 - (void)drawRect:(NSRect)dirtyRect {
     
     //    if (!NSEqualRects(prevbounds, [self bounds])) {
@@ -321,15 +401,21 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
             }
         }];
     }
-
-
     
-    [(controls[0]) drawRect:([controls[0] frame])];
+    
+    
+//    if (CGRectIntersectsRect(dock.frame, dirtyRect)) {
+//        [dock setNeedsDisplay];
+//    }
+
+//    [self setNeedsDisplayInRect:[controls[0] frame]];
+//    [self updateCell:controls[0]];
+//    [controls[0] drawFrame:[controls[0] frame] inView:self];
+//    [self drawCellInside:btn1];
     
 }
 
 @end
-
 
 
 

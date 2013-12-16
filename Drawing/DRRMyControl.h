@@ -53,6 +53,6 @@
 //- (void)mouseDragged:(NSEvent *)theEvent;
 - (void)mouseUp:(NSEvent *)theEvent;
 
-- (void)drawRect:(NSRect)dirtyRect;
+- (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
 
 @end

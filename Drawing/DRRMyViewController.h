@@ -8,7 +8,8 @@
 
 #import <Cocoa/Cocoa.h>
 #import "DRRPointObj.h"
-#import "DRRMyControl.h"
+#import "DRRMyControl.h" //??
+#import "DRRDock.h"
 
 #define DEBUGMODE 0
 
@@ -42,13 +43,29 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
  *  Parte principale dell'applicazione.
  */
 @interface DRRMyViewController : NSControl {
-
+    
+//    IBOutlet NSController *controller;
+    
     // coordinata precedente mouse per mouseDragged (ridisegno solo zona cambiata)
     NSPoint prevmouseXY;
     
-    // array dei bottoni dell'interfaccia
+    // Matrice che gestisce i bottoni dell'interfaccia. Grandezza controllo. Rotondità del bordo dei tasti.
+    // Spessore linea del disegno interno dei controlli.
+    NSMatrix * dock;
+    NSMutableArray * cellpaths;
+    NSMutableArray * cellmodes;
+//    NSMutableArray * tempPaths;
+//    NSMutableArray * tempModes;
+    NSSize cellsize;
+    CGFloat roundness;
+    CGFloat linewidth;
+    
+    
+    
+    
     NSMutableArray * controls;
-    NSSize ctrlsize;
+    DRRbuttonDrawFreely * btn1;
+    NSInteger ctrlsz;
     
     // array e altro per contenere i punti del mouse da convertire in linee
     NSMutableArray * linesContainer;
@@ -72,18 +89,17 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
 - (void)addEmptyLine;
 - (void)addPointToLatestLine:(NSPoint*)p;
 
+//- (IBAction)cellPressed:(id)sender;
+
 - (void)mouseDown:(NSEvent *)theEvent;
 - (void)mouseDragged:(NSEvent *)theEvent;
 - (void)mouseUp:(NSEvent *)theEvent;
 
+- (void)setNeedsDisplay;
+- (void)setNeedsDisplayInRect:(NSRect)invalidRect;
 - (void)drawRect:(NSRect)dirtyRect;
 
 @end
-
-
-
-
-
 
 
 

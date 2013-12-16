@@ -19,11 +19,23 @@
     return self;
 }
 
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+    }
+    
+    return self;
+}
+
 // metodi per ricevere e settare il rettangolo del controllo oppure la sua origine e le dimensioni
 - (NSPoint)getFrameOrigin { return self.frame.origin; }
 - (NSSize)getFrameSize    { return self.frame.size; }
 - (void)setFrameOrigin:(NSPoint)o { self.frame = NSMakeRect(o.x, o.y, self.frame.size.width, self.frame.size.height); }
 - (void)setFrameSize:(NSSize)s    { self.frame = NSMakeRect(self.frame.origin.x, self.frame.origin.y, s.width, s.height); }
+//- (NSSize)cellSize {
+//    return self.controlView.bounds.size;
+//}
 
 // metodo che restituisce true se il punto passato è dentro al rettangolo del controllo
 - (BOOL)hitTest:(NSPoint)p {
@@ -82,13 +94,22 @@
     return self;
 }
 
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+    }
+    
+    return self;
+}
+
 - (void)mouseDown:(NSEvent *)theEvent { [self setState:NSOnState]; }
 //- (void)mouseDragged { }
 - (void)mouseUp:(NSEvent *)theEvent { [self setState:NSOffState]; }
 
-- (void)drawRect:(NSRect)dirtyRect {
+- (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     NSLog(@"draw-buttonDRawFreely"); /////DELETE
-    NSColor * prevColor; ///// TODO salvare colore precedente
+//    NSColor * prevColor; ///// TODO salvare colore precedente
     
     [border setLineWidth: linewidth];
     

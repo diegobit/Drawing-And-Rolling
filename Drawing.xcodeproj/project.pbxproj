@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		F106B33018564AC8009804A8 /* DRRPointObj.m in Sources */ = {isa = PBXBuildFile; fileRef = F106B32F18564AC8009804A8 /* DRRPointObj.m */; };
+		F108A7AD185C9EE900AE183A /* DRRDock.m in Sources */ = {isa = PBXBuildFile; fileRef = F108A7AC185C9EE900AE183A /* DRRDock.m */; };
 		F11DFE9018560DE8001A17AA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F11DFE8F18560DE8001A17AA /* Cocoa.framework */; };
 		F11DFE9A18560DE8001A17AA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F11DFE9818560DE8001A17AA /* InfoPlist.strings */; };
 		F11DFE9C18560DE8001A17AA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFE9B18560DE8001A17AA /* main.m */; };
@@ -36,6 +37,8 @@
 /* Begin PBXFileReference section */
 		F106B32E18564AC8009804A8 /* DRRPointObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRPointObj.h; sourceTree = "<group>"; };
 		F106B32F18564AC8009804A8 /* DRRPointObj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRPointObj.m; sourceTree = "<group>"; };
+		F108A7AB185C9EE900AE183A /* DRRDock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRDock.h; sourceTree = "<group>"; };
+		F108A7AC185C9EE900AE183A /* DRRDock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRDock.m; sourceTree = "<group>"; };
 		F11DFE8C18560DE8001A17AA /* Drawing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Drawing.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F11DFE8F18560DE8001A17AA /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		F11DFE9218560DE8001A17AA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -59,8 +62,6 @@
 		F11DFEC418560E36001A17AA /* DRRMyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRMyViewController.m; sourceTree = "<group>"; };
 		F1FF8F3818575A99003D9E71 /* DRRMyControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRMyControl.h; sourceTree = "<group>"; };
 		F1FF8F3918575A99003D9E71 /* DRRMyControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRMyControl.m; sourceTree = "<group>"; };
-		F1FF8F3C18575FF3003D9E71 /* Base */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Base; path = Base.lproj/DRRButtons.h; sourceTree = "<group>"; };
-		F1FF8F3E18575FF3003D9E71 /* Base */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = Base; path = Base.lproj/DRRButtons.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,12 +129,12 @@
 			children = (
 				F11DFEA118560DE8001A17AA /* DRRAppDelegate.h */,
 				F11DFEA218560DE8001A17AA /* DRRAppDelegate.m */,
-				F1FF8F3B18575FF3003D9E71 /* DRRButtons.h */,
-				F1FF8F3D18575FF3003D9E71 /* DRRButtons.m */,
-				F11DFEC318560E36001A17AA /* DRRMyViewController.h */,
-				F11DFEC418560E36001A17AA /* DRRMyViewController.m */,
 				F1FF8F3818575A99003D9E71 /* DRRMyControl.h */,
 				F1FF8F3918575A99003D9E71 /* DRRMyControl.m */,
+				F11DFEC318560E36001A17AA /* DRRMyViewController.h */,
+				F11DFEC418560E36001A17AA /* DRRMyViewController.m */,
+				F108A7AB185C9EE900AE183A /* DRRDock.h */,
+				F108A7AC185C9EE900AE183A /* DRRDock.m */,
 				F106B32E18564AC8009804A8 /* DRRPointObj.h */,
 				F106B32F18564AC8009804A8 /* DRRPointObj.m */,
 				F11DFEA718560DE8001A17AA /* Images.xcassets */,
@@ -275,6 +276,7 @@
 				F11DFE9C18560DE8001A17AA /* main.m in Sources */,
 				F106B33018564AC8009804A8 /* DRRPointObj.m in Sources */,
 				F1FF8F3A18575A99003D9E71 /* DRRMyControl.m in Sources */,
+				F108A7AD185C9EE900AE183A /* DRRDock.m in Sources */,
 				F11DFEC518560E36001A17AA /* DRRMyViewController.m in Sources */,
 				F11DFEA318560DE8001A17AA /* DRRAppDelegate.m in Sources */,
 			);
@@ -329,22 +331,6 @@
 				F11DFEB718560DE9001A17AA /* en */,
 			);
 			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		F1FF8F3B18575FF3003D9E71 /* DRRButtons.h */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F1FF8F3C18575FF3003D9E71 /* Base */,
-			);
-			name = DRRButtons.h;
-			sourceTree = "<group>";
-		};
-		F1FF8F3D18575FF3003D9E71 /* DRRButtons.m */ = {
-			isa = PBXVariantGroup;
-			children = (
-				F1FF8F3E18575FF3003D9E71 /* Base */,
-			);
-			name = DRRButtons.m;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
