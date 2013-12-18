@@ -11,6 +11,16 @@
 typedef enum drawingmodes {STROKE, FILL} drawingmode_t;
 
 
+@interface DRRPathObj : NSObject
+
+@property NSBezierPath * path;
+
+- (id)initWithPath:(NSBezierPath *)p;
+//- (NSBezierPath *)getPoint;
+//- (void)setPath:(NSBezierPath *)p;
+
+@end
+
 
 @interface DRRDrawingProperties : NSObject
 
@@ -27,6 +37,7 @@ typedef enum drawingmodes {STROKE, FILL} drawingmode_t;
 
 void makeDrawFreeButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes);
 
+void makeDrawLine(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes);
 
 
 @interface DRRDock : NSMatrix
@@ -50,10 +61,10 @@ void makeDrawFreeButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMu
 
 
 
-@interface DRRButton : NSButtonCell {
+@interface DRRButton : NSCell {
     
-    NSMutableArray * paths;
-    NSMutableArray * modes;
+    NSMutableArray * btnpaths;
+    NSMutableArray * btnmodes;
 //    // Un path per il bordo (serve per disegnarlo e per l'hitTest) e un path per il disegno al suo interno.
 //    NSBezierPath * border;
 //    NSBezierPath * innerborder;
@@ -74,8 +85,9 @@ void makeDrawFreeButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMu
 
 //@property NSSize size;
 //@property CGFloat roundness;
++ (Class)cellClass;
 
-- (id)initWithSize:(NSSize)size paths:(NSMutableArray*)paths typeOfDrawing:(NSMutableArray*)modes;
+- (id)initWithPaths:(NSMutableArray*)paths typeOfDrawing:(NSMutableArray*)modes;
 
 //- (id)setPathsToDraw:(NSMutableArray *)paths;
 //

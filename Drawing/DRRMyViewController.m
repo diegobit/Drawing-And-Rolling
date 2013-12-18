@@ -8,16 +8,6 @@
 
 #import "DRRMyViewController.h"
 
-NSRect computeRect(NSPoint p1, NSPoint p2, NSInteger border) {
-    
-    CGFloat x = MIN(p1.x, p2.x) - border; CGFloat y = MIN(p1.y, p2.y) - border;
-    CGFloat raww = p2.x - p1.x; CGFloat rawh = p2.y - p1.y;
-    CGFloat w = ABS(raww) + 2*border; CGFloat h = ABS(rawh) + 2*border;
-    
-    return NSMakeRect(x, y, w, h);
-}
-
-
 
 NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     __block NSPoint doubleidx;
@@ -130,34 +120,60 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     [super awakeFromNib];
     [self setItemPropertiesToDefault];
     
-    [dock setCellClass:[DRRButton class]];
-    [dock setFrameOrigin:NSMakePoint(0, 0)];
+    dock = [[DRRDock alloc] initWithFrame:NSMakeRect(0, 0, 1, 1) mode:NSRadioModeMatrix cellClass:[DRRButton class] numberOfRows:1 numberOfColumns:2];
+//    [dock setCellClass:[DRRButton class]];
+//    [dock setFrameOrigin:NSMakePoint(0, 0)];
+//    [dock renewRows:4 columns:4];
     [dock setCellSize:cellsize];
-    [dock renewRows:1 columns:1];
     
     cellpaths = [[NSMutableArray alloc] init];
     cellmodes = [[NSMutableArray alloc] init];
-    makeDrawFreeButton(NSMakeRect(dock.frame.origin.x, dock.frame.origin.y, 1 * dock.cellSize.width, 1 * dock.cellSize.height), roundness, linewidth, cellpaths, cellmodes);
-//    [cellpaths addObject:cellpaths];
-//    [cellmodes addObject:cellmodes];
-    DRRButton * btnDrawFree = [[DRRButton alloc] initWithSize:cellsize paths:cellpaths typeOfDrawing:cellmodes];
-    [dock putCell:btnDrawFree atRow:1 column:1];
+    makeDrawFreeButton(NSMakeRect(dock.frame.origin.x, dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), roundness, linewidth, cellpaths, cellmodes);
+    DRRButton * btnDrawFree = [[DRRButton alloc] initWithPaths:cellpaths typeOfDrawing:cellmodes];
+    
+//    NSArray * array = [NSArray arrayWithObjects:btnDrawFree, btnDrawLine, nil];
+//    [dock addRowWithCells:array];
+    [dock putCell:btnDrawFree atRow:0 column:0];
     [dock sizeToCells];
     
+    NSMutableArray * cp = [[NSMutableArray alloc] init];
+    NSMutableArray * cm = [[NSMutableArray alloc] init];
+    makeDrawLine(NSMakeRect(dock.frame.origin.x + (1 * dock.cellSize.width), dock.frame.origin.y + 1 * dock.cellSize.height, dock.cellSize.width, dock.cellSize.height), roundness, linewidth, cp, cm);
+    DRRButton * btnDrawLine = [[DRRButton alloc] initWithPaths:cp typeOfDrawing:cm];
+    [dock putCell:btnDrawLine atRow:0 column:1];
+    [dock sizeToCells];
     
-    
-
-    
-    
+//    DRRButton * a1 = [dock cellAtRow:0 column:0];
+//    DRRButton * a2 = [dock cellAtRow:0 column:1];
+//    
+//    NSArray * aaaa;
+//    NSLog(@"pippi");
 //    cellpaths = [[NSMutableArray alloc] init];
 //    cellmodes = [[NSMutableArray alloc] init];
+    
+//    [dock putCell:btnDrawLine atRow:0 column:1];
+    
+    
+    
+    
+    
+    [self addSubview:dock];
+    [dock updateCell:[dock cellAtRow:0 column:0]];
+    [dock updateCell:[dock cellAtRow:0 column:1]];
+//    [self setNeedsDisplay:YES];
+//    [dock setNeedsDisplay:YES];
+    
+    
+    
 //    // altri bottoni TODO
+    //    cellpaths = [[NSMutableArray alloc] init];
+    //    cellmodes = [[NSMutableArray alloc] init];
     
     
 //    NSArray * cells = [[NSArray alloc] init];
-//    [cells arrayByAddingObject:<#(id)#>
+//    [cells arrayByAddingObject:(id)
     
-//    [dock addRowWithCells:<#(NSArray *)#>];
+//    [dock addRowWithCells:(NSArray *)];
     
     
     
@@ -167,23 +183,8 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     //    NSCell * btnPlay = [[DRRbuttonDrawPlay alloc] init];
     //    NSCell * btnZoomSlider = [[DRRbuttonZoomSlider alloc] init];
     
-    //    DRRbuttonDrawFreely * btnDrawFreely = [self cell];
-//    DRRbuttonDrawFreely * btnDrawFreely = [[DRRbuttonDrawFreely alloc] initWithFrame:NSMakeRect(0, self.frame.size.height - ctrlsize.height, ctrlsize.width, ctrlsize.height)];
 //    
-//    [btnDrawFreely setControlView:self];
-//    [btnDrawFreely setFrame:NSMakeRect(0, self.frame.size.height - ctrlsize.height, ctrlsize.width, ctrlsize.height)];
-//    [btnDrawFreely setEnabled:YES];
-//    [btnDrawFreely setControlSize:ctrlsz];
-//    
-//    btn1 = [[DRRbuttonDrawFreely alloc] initWithFrame:NSMakeRect(0, self.frame.size.height - ctrlsize.height, ctrlsize.width, ctrlsize.height)];
-//    [btn1 setControlView:self];
-//    [btn1 setFrame:NSMakeRect(0, self.frame.size.height - ctrlsize.height, ctrlsize.width, ctrlsize.height)];
-//    [btn1 setEnabled:YES];
-//    [btn1 setControlSize:ctrlsz];
-//    [self sizeToFit];
-//    
-//    [controls addObject:btnDrawFreely];
-    
+  
     
 }
 
@@ -207,14 +208,34 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     linewidth = (cellsize.width + cellsize.height) / 32;
     if (linewidth < 1) { linewidth = 1; }
     roundness = 5;
+    
+    thisIsANewLine = YES;
 }
 
+
+- (NSRect)computeRect:(NSPoint)p1 secondPoint:(NSPoint)p2 moveBorder:(NSInteger)border {
+    
+    CGFloat x = MIN(p1.x, p2.x) - border; CGFloat y = MIN(p1.y, p2.y) - border;
+    CGFloat raww = p2.x - p1.x; CGFloat rawh = p2.y - p1.y;
+    CGFloat w = ABS(raww) + 2*border; CGFloat h = ABS(rawh) + 2*border;
+    
+    return NSMakeRect(x, y, w, h);
+}
 
 
 - (void)addEmptyLine {
     NSMutableArray * line = [[NSMutableArray alloc] init];     ///// TODO andranno   le alloc??
     [linesContainer addObject:line];
     last++;
+}
+
+
+- (CGFloat)distanceBetweenPoint:(NSPoint)p1 andPoint:(NSPoint)p2 {
+    CGFloat dX = abs(p1.x - p2.x);
+    CGFloat dY = abs(p1.y - p2.y);
+    CGFloat d = sqrt((dX*dX) + (dY*dY)); ///// TODO migliora efficienza
+    
+    return d;
 }
 
 
@@ -248,6 +269,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 
 - (void)mouseDown:(NSEvent *)theEvent {
     
+    NSLog(@"MDOWN");
     ////// [controller start:self];
     NSPoint pwindow = [theEvent locationInWindow];
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
@@ -259,6 +281,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     // ...si! Ancoro la nuova linea a quella.
     if (nearpointIdx.x != ARGERROR && nearpointIdx.x != NOTFOUND) {
         thisIsANewLine = NO;
+        NSLog(@"no new line");
         NSPoint nearpoint = [linesContainer[(NSInteger)nearpointIdx.x][(NSInteger)nearpointIdx.y] getPoint];
         prevmouseXY = nearpoint;
         
@@ -286,18 +309,27 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 
 - (void)mouseDragged:(NSEvent *)theEvent {
     
+    NSLog(@"MDRAGGED");
     NSPoint pwindow = [theEvent locationInWindow];
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
     
     // Devo aggiungere i punti a quella linea ancorata nella mouseDown senza crearne una nuova
-    if (!thisIsANewLine)
-        [self addPointToIdxLine:(&pview) idxLinesArray:nearpointIdx.x];
+    if (!thisIsANewLine) {
+        NSInteger idx1 = nearpointIdx.x;
+        NSInteger idx2 = nearpointIdx.y;
+        NSMutableArray * line = linesContainer[idx1];
+        NSPoint p2 = [line[idx2] getPoint];
+        NSInteger idxlastpoint = ;
+        NSPoint p2 = [(linesContainer[idx])];
     
+        [self distanceBetweenPoint:pview andPoint:[nearpointIdx.x]]
+        [self addPointToIdxLine:(&pview) idxLinesArray:nearpointIdx.x];
+    }
     // Creo nuova linea.
     else
         [self addPointToLatestLine:(&pview)];
 
-    NSRect dirtyRect = computeRect(prevmouseXY, pwindow, 2);
+    NSRect dirtyRect = [self computeRect:prevmouseXY secondPoint:pwindow moveBorder:2];
     [self setNeedsDisplayInRect:dirtyRect];
         
     prevmouseXY = pwindow;
@@ -307,29 +339,28 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 
 - (void)mouseUp:(NSEvent *)theEvent {
     
+    NSLog(@"MUP");
     NSPoint pwindow = [theEvent locationInWindow];
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
     
     // Devo aggiungere i punti a quella linea ancorata nella mouseDown senza crearne una nuova
     if (!thisIsANewLine)
         [self addPointToIdxLine:(&pview) idxLinesArray:nearpointIdx.x];
-    
     // Creo nuova linea.
     else
         [self addPointToLatestLine:(&pview)];
     
-    NSRect dirtyRect = computeRect(prevmouseXY, pwindow, 2);
+    NSRect dirtyRect = [self computeRect:prevmouseXY secondPoint:pwindow moveBorder:2];
     [self setNeedsDisplayInRect:dirtyRect];
     
     prevmouseXY = pwindow;
-    
+//    thisIsANewLine = YES;
 }
 
 
 - (void)setNeedsDisplay {
     [super setNeedsDisplay];
     [dock setNeedsDisplay];
-    
 }
 
 
@@ -353,11 +384,9 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     NSColor * white = [NSColor whiteColor];
     NSColor * red = [NSColor redColor];
     
-    [white set];
-    NSRectFill(dirtyRect);
+//    [white set];
+//    NSRectFill(dirtyRect);
     
-    //    NSGraphicsContext * g = [NSGraphicsContext currentContext];
-    //    CGContextRef gport = [g graphicsPort];
 //    NSBezierPath *path = [NSBezierPath bezierPath];
     pathLines = [NSBezierPath bezierPath];
     if (DEBUGMODE) { pathSinglePoint = [NSBezierPath bezierPath]; }
@@ -402,10 +431,16 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
         }];
     }
     
-    
+    [dock setBackgroundColor:[NSColor lightGrayColor]];
+    [dock setDrawsBackground:YES];
     
 //    if (CGRectIntersectsRect(dock.frame, dirtyRect)) {
-//        [dock setNeedsDisplay];
+//        [dock drawCellInside:[dock cellAtRow:0 column:0]];
+//        [dock drawCellInside:[dock cellAtRow:0 column:1]];
+    
+//        [dock setNeedsDisplay:YES];
+//        [dock selectCellAtRow:0 column:0];
+//        [dock updateCell:[dock cellAtRow:0 column:0]];
 //    }
 
 //    [self setNeedsDisplayInRect:[controls[0] frame]];

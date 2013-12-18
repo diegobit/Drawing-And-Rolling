@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "DRRPointObj.h"
-#import "DRRMyControl.h" //??
+//#import "DRRMyControl.h"
 #import "DRRDock.h"
 
 #define DEBUGMODE 0
@@ -19,12 +19,6 @@
 
 // distanza tra due punti per essere considerati adiacenti
 #define PTDISTANCE 20.0
-
-
-/**
- *  Restituisce il rettangolo che ha come vertici i due punti passati come parametro
- */
-NSRect computeRect(NSPoint p1, NSPoint p2, NSInteger border);
 
 
 /**
@@ -54,18 +48,9 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
     NSMatrix * dock;
     NSMutableArray * cellpaths;
     NSMutableArray * cellmodes;
-//    NSMutableArray * tempPaths;
-//    NSMutableArray * tempModes;
     NSSize cellsize;
     CGFloat roundness;
     CGFloat linewidth;
-    
-    
-    
-    
-    NSMutableArray * controls;
-    DRRbuttonDrawFreely * btn1;
-    NSInteger ctrlsz;
     
     // array e altro per contenere i punti del mouse da convertire in linee
     NSMutableArray * linesContainer;
@@ -86,7 +71,14 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
 //- (NSPoint)convertToScreenFromLocalPoint:(NSPoint)point relativeToView:(NSView *)view;
 
 - (id)initWithFrame:(NSRect)frameRect;
+- (void)awakeFromNib;
+- (id)initWithCoder:(NSCoder *)aDecoder;
+
+/** Restituisce il rettangolo che ha come vertici i due punti passati come parametro */
+- (NSRect)computeRect:(NSPoint)p1 secondPoint:(NSPoint)p2 moveBorder:(NSInteger)border;
 - (void)addEmptyLine;
+- (CGFloat)distanceBetweenPoint:(NSPoint)p1 andPoint:(NSPoint)p2;
+- (void)addPointToIdxLine:(NSPoint*)p idxLinesArray:(NSInteger)idx;
 - (void)addPointToLatestLine:(NSPoint*)p;
 
 //- (IBAction)cellPressed:(id)sender;

@@ -14,6 +14,7 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     NSLog(@"applicationDidFinishLaunching");
+    [self.window setBackgroundColor:[NSColor whiteColor]];
     // Insert code here to initialize your application
 }
 
