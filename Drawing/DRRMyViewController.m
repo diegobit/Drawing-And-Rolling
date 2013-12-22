@@ -9,6 +9,21 @@
 #import "DRRMyViewController.h"
 
 
+@implementation DRRSegmentIdx
+
+- (id)initWithIndex:(NSInteger)iline indexTwo:(NSInteger)istartpt indexThree:(NSInteger)iendpt {
+    self = [super init];
+    if (self) {
+        self.idxline = iline;
+        self.idxstartpt = istartpt;
+        self.idxendpt = iendpt;
+    }
+    return self;
+}
+
+@end
+
+
 NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     __block NSPoint doubleidx;
     __block BOOL found = NO;
@@ -98,7 +113,9 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 //}
 
 - (id)initWithFrame:(NSRect)frameRect {
-    NSLog(@"initWithFrame myViewController"); // REMOVE
+    #ifdef DEBUGINIT
+    NSLog(@"initWithFrame myView");
+    #endif
     
     self = [super initWithFrame:frameRect];
     if (self) {
@@ -115,10 +132,13 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 }
 
 - (void)awakeFromNib {
-    NSLog(@"awakeFromNib"); // REMOVE
+    #ifdef DEBUGINIT
+    NSLog(@"awakeFromNib myView");
+    #endif
     
     [super awakeFromNib];
     [self setItemPropertiesToDefault];
+    origwindowframe = self.frame;
     
     dock = [[DRRDock alloc] initWithFrame:NSMakeRect(0, 0, 1, 1) mode:NSRadioModeMatrix cellClass:[DRRButton class] numberOfRows:1 numberOfColumns:2];
 //    [dock setCellClass:[DRRButton class]];
@@ -191,17 +211,25 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 
 
 
-- (id)initWithCoder:(NSCoder *)aDecoder
-{
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    #ifdef DEBUGINIT
+    NSLog(@"initWithCoder myView");
+    #endif
+    
     self = [super initWithCoder:aDecoder];
 //    if (self) { }
     return self;
 }
 
 - (void)setItemPropertiesToDefault {
+    #ifdef DEBUGINIT
+    NSLog(@"setItemProperties myView");
+    #endif
+    
     // inizializzo l'array di linee disegnate e le proprietà
     linesContainer = [[NSMutableArray alloc] init];
-    last = -1;
+    linesHistory = [[NSMutableArray alloc] init];
+//    last = -1;
     
     // Dimensione bottoni della dock, spessore line del disegno interno. Rotondità tasti.
     cellsize = NSMakeSize(32, 32);
@@ -210,6 +238,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     roundness = 5;
     
     thisIsANewLine = YES;
+    dirtyRect = NSMakeRect(0, 0, 1, 1);
 }
 
 
@@ -224,16 +253,21 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 
 
 - (void)addEmptyLine {
-    NSMutableArray * line = [[NSMutableArray alloc] init];     ///// TODO andranno   le alloc??
+    // Aggiorno l'array di linee con una vuota e l'array per la cronologia delle linee
+    NSMutableArray * line = [[NSMutableArray alloc] init];
     [linesContainer addObject:line];
-    last++;
+//    NSInteger last = [linesContainer count] - 1;
+//    last++;
+    
+//    DRRSegmentIdx * s = [[DRRSegmentIdx alloc] initWithIndex:last indexTwo:0 indexThree:0];
+//    [linesHistory addObject:s];
 }
 
 
 - (CGFloat)distanceBetweenPoint:(NSPoint)p1 andPoint:(NSPoint)p2 {
     CGFloat dX = abs(p1.x - p2.x);
     CGFloat dY = abs(p1.y - p2.y);
-    CGFloat d = sqrt((dX*dX) + (dY*dY)); ///// TODO migliora efficienza
+    CGFloat d = sqrt((dX*dX) + (dY*dY)); ///// TODO migliora!
     
     return d;
 }
@@ -242,7 +276,15 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 - (void)addPointToLatestLine:(NSPoint*)p {
     if (p != NULL) {
         DRRPointObj * pobj = [[DRRPointObj alloc] initWithPoint:p];
+        NSInteger last = [linesContainer count] - 1;
         [linesContainer[last] addObject:pobj];
+        
+        // Aggiungo un oggetto alla cronologia di linee. Gli indici interni sono 0 e l'ultimo della linea perchè
+        // utilizzo questo metodo solo per aggiungere nuove linee
+//        if (lastPtOfLine) {
+//            DRRSegmentIdx * s = [[DRRSegmentIdx alloc] initWithIndex:last indexTwo:0 indexThree:([linesContainer[last] count] - 1)];
+//            [linesHistory addObject:s];
+//        }
     }
     else
         errno = EINVAL;
@@ -253,27 +295,48 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     if (p != NULL) {
         DRRPointObj * pobj = [[DRRPointObj alloc] initWithPoint:p];
         [linesContainer[idx] addObject:pobj];
+        
+//        if (firstPtOfLine)
+//            idxFirstPtOfLine = nearpointIdx.y + 1;
+//        else if (lastPtOfLine) {
+//            DRRSegmentIdx * s = [[DRRSegmentIdx alloc] initWithIndex:idx indexTwo:idxFirstPtOfLine indexThree:([linesContainer[idx] count] - 1)];
+//            [linesHistory addObject:s];
+//        }
     }
     else
         errno = EINVAL;
 }
 
 
-//- (IBAction)cellPressed:(id)sender {
-//    [sender setState:NSOnState];
-//}
-//
-//- (IBAction)cellPressedNoMore:(id)sender {
-//    [sender setState:NSOffState];
-//}
+- (void)removeLatestLine {
+    if ([linesHistory count] > 0) {
+        DRRSegmentIdx * idxs = [linesHistory lastObject];
+        if (idxs.idxstartpt == 0) {
+            [linesContainer removeObjectAtIndex:(idxs.idxline)]; // TODO sarebbe meglio che eliminasse solo i punti da togliere e spostasse gli altri all'inizio dell'array dentro linescontainer ecc
+        }
+        else {
+            NSMutableArray * line = linesContainer[idxs.idxline];
+            NSInteger i = 0;
+            
+            for (i = idxs.idxstartpt; i < idxs.idxendpt; i++)
+                [line removeObjectAtIndex:i];
+        }
+        
+        [linesHistory removeLastObject];
+    }
+}
+
+//- (IBAction)cellPressed:(id)sender {   [sender setState:NSOnState]; }
+//- (IBAction)cellPressedNoMore:(id)sender { [sender setState:NSOffState]; }
 
 - (void)mouseDown:(NSEvent *)theEvent {
     
-    NSLog(@"MDOWN");
-    ////// [controller start:self];
+    #ifdef DEBUGMOUSECORR
+    NSLog(@"+mouseDown");
+    #endif
+    leftpressed = YES;
     NSPoint pwindow = [theEvent locationInWindow];
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
-    prevmouseXY = pwindow;
     
     // controllo se il mouse è vicino ad un punto precedente...
     nearpointIdx = findAdiacentVertex(linesContainer, pview);
@@ -281,80 +344,143 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     // ...si! Ancoro la nuova linea a quella.
     if (nearpointIdx.x != ARGERROR && nearpointIdx.x != NOTFOUND) {
         thisIsANewLine = NO;
-        NSLog(@"no new line");
         NSPoint nearpoint = [linesContainer[(NSInteger)nearpointIdx.x][(NSInteger)nearpointIdx.y] getPoint];
         prevmouseXY = nearpoint;
         
         // sposto il puntatore del mouse nella nuova posizione (coordinate schermo)
+//        origwindowframe.origin = self.frame.origin;
         NSRect frameRelativeToScreen = [self.window convertRectToScreen:self.frame];
         NSPoint newpos = NSMakePoint(frameRelativeToScreen.origin.x + nearpoint.x,
                                      frameRelativeToScreen.origin.y + self.window.frame.size.height - nearpoint.y);
+//        NSRect nearpointRelToScreen = [self.window convertRectToScreen:NSMakeRect(nearpoint.x, nearpoint.y, 1, 1)];
+//        NSPoint newpos = NSMakePoint(frameRelToScreen.origin.x + nearpointRelToScreen.origin.x,
+//                                     frameRelToScreen.origin.y + self.window.frame.size.height - nearpointRelToScreen.origin.x); //FIXME mi interessa trasformare il punto e uso una funzione su un rettangolo...
+
         CGWarpMouseCursorPosition(newpos);
     }
     
-    // ...no! Aggiungo una nuova linea e il punto ad essa. Includo il caso in cui la funzione abbia restituito un errore
-    // per camuffarlo a runtime
+    // ...no! Aggiungo una nuova linea e il punto ad essa. Includo il caso in cui la funzione abbia restituito un errore per camuffarlo a runtime
     else {
         thisIsANewLine = YES;
+        prevmouseXY = pwindow;
+        
         [self addEmptyLine];
         [self addPointToLatestLine:(&pview)];
+        
         if (nearpointIdx.x == ARGERROR)
             perror("myViewController: mouseDown: findAdiacentVertex");
     }
-    
-    //    [self drawRect:([self bounds])];
     
 }
 
 
 - (void)mouseDragged:(NSEvent *)theEvent {
     
-    NSLog(@"MDRAGGED");
+    #ifdef DEBUGMOUSECORR
+    NSLog(@"+mouseDragged");
+    #endif
     NSPoint pwindow = [theEvent locationInWindow];
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
     
-    // Devo aggiungere i punti a quella linea ancorata nella mouseDown senza crearne una nuova
-    if (!thisIsANewLine) {
-        NSInteger idx1 = nearpointIdx.x;
-        NSInteger idx2 = nearpointIdx.y;
-        NSMutableArray * line = linesContainer[idx1];
-        NSPoint p2 = [line[idx2] getPoint];
-        NSInteger idxlastpoint = ;
-        NSPoint p2 = [(linesContainer[idx])];
+    // Voglio evitare di avere troppi punti molto vicini, controllo la distanza tra questo punto e il precedente
+    CGFloat d = [self distanceBetweenPoint:prevmouseXY andPoint:pview];
     
-        [self distanceBetweenPoint:pview andPoint:[nearpointIdx.x]]
-        [self addPointToIdxLine:(&pview) idxLinesArray:nearpointIdx.x];
-    }
-    // Creo nuova linea.
-    else
-        [self addPointToLatestLine:(&pview)];
-
-    NSRect dirtyRect = [self computeRect:prevmouseXY secondPoint:pwindow moveBorder:2];
-    [self setNeedsDisplayInRect:dirtyRect];
+    if (d > 7) {
+        atLeastOneStroke = YES;
         
-    prevmouseXY = pwindow;
+        // Devo aggiungere i punti alla linea ancorata nella mouseDown senza crearne una nuova
+        if (!thisIsANewLine)
+            [self addPointToIdxLine:(&pview) idxLinesArray:nearpointIdx.x];
+        // Creo nuova linea.
+        else
+            [self addPointToLatestLine:(&pview)];
+        
+        dirtyRect = [self computeRect:prevmouseXY secondPoint:pwindow moveBorder:2];
+        [self setNeedsDisplayInRect:dirtyRect];
+        
+        #if defined(DEBUGLINES) || defined(DEBUGLINESHIST)
+        [self setNeedsDisplayInRect:NSMakeRect(self.frame.size.width - 55, 0, self.frame.size.width, 50)];
+        #endif
+        
+        prevmouseXY = pwindow;
+    }
     
+    else {
+        #ifdef DEBUGLINES
+        NSLog(@"Punto troppo vicino, lo ignoro");
+        #endif
+    }
+
 }
 
 
 - (void)mouseUp:(NSEvent *)theEvent {
     
-    NSLog(@"MUP");
-    NSPoint pwindow = [theEvent locationInWindow];
-    NSPoint pview   = [self convertPoint:pwindow fromView:nil];
+    #ifdef DEBUGMOUSECORR
+    NSLog(@"+mouseUp");
+    #endif
     
-    // Devo aggiungere i punti a quella linea ancorata nella mouseDown senza crearne una nuova
-    if (!thisIsANewLine)
-        [self addPointToIdxLine:(&pview) idxLinesArray:nearpointIdx.x];
-    // Creo nuova linea.
-    else
-        [self addPointToLatestLine:(&pview)];
+    leftpressed = NO;
+//    NSPoint pwindow = [theEvent locationInWindow];
+//    NSPoint pview   = [self convertPoint:pwindow fromView:nil];
     
-    NSRect dirtyRect = [self computeRect:prevmouseXY secondPoint:pwindow moveBorder:2];
-    [self setNeedsDisplayInRect:dirtyRect];
+    // Se è stato disegnato almeno un pezzo di linea allora lo aggiungo alla cronologia...
+    if (atLeastOneStroke) {
+        if (!thisIsANewLine) {
+            NSInteger idxline = (NSInteger) nearpointIdx.x;
+            NSInteger idxstart = (NSInteger) nearpointIdx.y;
+            NSMutableArray * thisline = linesContainer[idxline];
+            NSInteger lastpointidx = [thisline count] - 1;
+            DRRSegmentIdx * idxs = [[DRRSegmentIdx alloc] initWithIndex:idxline indexTwo:(idxstart + 1) indexThree:lastpointidx];
+            [linesHistory addObject:idxs];
+        }
+        else {
+            NSInteger lastlineidx = [linesContainer count] - 1;
+            NSInteger lastpointidx = [linesContainer[lastlineidx] count] - 1;
+            DRRSegmentIdx * idxs = [[DRRSegmentIdx alloc] initWithIndex:lastlineidx indexTwo:0 indexThree:lastpointidx];
+            [linesHistory addObject:idxs];
+        }
+    }
     
-    prevmouseXY = pwindow;
+    // altrimenti, solo se stavo disegnando una nuova linea, rimuovo quel punto dall'array linesContainer
+    else if (thisIsANewLine) {
+        [linesContainer removeLastObject];
+    }
+    
+    #if defined(DEBUGLINES) || defined(DEBUGLINESHIST)
+    [self setNeedsDisplayInRect:NSMakeRect(self.frame.size.width - 55, 0, self.frame.size.width, 50)];
+    #endif
+    
 //    thisIsANewLine = YES;
+}
+
+
+- (void)rightMouseDown:(NSEvent *)theEvent {
+    
+    #ifdef DEBUGMOUSECORR
+    NSLog(@"+rightMouseDown");
+    #endif
+    
+    if (!leftpressed) {
+        rightpressed = YES;
+        //TODO
+    }
+}
+
+
+- (void)rightMouseUp:(NSEvent *)theEvent {
+    
+    #ifdef DEBUGMOUSECORR
+    NSLog(@"+rightMouseUp");
+    #endif
+    
+    if (rightpressed) {
+        //TODO
+        [self removeLatestLine];
+        [self setNeedsDisplay];
+//        [self setNeedsDisplayInRect:dirtyRect];
+        rightpressed = NO;
+    }
 }
 
 
@@ -376,24 +502,20 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 
 - (void)drawRect:(NSRect)dirtyRect {
     
-    //    if (!NSEqualRects(prevbounds, [self bounds])) {
-    //        [self setLayoutDefault];
-    //    }
-    if(DEBUGMODE) NSLog(@"draw");
-    NSColor * black = [NSColor blackColor];
-    NSColor * white = [NSColor whiteColor];
-    NSColor * red = [NSColor redColor];
+    #ifdef DEBUGDRAW
+    NSLog(@"-drawRect myView");
+    #endif
+    #ifdef DEBUGLINES
+    pathSinglePoint = [NSBezierPath bezierPath];
+    #endif
     
-//    [white set];
-//    NSRectFill(dirtyRect);
-    
-//    NSBezierPath *path = [NSBezierPath bezierPath];
+//    NSColor * black = [NSColor blackColor];
+//    NSColor * white = [NSColor whiteColor];
+//    NSColor * red = [NSColor redColor];
+
     pathLines = [NSBezierPath bezierPath];
-    if (DEBUGMODE) { pathSinglePoint = [NSBezierPath bezierPath]; }
     [pathLines setLineWidth: 2];
-    [black set];
-    
-//    srand(time(NULL));
+    [[NSColor blackColor] set];
     
     // per ogni linea del contenitore creo un path con NSBezierPath
     if ([linesContainer count] > 0) {
@@ -402,37 +524,41 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
                 // aggiungo ogni punto della linea al path
                 [line enumerateObjectsUsingBlock:^(id point, NSUInteger ipoint, BOOL *stop2) {
                     NSPoint p = [point getPoint];
-                    if (DEBUGMODE) {
-                        [pathSinglePoint appendBezierPathWithOvalInRect:NSMakeRect(p.x - 1.5, p.y - 1.5, 3, 3)];
-                    }
+                    #ifdef DEBUGLINES
+                    [pathSinglePoint appendBezierPathWithOvalInRect:NSMakeRect(p.x - 2, p.y - 2, 4, 4)];
+                    #endif
                     
                     if (ipoint == 0)
                         [pathLines moveToPoint:p];
-                    else {
-//                        NSPoint p = [point getPoint];
-//                        NSInteger r1 = rand() % 20; NSInteger r2 = rand() % 20;
-//                        NSPoint pc1 = NSMakePoint(p.x + r1, p.y - r2);
-//                        NSPoint pc2 = NSMakePoint(p.x - r1, p.y + r2);
-//                        [path curveToPoint:p controlPoint1:pc1 controlPoint2:pc2];
+                    else
                         [pathLines lineToPoint:[point getPoint]];
-                    }
                 }];
                 
-                [black set];
+                [[NSColor blackColor] set];
                 [pathLines stroke];
-                if (DEBUGMODE) {
-                    [red set];
-                    [pathSinglePoint fill];
-                    [pathSinglePoint removeAllPoints];
-                }
                 [pathLines removeAllPoints];
-//                [self setNeedsDisplay:YES];
+                
+                #ifdef DEBUGLINES
+                [[NSColor redColor] set]; [pathSinglePoint fill]; [pathSinglePoint removeAllPoints];
+                #endif
             }
         }];
     }
     
     [dock setBackgroundColor:[NSColor lightGrayColor]];
     [dock setDrawsBackground:YES];
+    
+    // DEBUG: scrivo il numero di elementi nell'array delle linee e in quello della cronologia
+    #if defined(DEBUGLINES) || defined(DEBUGLINESHIST)
+    NSMutableParagraphStyle *style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+    [style setAlignment:NSLeftTextAlignment];
+    NSDictionary *attr = [NSDictionary dictionaryWithObject:style forKey:NSParagraphStyleAttributeName];
+    NSInteger lCont_len = [linesContainer count]; NSInteger lHist_len = [linesContainer count];
+    NSString * lCont_str = [NSString stringWithFormat:@"%li", (long)lCont_len];
+    NSString * lHist_str = [NSString stringWithFormat:@"%li", (long)lHist_len];
+    [lCont_str drawInRect:NSMakeRect(self.frame.size.width - 52, 0, 20, 15) withAttributes:attr];
+    [lHist_str drawInRect:NSMakeRect(self.frame.size.width - 22, 0, 40, 15) withAttributes:attr];
+    #endif
     
 //    if (CGRectIntersectsRect(dock.frame, dirtyRect)) {
 //        [dock drawCellInside:[dock cellAtRow:0 column:0]];
