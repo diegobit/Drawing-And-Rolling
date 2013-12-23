@@ -138,6 +138,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     
     [super awakeFromNib];
     [self setItemPropertiesToDefault];
+    viewPrevResizeWasInLive = NO;
     origwindowframe = self.frame;
     
     dock = [[DRRDock alloc] initWithFrame:NSMakeRect(0, 0, 1, 1) mode:NSRadioModeMatrix cellClass:[DRRButton class] numberOfRows:1 numberOfColumns:2];
@@ -242,13 +243,67 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 }
 
 
-- (NSRect)computeRect:(NSPoint)p1 secondPoint:(NSPoint)p2 moveBorder:(NSInteger)border {
+- (NSRect)computeRect:(NSPoint)p1 secondPoint:(NSPoint)p2 moveBorder:(CGFloat)border {
     
     CGFloat x = MIN(p1.x, p2.x) - border; CGFloat y = MIN(p1.y, p2.y) - border;
     CGFloat raww = p2.x - p1.x; CGFloat rawh = p2.y - p1.y;
-    CGFloat w = ABS(raww) + 2*border; CGFloat h = ABS(rawh) + 2*border;
+    CGFloat w = fabs(raww) + 2*border; CGFloat h = fabs(rawh) + 2*border;
     
     return NSMakeRect(x, y, w, h);
+}
+
+
+- (NSRect)computeRectFromArray:(NSMutableArray *)points moveBorder:(CGFloat)border {
+    
+    if (points != NULL) {
+        NSInteger ptlen = [points count];
+        switch (ptlen) {
+            // 0 punti nell'array, ritorno un rettangolo vuoto
+            case 0:
+                NSLog(@"computeRectFromArray: l'array era vuoto, l'NSRect avrà componenti nulle");
+                return NSMakeRect(0, 0, 0, 0);
+                break;
+            // Ritorno un rettangolo che contiene quel punto
+            case 1: {
+                NSPoint pt = [(DRRPointObj *) [points firstObject] getPoint];
+                return NSMakeRect(pt.x - 1 - border, pt.y - 1 - border, pt.x + 1 + 2*border, pt.y + 1 + 2*border);
+                break;
+            }
+            default: {
+                NSPoint pt0 = [(DRRPointObj *) [points firstObject] getPoint];
+                NSPoint pt1 = [(DRRPointObj *) [points objectAtIndex:1] getPoint];
+                NSRect rect = [self computeRect:pt0 secondPoint:pt1 moveBorder:border];
+                NSInteger i = 2;
+                
+                // se ho solo due punti mi fermo qui
+                if (ptlen == 2)
+                    return rect;
+                
+                // Per ogni punto oltre il secondo guardo se sta fuori o dentro il mio rettangolo e controllo una coordinata per volta
+                for (i = 2; i < ptlen; i++) {
+                    NSPoint pt = [(DRRPointObj *) [points objectAtIndex:i] getPoint];
+                    
+                    if ((rect.origin.x + rect.size.width) < pt.x)
+                        rect.size.width = pt.x - rect.origin.x;
+                    else if ((rect.origin.x) > pt.x)
+                        rect.origin.x = pt.x;
+                    
+                    if ((rect.origin.y + rect.size.height) < pt.y)
+                        rect.size.height = pt.y - rect.origin.y;
+                    else if ((rect.origin.y) > pt.y)
+                        rect.origin.y = pt.y;
+                }
+                
+                return rect;
+                break;
+            }
+        } // fine switch
+    }
+    else {
+        NSLog(@"computeRectFromArray: puntatore array null, l'NSRect avrà componenti nulle");
+        errno = EINVAL;
+        return NSMakeRect(0, 0, 0, 0);
+    }
 }
 
 
@@ -311,18 +366,33 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 - (void)removeLatestLine {
     if ([linesHistory count] > 0) {
         DRRSegmentIdx * idxs = [linesHistory lastObject];
-        if (idxs.idxstartpt == 0) {
-            [linesContainer removeObjectAtIndex:(idxs.idxline)]; // TODO sarebbe meglio che eliminasse solo i punti da togliere e spostasse gli altri all'inizio dell'array dentro linescontainer ecc
+        NSMutableArray * line = linesContainer[idxs.idxline];
+        NSInteger i = 0;
+        NSMutableArray * dirtyPoints = [[NSMutableArray alloc] init];
+        
+        // Rimuovo un punto alla volta dall'array di linee e creo un array con quei punti per poi creare il rettangolo da ridisegnare
+        for (i = idxs.idxendpt; i > idxs.idxstartpt; i--) {
+            [dirtyPoints addObject:line[i]];
+            [line removeObjectAtIndex:i];
         }
-        else {
-            NSMutableArray * line = linesContainer[idxs.idxline];
-            NSInteger i = 0;
-            
-            for (i = idxs.idxstartpt; i < idxs.idxendpt; i++)
-                [line removeObjectAtIndex:i];
+        // lo aggiungo sempre perchè devo ridisegnare anche il pezzo di linea che si unisce a quella precedente, se c'è
+        [dirtyPoints addObject:line[idxs.idxstartpt]];
+        // Non ho rimosso subito il punto di indice idxstartpt perchè se è una linea doppia allora quel punto serve per la linea dei punti di indici precedenti
+        if (idxs.idxstartpt == 0) {
+            [line removeObjectAtIndex:0];
         }
         
+        NSLog(@"--%lu", (unsigned long)[line count]);
+        if ([line count] == 0) {
+            [linesContainer removeObjectAtIndex:idxs.idxline];
+        }
+//        }
+        
         [linesHistory removeLastObject];
+        
+        // Invalido il contesto grafico nel rettanglo che contiene la linea
+        [self setNeedsDisplayInRect:[self computeRectFromArray:dirtyPoints moveBorder:2]];
+        // TODO sarà più veloce calcolare il rettangolo o ridisegnare tutto?
     }
 }
 
@@ -431,7 +501,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
             NSInteger idxstart = (NSInteger) nearpointIdx.y;
             NSMutableArray * thisline = linesContainer[idxline];
             NSInteger lastpointidx = [thisline count] - 1;
-            DRRSegmentIdx * idxs = [[DRRSegmentIdx alloc] initWithIndex:idxline indexTwo:(idxstart + 1) indexThree:lastpointidx];
+            DRRSegmentIdx * idxs = [[DRRSegmentIdx alloc] initWithIndex:idxline indexTwo:idxstart indexThree:lastpointidx];
             [linesHistory addObject:idxs];
         }
         else {
@@ -499,6 +569,20 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 }
 
 
+- (BOOL)inLiveResize {
+    BOOL ret = [super inLiveResize];
+    if (!ret) {
+        if (viewPrevResizeWasInLive) {
+            viewPrevResizeWasInLive = NO;
+            [self setNeedsDisplay];
+        }
+    }
+    else
+        viewPrevResizeWasInLive = YES;
+    
+    return ret;
+}
+
 
 - (void)drawRect:(NSRect)dirtyRect {
     
@@ -512,10 +596,15 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 //    NSColor * black = [NSColor blackColor];
 //    NSColor * white = [NSColor whiteColor];
 //    NSColor * red = [NSColor redColor];
-
     pathLines = [NSBezierPath bezierPath];
-    [pathLines setLineWidth: 2];
     [[NSColor blackColor] set];
+    
+    if ([self inLiveResize]) {
+        [[NSGraphicsContext currentContext] setShouldAntialias: NO];
+        [pathLines setLineWidth: 1.5];
+    }
+    else
+        [pathLines setLineWidth: 2];
     
     // per ogni linea del contenitore creo un path con NSBezierPath
     if ([linesContainer count] > 0) {
@@ -553,7 +642,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     NSMutableParagraphStyle *style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
     [style setAlignment:NSLeftTextAlignment];
     NSDictionary *attr = [NSDictionary dictionaryWithObject:style forKey:NSParagraphStyleAttributeName];
-    NSInteger lCont_len = [linesContainer count]; NSInteger lHist_len = [linesContainer count];
+    NSInteger lCont_len = [linesContainer count]; NSInteger lHist_len = [linesHistory count];
     NSString * lCont_str = [NSString stringWithFormat:@"%li", (long)lCont_len];
     NSString * lHist_str = [NSString stringWithFormat:@"%li", (long)lHist_len];
     [lCont_str drawInRect:NSMakeRect(self.frame.size.width - 52, 0, 20, 15) withAttributes:attr];

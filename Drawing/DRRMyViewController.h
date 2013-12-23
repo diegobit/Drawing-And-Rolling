@@ -14,7 +14,7 @@
 //#define DEBUGINIT
 //#define DEBUGDRAW
 //#define DEBUGLINES
-#define DEBUGLINESHIST
+//#define DEBUGLINESHIST
 //#define DEBUGMOUSECORR
 
 // costanti per indicare se una funzione: (1) non ha trovato l'elemento cercato; (2) parametro non valido
@@ -57,6 +57,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
     
     BOOL leftpressed;
     BOOL rightpressed;
+    BOOL viewPrevResizeWasInLive;
     
     // coordinata precedente mouse per mouseDragged (ridisegno solo zona cambiata)
     // e coordinata iniziale del trascinamento per la cronologia
@@ -103,7 +104,8 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
 - (id)initWithCoder:(NSCoder *)aDecoder;
 
 /** Restituisce il rettangolo che ha come vertici i due punti passati come parametro */
-- (NSRect)computeRect:(NSPoint)p1 secondPoint:(NSPoint)p2 moveBorder:(NSInteger)border;
+- (NSRect)computeRect:(NSPoint)p1 secondPoint:(NSPoint)p2 moveBorder:(CGFloat)border;
+- (NSRect)computeRectFromArray:(NSMutableArray *)points moveBorder:(CGFloat)border;
 - (void)addEmptyLine;
 - (CGFloat)distanceBetweenPoint:(NSPoint)p1 andPoint:(NSPoint)p2;
 - (void)addPointToLatestLine:(NSPoint*)p;
@@ -119,6 +121,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
 
 - (void)setNeedsDisplay;
 - (void)setNeedsDisplayInRect:(NSRect)invalidRect;
+- (BOOL)inLiveResize;
 - (void)drawRect:(NSRect)dirtyRect;
 
 @end
