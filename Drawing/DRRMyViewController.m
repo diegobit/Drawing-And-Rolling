@@ -116,7 +116,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     #ifdef DEBUGINIT
     NSLog(@"initWithFrame myView");
     #endif
-    
+
     self = [super initWithFrame:frameRect];
     if (self) {
         
@@ -139,7 +139,6 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     [super awakeFromNib];
     [self setItemPropertiesToDefault];
     viewPrevResizeWasInLive = NO;
-    origwindowframe = self.frame;
     
     dock = [[DRRDock alloc] initWithFrame:NSMakeRect(0, 0, 1, 1) mode:NSRadioModeMatrix cellClass:[DRRButton class] numberOfRows:1 numberOfColumns:2];
 //    [dock setCellClass:[DRRButton class]];
@@ -179,8 +178,8 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     
     
     [self addSubview:dock];
-    [dock updateCell:[dock cellAtRow:0 column:0]];
-    [dock updateCell:[dock cellAtRow:0 column:1]];
+//    [dock updateCell:[dock cellAtRow:0 column:0]];
+//    [dock updateCell:[dock cellAtRow:0 column:1]];
 //    [self setNeedsDisplay:YES];
 //    [dock setNeedsDisplay:YES];
     
@@ -230,7 +229,9 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     // inizializzo l'array di linee disegnate e le proprietà
     linesContainer = [[NSMutableArray alloc] init];
     linesHistory = [[NSMutableArray alloc] init];
-//    last = -1;
+    pathLines = [NSBezierPath bezierPath];
+    
+    screenRect = [[NSScreen mainScreen] frame];
     
     // Dimensione bottoni della dock, spessore line del disegno interno. Rotondità tasti.
     cellsize = NSMakeSize(32, 32);
@@ -293,6 +294,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
                     else if ((rect.origin.y) > pt.y)
                         rect.origin.y = pt.y;
                 }
+                ///// FIXME non funziona credo... nella rightmouseup nella removepoint chiamo questa ma non aggiorna la linea...
                 
                 return rect;
                 break;
@@ -382,7 +384,6 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
             [line removeObjectAtIndex:0];
         }
         
-        NSLog(@"--%lu", (unsigned long)[line count]);
         if ([line count] == 0) {
             [linesContainer removeObjectAtIndex:idxs.idxline];
         }
@@ -391,7 +392,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
         [linesHistory removeLastObject];
         
         // Invalido il contesto grafico nel rettanglo che contiene la linea
-        [self setNeedsDisplayInRect:[self computeRectFromArray:dirtyPoints moveBorder:2]];
+//        [self setNeedsDisplayInRect:[self computeRectFromArray:dirtyPoints moveBorder:2]];
         // TODO sarà più veloce calcolare il rettangolo o ridisegnare tutto?
     }
 }
@@ -415,13 +416,13 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     if (nearpointIdx.x != ARGERROR && nearpointIdx.x != NOTFOUND) {
         thisIsANewLine = NO;
         NSPoint nearpoint = [linesContainer[(NSInteger)nearpointIdx.x][(NSInteger)nearpointIdx.y] getPoint];
+        
         prevmouseXY = nearpoint;
         
         // sposto il puntatore del mouse nella nuova posizione (coordinate schermo)
-//        origwindowframe.origin = self.frame.origin;
         NSRect frameRelativeToScreen = [self.window convertRectToScreen:self.frame];
         NSPoint newpos = NSMakePoint(frameRelativeToScreen.origin.x + nearpoint.x,
-                                     frameRelativeToScreen.origin.y + self.window.frame.size.height - nearpoint.y);
+                                     (screenRect.size.height) - (frameRelativeToScreen.origin.y + nearpoint.y));
 //        NSRect nearpointRelToScreen = [self.window convertRectToScreen:NSMakeRect(nearpoint.x, nearpoint.y, 1, 1)];
 //        NSPoint newpos = NSMakePoint(frameRelToScreen.origin.x + nearpointRelToScreen.origin.x,
 //                                     frameRelToScreen.origin.y + self.window.frame.size.height - nearpointRelToScreen.origin.x); //FIXME mi interessa trasformare il punto e uso una funzione su un rettangolo...
@@ -546,9 +547,9 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     
     if (rightpressed) {
         //TODO
+//        [self removeLatestLine]; // setNeedsDisplay chiamato da questo metodo
         [self removeLatestLine];
         [self setNeedsDisplay];
-//        [self setNeedsDisplayInRect:dirtyRect];
         rightpressed = NO;
     }
 }
@@ -569,9 +570,15 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 }
 
 
+- (void)viewWillStartLiveResize {
+    [super viewWillStartLiveResize];
+    [[NSGraphicsContext currentContext] setShouldAntialias: NO];
+}
+
+
 - (BOOL)inLiveResize {
-    BOOL ret = [super inLiveResize];
-    if (!ret) {
+    BOOL isInLive = [super inLiveResize];
+    if (!isInLive) {
         if (viewPrevResizeWasInLive) {
             viewPrevResizeWasInLive = NO;
             [self setNeedsDisplay];
@@ -580,7 +587,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     else
         viewPrevResizeWasInLive = YES;
     
-    return ret;
+    return isInLive;
 }
 
 
@@ -593,15 +600,11 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     pathSinglePoint = [NSBezierPath bezierPath];
     #endif
     
-//    NSColor * black = [NSColor blackColor];
-//    NSColor * white = [NSColor whiteColor];
-//    NSColor * red = [NSColor redColor];
-    pathLines = [NSBezierPath bezierPath];
     [[NSColor blackColor] set];
     
     if ([self inLiveResize]) {
         [[NSGraphicsContext currentContext] setShouldAntialias: NO];
-        [pathLines setLineWidth: 1.5];
+        [pathLines setLineWidth: 1.1];
     }
     else
         [pathLines setLineWidth: 2];
@@ -634,8 +637,8 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
         }];
     }
     
-    [dock setBackgroundColor:[NSColor lightGrayColor]];
-    [dock setDrawsBackground:YES];
+//    [dock setBackgroundColor:[NSColor lightGrayColor]];
+//    [dock setDrawsBackground:YES];
     
     // DEBUG: scrivo il numero di elementi nell'array delle linee e in quello della cronologia
     #if defined(DEBUGLINES) || defined(DEBUGLINESHIST)

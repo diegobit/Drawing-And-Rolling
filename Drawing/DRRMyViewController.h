@@ -62,7 +62,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
     // coordinata precedente mouse per mouseDragged (ridisegno solo zona cambiata)
     // e coordinata iniziale del trascinamento per la cronologia
     NSPoint prevmouseXY;
-    NSRect origwindowframe;
+    NSRect screenRect;
     
     // Matrice che gestisce i bottoni dell'interfaccia. Grandezza controllo. Rotondità del bordo dei tasti.
     // Spessore linea del disegno interno dei controlli.

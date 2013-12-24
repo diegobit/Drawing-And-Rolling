@@ -21,7 +21,6 @@
 		F11DFEB818560DE9001A17AA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F11DFEB618560DE9001A17AA /* InfoPlist.strings */; };
 		F11DFEBA18560DE9001A17AA /* DrawingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFEB918560DE9001A17AA /* DrawingTests.m */; };
 		F11DFEC518560E36001A17AA /* DRRMyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFEC418560E36001A17AA /* DRRMyViewController.m */; };
-		F1FF8F3A18575A99003D9E71 /* DRRMyControl.m in Sources */ = {isa = PBXBuildFile; fileRef = F1FF8F3918575A99003D9E71 /* DRRMyControl.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,8 +59,6 @@
 		F11DFEB918560DE9001A17AA /* DrawingTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DrawingTests.m; sourceTree = "<group>"; };
 		F11DFEC318560E36001A17AA /* DRRMyViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRMyViewController.h; sourceTree = "<group>"; };
 		F11DFEC418560E36001A17AA /* DRRMyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRMyViewController.m; sourceTree = "<group>"; };
-		F1FF8F3818575A99003D9E71 /* DRRMyControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRMyControl.h; sourceTree = "<group>"; };
-		F1FF8F3918575A99003D9E71 /* DRRMyControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRMyControl.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -129,8 +126,6 @@
 			children = (
 				F11DFEA118560DE8001A17AA /* DRRAppDelegate.h */,
 				F11DFEA218560DE8001A17AA /* DRRAppDelegate.m */,
-				F1FF8F3818575A99003D9E71 /* DRRMyControl.h */,
-				F1FF8F3918575A99003D9E71 /* DRRMyControl.m */,
 				F11DFEC318560E36001A17AA /* DRRMyViewController.h */,
 				F11DFEC418560E36001A17AA /* DRRMyViewController.m */,
 				F108A7AB185C9EE900AE183A /* DRRDock.h */,
@@ -275,7 +270,6 @@
 			files = (
 				F11DFE9C18560DE8001A17AA /* main.m in Sources */,
 				F106B33018564AC8009804A8 /* DRRPointObj.m in Sources */,
-				F1FF8F3A18575A99003D9E71 /* DRRMyControl.m in Sources */,
 				F108A7AD185C9EE900AE183A /* DRRDock.m in Sources */,
 				F11DFEC518560E36001A17AA /* DRRMyViewController.m in Sources */,
 				F11DFEA318560DE8001A17AA /* DRRAppDelegate.m in Sources */,
