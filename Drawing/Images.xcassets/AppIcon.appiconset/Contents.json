@@ -3,61 +3,61 @@
     {
       "size" : "16x16",
       "idiom" : "mac",
-      "filename" : "Icon3sc-16.png",
+      "filename" : "Icon3sb-2-16.png",
       "scale" : "1x"
     },
     {
       "size" : "16x16",
       "idiom" : "mac",
-      "filename" : "Icon3sc-32.png",
+      "filename" : "Icon3sb-2-32.png",
       "scale" : "2x"
     },
     {
       "size" : "32x32",
       "idiom" : "mac",
-      "filename" : "Icon3sc-32-1.png",
+      "filename" : "Icon3sb-2-32-1.png",
       "scale" : "1x"
     },
     {
       "size" : "32x32",
       "idiom" : "mac",
-      "filename" : "Icon3sc-64.png",
+      "filename" : "Icon3sb-2-64.png",
       "scale" : "2x"
     },
     {
       "size" : "128x128",
       "idiom" : "mac",
-      "filename" : "Icon3sc-128.png",
+      "filename" : "Icon3sb-2-128.png",
       "scale" : "1x"
     },
     {
       "size" : "128x128",
       "idiom" : "mac",
-      "filename" : "Icon3sc-256.png",
+      "filename" : "Icon3sb-2-256.png",
       "scale" : "2x"
     },
     {
       "size" : "256x256",
       "idiom" : "mac",
-      "filename" : "Icon3sc-256-1.png",
+      "filename" : "Icon3sb-2-256-1.png",
       "scale" : "1x"
     },
     {
       "size" : "256x256",
       "idiom" : "mac",
-      "filename" : "Icon3sc-512.png",
+      "filename" : "Icon3sb-2-512.png",
       "scale" : "2x"
     },
     {
       "size" : "512x512",
       "idiom" : "mac",
-      "filename" : "Icon3sc-512-1.png",
+      "filename" : "Icon3sb-2-512-1.png",
       "scale" : "1x"
     },
     {
       "size" : "512x512",
       "idiom" : "mac",
-      "filename" : "Icon3sc-1024.png",
+      "filename" : "Icon3sb-2-1024.png",
       "scale" : "2x"
     }
   ],

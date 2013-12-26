@@ -76,43 +76,8 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 
 @implementation DRRMyViewController
 
-
-//- (NSSize)screenSize {
-//    
-//    NSRect screenRect;
-//    NSArray *screenArray = [NSScreen screens];
-//    NSInteger screenCount = [screenArray count];
-//    NSInteger i  = 0;
-//    
-//    for (i = 0; i < screenCount; i++)
-//    {
-//        NSScreen *screen = [screenArray objectAtIndex: i];
-//        screenRect = [screen visibleFrame];
-//    }
-//    
-//    return screenRect.size;
-//}
-
-//NSRect frameRelativeToWindow = [self convertRect:myView.bounds toView:nil];
-//NSRect frameRelativeToScreen = [self.window convertRectToScreen:frameInWindow];
-
-//- (NSPoint)convertToScreenFromLocalPoint:(NSPoint)point relativeToView:(NSView *)view {
-//	NSPoint windowPoint = [view convertPoint:point toView:nil];
-//    NSPoint screenPoint = [[view window] convertBaseToScreen:windowPoint];
-//	
-//	return screenPoint;
-//}
-
-//- (void)moveMouseToScreenPoint:(NSPoint)point
-//{
-//	CGPoint cgPoint = NSPointToCGPoint(point);
-//    
-//	CGSetLocalEventsSuppressionInterval(0.0);
-//	CGWarpMouseCursorPosition(cgPoint);
-//	CGSetLocalEventsSuppressionInterval(0.25);
-//}
-
 - (id)initWithFrame:(NSRect)frameRect {
+    
     #ifdef DEBUGINIT
     NSLog(@"initWithFrame myView");
     #endif
@@ -132,6 +97,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 }
 
 - (void)awakeFromNib {
+    
     #ifdef DEBUGINIT
     NSLog(@"awakeFromNib myView");
     #endif
@@ -140,10 +106,11 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     [self setItemPropertiesToDefault];
     viewPrevResizeWasInLive = NO;
     
-    dock = [[DRRDock alloc] initWithFrame:NSMakeRect(0, 0, 1, 1) mode:NSRadioModeMatrix cellClass:[DRRButton class] numberOfRows:1 numberOfColumns:2];
-//    [dock setCellClass:[DRRButton class]];
-//    [dock setFrameOrigin:NSMakePoint(0, 0)];
-//    [dock renewRows:4 columns:4];
+    dock = [[DRRDock alloc] initWithFrame:NSMakeRect(0, 0, 1, 1)
+                                     mode:NSRadioModeMatrix
+                                cellClass:[DRRButton class]
+                             numberOfRows:1
+                          numberOfColumns:2];
     [dock setCellSize:cellsize];
     
     cellpaths = [[NSMutableArray alloc] init];
@@ -172,31 +139,14 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 //    cellmodes = [[NSMutableArray alloc] init];
     
 //    [dock putCell:btnDrawLine atRow:0 column:1];
-    
-    
-    
-    
+
     
     [self addSubview:dock];
 //    [dock updateCell:[dock cellAtRow:0 column:0]];
 //    [dock updateCell:[dock cellAtRow:0 column:1]];
 //    [self setNeedsDisplay:YES];
 //    [dock setNeedsDisplay:YES];
-    
-    
-    
-//    // altri bottoni TODO
-    //    cellpaths = [[NSMutableArray alloc] init];
-    //    cellmodes = [[NSMutableArray alloc] init];
-    
-    
-//    NSArray * cells = [[NSArray alloc] init];
-//    [cells arrayByAddingObject:(id)
-    
-//    [dock addRowWithCells:(NSArray *)];
-    
-    
-    
+
     
     //    NSCell * btnDrawLine = [[DRRbuttonDrawLine alloc] init];
     //    NSCell * btnMoveView = [[DRRbuttonMoveView alloc] init];
@@ -207,8 +157,6 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
   
     
 }
-
-
 
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
@@ -313,11 +261,6 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     // Aggiorno l'array di linee con una vuota e l'array per la cronologia delle linee
     NSMutableArray * line = [[NSMutableArray alloc] init];
     [linesContainer addObject:line];
-//    NSInteger last = [linesContainer count] - 1;
-//    last++;
-    
-//    DRRSegmentIdx * s = [[DRRSegmentIdx alloc] initWithIndex:last indexTwo:0 indexThree:0];
-//    [linesHistory addObject:s];
 }
 
 
@@ -335,13 +278,6 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
         DRRPointObj * pobj = [[DRRPointObj alloc] initWithPoint:p];
         NSInteger last = [linesContainer count] - 1;
         [linesContainer[last] addObject:pobj];
-        
-        // Aggiungo un oggetto alla cronologia di linee. Gli indici interni sono 0 e l'ultimo della linea perchè
-        // utilizzo questo metodo solo per aggiungere nuove linee
-//        if (lastPtOfLine) {
-//            DRRSegmentIdx * s = [[DRRSegmentIdx alloc] initWithIndex:last indexTwo:0 indexThree:([linesContainer[last] count] - 1)];
-//            [linesHistory addObject:s];
-//        }
     }
     else
         errno = EINVAL;
@@ -352,13 +288,6 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     if (p != NULL) {
         DRRPointObj * pobj = [[DRRPointObj alloc] initWithPoint:p];
         [linesContainer[idx] addObject:pobj];
-        
-//        if (firstPtOfLine)
-//            idxFirstPtOfLine = nearpointIdx.y + 1;
-//        else if (lastPtOfLine) {
-//            DRRSegmentIdx * s = [[DRRSegmentIdx alloc] initWithIndex:idx indexTwo:idxFirstPtOfLine indexThree:([linesContainer[idx] count] - 1)];
-//            [linesHistory addObject:s];
-//        }
     }
     else
         errno = EINVAL;
@@ -397,6 +326,26 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     }
 }
 
+//NSRect frameRelativeToWindow = [self convertRect:myView.bounds toView:nil];
+//NSRect frameRelativeToScreen = [self.window convertRectToScreen:frameInWindow];
+
+//- (NSPoint)convertToScreenFromLocalPoint:(NSPoint)point relativeToView:(NSView *)view {
+//	NSPoint windowPoint = [view convertPoint:point toView:nil];
+//    NSPoint screenPoint = [[view window] convertBaseToScreen:windowPoint];
+//
+//	return screenPoint;
+//}
+
+//- (void)moveMouseToScreenPoint:(NSPoint)point
+//{
+//	CGPoint cgPoint = NSPointToCGPoint(point);
+//
+//	CGSetLocalEventsSuppressionInterval(0.0);
+//	CGWarpMouseCursorPosition(cgPoint);
+//	CGSetLocalEventsSuppressionInterval(0.25);
+//}
+
+
 //- (IBAction)cellPressed:(id)sender {   [sender setState:NSOnState]; }
 //- (IBAction)cellPressedNoMore:(id)sender { [sender setState:NSOffState]; }
 
@@ -423,10 +372,6 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
         NSRect frameRelativeToScreen = [self.window convertRectToScreen:self.frame];
         NSPoint newpos = NSMakePoint(frameRelativeToScreen.origin.x + nearpoint.x,
                                      (screenRect.size.height) - (frameRelativeToScreen.origin.y + nearpoint.y));
-//        NSRect nearpointRelToScreen = [self.window convertRectToScreen:NSMakeRect(nearpoint.x, nearpoint.y, 1, 1)];
-//        NSPoint newpos = NSMakePoint(frameRelToScreen.origin.x + nearpointRelToScreen.origin.x,
-//                                     frameRelToScreen.origin.y + self.window.frame.size.height - nearpointRelToScreen.origin.x); //FIXME mi interessa trasformare il punto e uso una funzione su un rettangolo...
-
         CGWarpMouseCursorPosition(newpos);
     }
     
@@ -546,8 +491,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     #endif
     
     if (rightpressed) {
-        //TODO
-//        [self removeLatestLine]; // setNeedsDisplay chiamato da questo metodo
+        // setNeedsDisplay chiamato da questo metodo
         [self removeLatestLine];
         [self setNeedsDisplay];
         rightpressed = NO;
@@ -565,14 +509,8 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     [super setNeedsDisplayInRect:invalidRect];
     
     if (CGRectIntersectsRect(dock.frame, invalidRect)) {
-        [dock setNeedsDisplay];
+        [dock setNeedsDisplayInRect:invalidRect];
     }
-}
-
-
-- (void)viewWillStartLiveResize {
-    [super viewWillStartLiveResize];
-    [[NSGraphicsContext currentContext] setShouldAntialias: NO];
 }
 
 
@@ -599,12 +537,12 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     #ifdef DEBUGLINES
     pathSinglePoint = [NSBezierPath bezierPath];
     #endif
-    
+
     [[NSColor blackColor] set];
     
     if ([self inLiveResize]) {
         [[NSGraphicsContext currentContext] setShouldAntialias: NO];
-        [pathLines setLineWidth: 1.1];
+        [pathLines setLineWidth: 1.2];
     }
     else
         [pathLines setLineWidth: 2];

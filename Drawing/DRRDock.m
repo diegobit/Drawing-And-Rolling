@@ -229,7 +229,10 @@ void makeDrawLine(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableA
 //- (void)mouseUp:(NSEvent *)theEvent { [self setState:NSOffState]; }
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-    NSLog(@"draw-buttonDRawFreely"); /////DELETE
+    #ifdef DEBUGDRAWDOCK
+    NSLog(@"draw-buttonDRawFreely");
+    #endif
+    
     //    NSColor * prevColor; ///// TODO salvare colore precedente
     
     [btnpaths enumerateObjectsUsingBlock:^(DRRPathObj * pathobj, NSUInteger idx, BOOL *stop) {

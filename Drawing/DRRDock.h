@@ -8,8 +8,9 @@
 
 #import <Cocoa/Cocoa.h>
 
-typedef enum drawingmodes {STROKE, FILL} drawingmode_t;
+//#define DEBUGDRAWDOCK
 
+typedef enum drawingmodes {STROKE, FILL} drawingmode_t;
 
 @interface DRRPathObj : NSObject
 

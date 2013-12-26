@@ -8,7 +8,6 @@
 
 #import <Cocoa/Cocoa.h>
 #import "DRRPointObj.h"
-//#import "DRRMyControl.h"
 #import "DRRDock.h"
 
 //#define DEBUGINIT
@@ -57,7 +56,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
     
     BOOL leftpressed;
     BOOL rightpressed;
-    BOOL viewPrevResizeWasInLive;
+    BOOL viewPrevResizeWasInLive;    
     
     // coordinata precedente mouse per mouseDragged (ridisegno solo zona cambiata)
     // e coordinata iniziale del trascinamento per la cronologia
@@ -103,13 +102,16 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
 - (void)awakeFromNib;
 - (id)initWithCoder:(NSCoder *)aDecoder;
 
-/** Restituisce il rettangolo che ha come vertici i due punti passati come parametro */
+/** Metodi per calcolare il retangolo contenente dei punti dati, oppure la distanza tra due punti */
 - (NSRect)computeRect:(NSPoint)p1 secondPoint:(NSPoint)p2 moveBorder:(CGFloat)border;
 - (NSRect)computeRectFromArray:(NSMutableArray *)points moveBorder:(CGFloat)border;
 - (void)addEmptyLine;
 - (CGFloat)distanceBetweenPoint:(NSPoint)p1 andPoint:(NSPoint)p2;
+
+/** Metodi per aggiungere linee da disegnare e rimuoverle */
 - (void)addPointToLatestLine:(NSPoint*)p;
 - (void)addPointToIdxLine:(NSPoint*)p idxLinesArray:(NSInteger)idx;
+- (void)removeLatestLine;
 
 //- (IBAction)cellPressed:(id)sender;
 
@@ -121,6 +123,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
 
 - (void)setNeedsDisplay;
 - (void)setNeedsDisplayInRect:(NSRect)invalidRect;
+- (void)viewWillStartLiveResize;
 - (BOOL)inLiveResize;
 - (void)drawRect:(NSRect)dirtyRect;
 
