@@ -66,8 +66,6 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
     // Matrice che gestisce i bottoni dell'interfaccia. Grandezza controllo. Rotondità del bordo dei tasti.
     // Spessore linea del disegno interno dei controlli.
     NSMatrix * dock;
-    NSMutableArray * cellpaths;
-    NSMutableArray * cellmodes;
     NSSize cellsize;
     CGFloat roundness;
     CGFloat linewidth;
@@ -113,6 +111,9 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
 - (void)addPointToIdxLine:(NSPoint*)p idxLinesArray:(NSInteger)idx;
 - (void)removeLatestLine;
 
+- (void)transform:(NSSize)dimensions;
+- (void)scale:(CGFloat)factor;
+
 //- (IBAction)cellPressed:(id)sender;
 
 - (void)mouseDown:(NSEvent *)theEvent;
@@ -123,7 +124,6 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
 
 - (void)setNeedsDisplay;
 - (void)setNeedsDisplayInRect:(NSRect)invalidRect;
-- (void)viewWillStartLiveResize;
 - (BOOL)inLiveResize;
 - (void)drawRect:(NSRect)dirtyRect;
 

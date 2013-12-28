@@ -23,6 +23,7 @@ typedef enum drawingmodes {STROKE, FILL} drawingmode_t;
 @end
 
 
+
 @interface DRRDrawingProperties : NSObject
 
 @property NSColor * color;
@@ -41,9 +42,21 @@ void makeDrawFreeButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMu
 void makeDrawLine(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes);
 
 
-@interface DRRDock : NSMatrix
+@interface DRRDock : NSMatrix {
+    BOOL dockPrevResizeWasInLive;
+    NSPoint cellHighlighted;
+}
 
+- (id)init;
 - (id)initWithFrame:(NSRect)frameRect;
+- (id)initWithFrame:(NSRect)frameRect mode:(NSMatrixMode)aMode cellClass:(Class)factoryId numberOfRows:(NSInteger)rowsHigh numberOfColumns:(NSInteger)colsWide;
+- (id)initWithFrame:(NSRect)frameRect mode:(NSMatrixMode)aMode prototype:(NSCell *)aCell numberOfRows:(NSInteger)rowsHigh numberOfColumns:(NSInteger)colsWide;
+- (id)initWithCoder:(NSCoder *)aDecoder;
+- (void)setDefaultItemProperties;
+
+//- (void)highlightCell:(BOOL)flag atRow:(NSInteger)row column:(NSInteger)column;
+//- (NSPoint)getHighlightedCell;
+//- (void)setHighlightedCell:(NSInteger)row atColumn:(NSInteger)column;
 
 //@property (readonly) NSRect frame;
 //- (NSPoint)getFrameOrigin;
@@ -51,7 +64,7 @@ void makeDrawLine(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableA
 //- (void)setFrameOrigin:(NSPoint)o;
 //- (void)setFrameSize:(NSSize)s;
 
-- (BOOL)hitTest:(NSPoint)p;
+//- (BOOL)hitTest:(NSPoint)p;
 //- (void)mouseDown:(NSEvent *)theEvent;
 //- (void)mouseDragged:(NSEvent *)theEvent;
 //- (void)mouseUp:(NSEvent *)theEvent;

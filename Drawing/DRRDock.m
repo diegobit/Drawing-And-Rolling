@@ -48,30 +48,38 @@ void makeDrawFreeButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMu
     NSBezierPath * border = [[NSBezierPath alloc] init];
     NSBezierPath * innerborder = [[NSBezierPath alloc] init];
     NSBezierPath * pencilpoint = [[NSBezierPath alloc] init];
-    NSBezierPath * pencilback = [[NSBezierPath alloc] init];
     
     // Path per il bordo
     [border appendBezierPathWithRoundedRect:frame xRadius:roundness yRadius:roundness];
-    [innerborder appendBezierPathWithRoundedRect:NSMakeRect(frame.origin.x + 3, frame.origin.y + 3, frame.size.width - 6, frame.size.height - 6) xRadius:roundness yRadius:roundness];
+    CGFloat bthickness = fmin(frame.size.width, frame.size.height) * 0.08;
+    [innerborder appendBezierPathWithRoundedRect:NSMakeRect(frame.origin.x + bthickness, frame.origin.y + bthickness, frame.size.width - (2 * bthickness), frame.size.height - (2 * bthickness)) xRadius:roundness yRadius:roundness];
     
     // Coordinate per il disegno interno della matita.
-    CGFloat leftX = frame.size.width * 0.22;
-    CGFloat bottomY = frame.size.height * 0.77;
-    CGFloat topY = frame.size.height * 0.63;
-    CGFloat rightX = frame.size.width * 0.36;
-    NSPoint backTopLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.68, frame.origin.y + frame.size.height * 0.17);
-    NSPoint backBottomRight = NSMakePoint(frame.origin.x + frame.size.width * 0.83, frame.origin.y + frame.size.height * 0.32);
+    NSPoint bottomLeftL = NSMakePoint(frame.origin.x + frame.size.width * 0.20,
+                                      frame.origin.y + frame.size.height * 0.75);
+    NSPoint topRightL = NSMakePoint(frame.origin.x + frame.size.width * 0.75,
+                                    frame.origin.y + frame.size.height * 0.20);
+    NSPoint bottomControlL = NSMakePoint(frame.origin.x + frame.size.width * 0.30,
+                                         frame.origin.y + frame.size.height * 0.35);
+    NSPoint topControlL = NSMakePoint(frame.origin.x + frame.size.width * 0.65,
+                                      frame.origin.y + frame.size.height * 0.65);
+    
+    NSPoint bottomLeftR = NSMakePoint(frame.origin.x + frame.size.width * 0.25,
+                                      frame.origin.y + frame.size.height * 0.80);
+    NSPoint topRightR = NSMakePoint(frame.origin.x + frame.size.width * 0.80,
+                                    frame.origin.y + frame.size.height * 0.25);
+    NSPoint bottomControlR = NSMakePoint(frame.origin.x + frame.size.width * 0.35,
+                                         frame.origin.y + frame.size.height * 0.40);
+    NSPoint topControlR = NSMakePoint(frame.origin.x + frame.size.width * 0.70,
+                                      frame.origin.y + frame.size.height * 0.70);
     
     // Path matita
-    [pencilpoint moveToPoint:NSMakePoint(frame.origin.x + leftX, frame.origin.y + bottomY)];
-    [pencilpoint lineToPoint:NSMakePoint(frame.origin.x + leftX, frame.origin.y + topY - 1)];
-    [pencilpoint lineToPoint:NSMakePoint(frame.origin.x + rightX + 1, frame.origin.y + bottomY)];
-    [pencilback moveToPoint:NSMakePoint(frame.origin.x + leftX + 1, frame.origin.y + topY - 1)];
-    [pencilback lineToPoint:backTopLeft];
-    [pencilback lineToPoint:backBottomRight];
-    [pencilback lineToPoint:NSMakePoint(frame.origin.x + rightX + 1, frame.origin.y + bottomY - 1)];
+    [pencilpoint moveToPoint:bottomLeftL];
+    [pencilpoint curveToPoint:topRightL controlPoint1:bottomControlL controlPoint2:topControlL];
+    [pencilpoint lineToPoint:topRightR];
+    [pencilpoint curveToPoint:bottomLeftR controlPoint1:topControlR controlPoint2:bottomControlR];
     
-    // Comincio ad aggiungere i paths all'array paths e ad impostare le preferenze di disegno in modes
+    // Aggiungo i paths all'array paths e imposto le preferenze di disegno in modes
     [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
     [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
     
@@ -80,9 +88,6 @@ void makeDrawFreeButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMu
     
     [paths addObject:[[DRRPathObj alloc] initWithPath:pencilpoint]];
     [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
-    
-    [paths addObject:[[DRRPathObj alloc] initWithPath:pencilback]];
-    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:STROKE]];
     
 }
 
@@ -95,15 +100,16 @@ void makeDrawLine(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableA
     
     // Path per il bordo
     [border appendBezierPathWithRoundedRect:frame xRadius:roundness yRadius:roundness];
-    [innerborder appendBezierPathWithRoundedRect:NSMakeRect(frame.origin.x + 3, frame.origin.y + 3, frame.size.width - 6, frame.size.height - 6) xRadius:roundness yRadius:roundness];
+    CGFloat bthickness = fmin(frame.size.width, frame.size.height) * 0.08;
+    [innerborder appendBezierPathWithRoundedRect:NSMakeRect(frame.origin.x + bthickness, frame.origin.y + bthickness, frame.size.width - (2 * bthickness), frame.size.height - (2 * bthickness)) xRadius:roundness yRadius:roundness];
     
     // Coordinate per il disegno interno della matita.
 //    NSPoint bottom = NSMakePoint(frame.size.width * 0.22, frame.size.height * 0.77);
 //    NSPoint top = NSMakePoint(frame.size.width * 0.88, frame.size.height * 0.23);
-    NSPoint bottomleft = NSMakePoint(frame.size.width * 0.20, frame.size.height * 0.75);
-    NSPoint bottomright = NSMakePoint(frame.size.width * 0.25, frame.size.height * 0.80);
-    NSPoint topleft = NSMakePoint(frame.size.width * 0.75, frame.size.height * 0.20);
-    NSPoint topright = NSMakePoint(frame.size.width * 0.80, frame.size.height * 0.25);
+    NSPoint bottomleft = NSMakePoint(frame.origin.x + frame.size.width * 0.20, frame.origin.y + frame.size.height * 0.75);
+    NSPoint bottomright = NSMakePoint(frame.origin.x + frame.size.width * 0.25, frame.origin.y + frame.size.height * 0.80);
+    NSPoint topleft = NSMakePoint(frame.origin.x + frame.size.width * 0.75, frame.origin.y + frame.size.height * 0.20);
+    NSPoint topright = NSMakePoint(frame.origin.x + frame.size.width * 0.80, frame.origin.y + frame.size.height * 0.25);
     
     // Path linea
     [line moveToPoint:bottomleft];
@@ -127,23 +133,61 @@ void makeDrawLine(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableA
 
 @implementation DRRDock
 
-// inizializza il controllo con un rettangolo
+- (id)init {
+    self = [super init];
+    if (self)
+        [self setDefaultItemProperties];
+    return self;
+}
+
 - (id)initWithFrame:(NSRect)frameRect {
     self = [super initWithFrame:frameRect];
     if (self) {
         self.frame = frameRect;
+        [self setDefaultItemProperties];
     }
     return self;
 }
 
-- (id)initWithCoder:(NSCoder *)aDecoder
-{
-    self = [super initWithCoder:aDecoder];
-    if (self) {
-    }
-    
+- (id)initWithFrame:(NSRect)frameRect mode:(NSMatrixMode)aMode cellClass:(Class)factoryId numberOfRows:(NSInteger)rowsHigh numberOfColumns:(NSInteger)colsWide {
+    self = [super initWithFrame:frameRect mode:aMode cellClass:factoryId numberOfRows:rowsHigh numberOfColumns:colsWide];
+    if (self)
+        [self setDefaultItemProperties];
     return self;
 }
+
+- (id)initWithFrame:(NSRect)frameRect mode:(NSMatrixMode)aMode prototype:(NSCell *)aCell numberOfRows:(NSInteger)rowsHigh numberOfColumns:(NSInteger)colsWide {
+    self = [super initWithFrame:frameRect mode:aMode prototype:aCell numberOfRows:rowsHigh numberOfColumns:colsWide];
+    if (self)
+        [self setDefaultItemProperties];
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    self = [super initWithCoder:aDecoder];
+    if (self)
+        [self setDefaultItemProperties];
+    return self;
+}
+
+- (void)setDefaultItemProperties {
+    dockPrevResizeWasInLive = NO;
+    cellHighlighted = NSMakePoint(-1, -1);
+}
+
+//- (void)highlightCell:(BOOL)flag atRow:(NSInteger)row column:(NSInteger)column {
+//    [super highlightCell:flag atRow:row column:column];
+//    [self setHighlightedCell:row atColumn:column];
+//}
+//
+//- (NSPoint)getHighlightedCell {
+//    return cellHighlighted;
+//}
+//
+//- (void)setHighlightedCell:(NSInteger)row atColumn:(NSInteger)column {
+//    cellHighlighted.x = column;
+//    cellHighlighted.y = row;
+//}
 
 // metodi per ricevere e settare il rettangolo del controllo oppure la sua origine e le dimensioni
 //- (NSPoint)getFrameOrigin { return self.frame.origin; }
@@ -157,10 +201,13 @@ void makeDrawLine(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableA
 //    return self.controlView.bounds.size;
 //}
 
+
+
 // metodo che restituisce true se il punto passato è dentro al rettangolo del controllo
-- (BOOL)hitTest:(NSPoint)p {
-    return NSPointInRect(p, self.frame);
-}
+//- (BOOL)hitTest:(NSPoint)p {
+//    return NSPointInRect(p, self.frame);
+//}
+
 
 //- (void)mouseDown { }
 //
@@ -169,6 +216,27 @@ void makeDrawLine(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableA
 //- (void)mouseUp { }
 //
 //- (void)drawRect:(NSRect)dirtyRect { }
+
+- (BOOL)inLiveResize {
+    BOOL isInLive = [super inLiveResize];
+    if (!isInLive) {
+        if (dockPrevResizeWasInLive) {
+            dockPrevResizeWasInLive = NO;
+            [self setNeedsDisplay];
+        }
+    }
+    else
+        dockPrevResizeWasInLive = YES;
+    
+    return isInLive;
+}
+
+- (void)drawRect:(NSRect)dirtyRect {
+    if ([self inLiveResize])
+        [[NSGraphicsContext currentContext] setShouldAntialias: NO];
+    
+    [super drawRect:dirtyRect];
+}
 
 @end
 
@@ -229,22 +297,25 @@ void makeDrawLine(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableA
 //- (void)mouseUp:(NSEvent *)theEvent { [self setState:NSOffState]; }
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+    
     #ifdef DEBUGDRAWDOCK
     NSLog(@"draw-buttonDRawFreely");
     #endif
     
     //    NSColor * prevColor; ///// TODO salvare colore precedente
+    if ([self isHighlighted]) {
+        DRRDrawingProperties * border = (DRRDrawingProperties *) btnmodes[0];
+        border.color = [NSColor lightGrayColor];
+    }
     
     [btnpaths enumerateObjectsUsingBlock:^(DRRPathObj * pathobj, NSUInteger idx, BOOL *stop) {
         NSBezierPath * path = pathobj.path;
         [((DRRDrawingProperties *) btnmodes[idx]).color set];
-        if (((DRRDrawingProperties *) btnmodes[idx]).drawingMode == FILL) {
+        if (((DRRDrawingProperties *) btnmodes[idx]).drawingMode == FILL)
             [path fill];
-        }
         else
             [path stroke];
-        
-            ///// TODO path secondo tipo di linea
+
     }];
 }
 
