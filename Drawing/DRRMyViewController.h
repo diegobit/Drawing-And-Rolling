@@ -13,7 +13,7 @@
 //#define DEBUGINIT
 //#define DEBUGDRAW
 //#define DEBUGLINES
-//#define DEBUGLINESHIST
+#define DEBUGLINESHIST
 //#define DEBUGMOUSECORR
 
 // costanti per indicare se una funzione: (1) non ha trovato l'elemento cercato; (2) parametro non valido
@@ -65,16 +65,19 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
     
     // Matrice che gestisce i bottoni dell'interfaccia. Grandezza controllo. Rotondità del bordo dei tasti.
     // Spessore linea del disegno interno dei controlli.
-    NSMatrix * dock;
+    DRRDock * dock;
     NSSize cellsize;
     CGFloat roundness;
     CGFloat linewidth;
     
+    DRRButton * btnDrawFree;
+    DRRButton * btnDrawLine;
+    DRRButton * btnPan;
+    DRRButton * btnZoom;
+    
     // array e altro per contenere i punti del mouse da convertire in linee
     NSMutableArray * linesContainer;
-//    NSInteger last;
     NSMutableArray * BezierPathsToDraw;
-    BOOL linesNeedDisplay;
     
     NSMutableArray * linesHistory;
 //    BOOL lastPtOfLine;
@@ -85,8 +88,13 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
     BOOL thisIsANewLine;
     // Coppia di indici per individuare il punto a cui si ancorerà la nuova linea. Valido solo se vale thisIsANewLine
     NSPoint nearpointIdx;
-    // Variabile booleana per sapere se è stata disegnta almeno una linea con i mouse dragged
+    // Variabile booleana per sapere se è stata disegnata almeno una linea con i mouse dragged della mano libera
     BOOL atLeastOneStroke;
+    // Variabile temporanea dove tenere il punto durante il drawLine della linea retta
+    NSPoint tempPoint;
+    NSPoint prevTempPoint;
+    // Variabile booleana per sapere se la linea temporanea della linea retta è valida
+    BOOL validLine;
     
     // path che contengono le linee da disegnare e i punti in cui viene rilevato il mouse
     NSRect dirtyRect;
@@ -102,13 +110,14 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
 
 /** Metodi per calcolare il retangolo contenente dei punti dati, oppure la distanza tra due punti */
 - (NSRect)computeRect:(NSPoint)p1 secondPoint:(NSPoint)p2 moveBorder:(CGFloat)border;
-- (NSRect)computeRectFromArray:(NSMutableArray *)points moveBorder:(CGFloat)border;
+//- (NSRect)computeRectFromArray:(NSMutableArray *)points moveBorder:(CGFloat)border;
 - (void)addEmptyLine;
 - (CGFloat)distanceBetweenPoint:(NSPoint)p1 andPoint:(NSPoint)p2;
 
 /** Metodi per aggiungere linee da disegnare e rimuoverle */
 - (void)addPointToLatestLine:(NSPoint*)p;
 - (void)addPointToIdxLine:(NSPoint*)p idxLinesArray:(NSInteger)idx;
+- (void)addLineToHistory;
 - (void)removeLatestLine;
 
 - (void)transform:(NSSize)dimensions;
@@ -122,8 +131,8 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
 - (void)rightMouseDown:(NSEvent *)theEvent;
 - (void)rightMouseUp:(NSEvent *)theEvent;
 
-- (void)setNeedsDisplay;
-- (void)setNeedsDisplayInRect:(NSRect)invalidRect;
+//- (void)setNeedsDisplay;
+//- (void)setNeedsDisplayInRect:(NSRect)invalidRect;
 - (BOOL)inLiveResize;
 - (void)drawRect:(NSRect)dirtyRect;
 

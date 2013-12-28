@@ -8,7 +8,8 @@
 
 #import <Cocoa/Cocoa.h>
 
-//#define DEBUGDRAWDOCK
+//#define DEBUGDOCKDRAW
+//#define DEBUGDOCKMOUSECORR
 
 typedef enum drawingmodes {STROKE, FILL} drawingmode_t;
 
@@ -38,9 +39,9 @@ typedef enum drawingmodes {STROKE, FILL} drawingmode_t;
 
 
 void makeDrawFreeButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes);
-
-void makeDrawLine(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes);
-
+void makeDrawLineButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes);
+void makePanButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes);
+void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes);
 
 @interface DRRDock : NSMatrix {
     BOOL dockPrevResizeWasInLive;
@@ -54,9 +55,10 @@ void makeDrawLine(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableA
 - (id)initWithCoder:(NSCoder *)aDecoder;
 - (void)setDefaultItemProperties;
 
-//- (void)highlightCell:(BOOL)flag atRow:(NSInteger)row column:(NSInteger)column;
-//- (NSPoint)getHighlightedCell;
-//- (void)setHighlightedCell:(NSInteger)row atColumn:(NSInteger)column;
+- (void)highlightCell:(BOOL)flag atRow:(NSInteger)row column:(NSInteger)column;
+- (NSPoint)getHighlightedCell;
+- (void)setHighlightedCell:(NSInteger)row atColumn:(NSInteger)column;
+- (BOOL)hasHighlightedCell;
 
 //@property (readonly) NSRect frame;
 //- (NSPoint)getFrameOrigin;
