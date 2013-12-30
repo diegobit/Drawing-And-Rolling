@@ -13,6 +13,8 @@
 
 typedef enum drawingmodes {STROKE, FILL} drawingmode_t;
 
+
+
 @interface DRRPathObj : NSObject
 
 @property NSBezierPath * path;
@@ -43,10 +45,21 @@ void makeDrawLineButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMu
 void makePanButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes);
 void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes);
 
+
+
+@protocol dockToView
+- (void)updateCursor:(id)sender;
+@end
+
+
+
 @interface DRRDock : NSMatrix {
+//    id delegate;
     BOOL dockPrevResizeWasInLive;
-    NSPoint cellHighlighted;
+//    NSPoint cellHighlighted;
 }
+
+@property id <dockToView> dockdelegate;
 
 - (id)init;
 - (id)initWithFrame:(NSRect)frameRect;
@@ -55,10 +68,10 @@ void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutabl
 - (id)initWithCoder:(NSCoder *)aDecoder;
 - (void)setDefaultItemProperties;
 
-- (void)highlightCell:(BOOL)flag atRow:(NSInteger)row column:(NSInteger)column;
-- (NSPoint)getHighlightedCell;
-- (void)setHighlightedCell:(NSInteger)row atColumn:(NSInteger)column;
-- (BOOL)hasHighlightedCell;
+//- (void)highlightCell:(BOOL)flag atRow:(NSInteger)row column:(NSInteger)column;
+//- (NSPoint)getHighlightedCell;
+//- (void)setHighlightedCell:(NSInteger)row atColumn:(NSInteger)column;
+//- (BOOL)hasHighlightedCell;
 
 //@property (readonly) NSRect frame;
 //- (NSPoint)getFrameOrigin;
@@ -67,7 +80,7 @@ void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutabl
 //- (void)setFrameSize:(NSSize)s;
 
 //- (BOOL)hitTest:(NSPoint)p;
-//- (void)mouseDown:(NSEvent *)theEvent;
+- (void)mouseDown:(NSEvent *)theEvent;
 //- (void)mouseDragged:(NSEvent *)theEvent;
 //- (void)mouseUp:(NSEvent *)theEvent;
 //

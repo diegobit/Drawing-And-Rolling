@@ -73,8 +73,57 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     }
 }
 
+NSInteger fsign(CGFloat n) {
+    if (n > 0) return 1;
+    if (n < 0) return -1;
+    return 0;
+}
+
+
+//@implementation superView:DRRMyViewController<dockDelegate>
+//
+//- (void)updateCursor:(id)sender {
+//    
+//}
+//
+//@end
+
 
 @implementation DRRMyViewController
+
+- (void)updateCursor:(id)sender {
+    
+    #ifdef DEBUGPROTOCOL
+    NSLog(@"DRRMyViewController: Protocol DockToView: updateCursor");
+    #endif
+    
+    DRRButton * btn = [dock selectedCell];
+    
+    if (btn == btnDrawFree) {
+        if (customCursor != DRAW) {
+            [[NSCursor arrowCursor] set];
+            customCursor = DRAW;
+            //        customCursorNext = DRAW;
+        }
+    }
+    
+    else if (btn == btnPan) {
+        if (customCursor != PANWAIT) {
+            [[NSCursor openHandCursor] set];
+            customCursor = PANWAIT;
+            //            customCursorNext = PANACTIVE;
+        }
+    }
+    
+    else if (btn == btnZoom) {
+        if (customCursor != ZOOM) {
+            [[NSCursor resizeUpDownCursor] set];
+            customCursor = ZOOM;
+            //            customCursorNext = ZOOM;
+        }
+    }
+    
+}
 
 - (id)initWithFrame:(NSRect)frameRect {
     
@@ -111,6 +160,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
                                 cellClass:[DRRButton class]
                              numberOfRows:1
                           numberOfColumns:4];
+    [dock setDockdelegate:self];
     [dock setCellSize:cellsize];
 //    [dock setBackgroundColor:[NSColor lightGrayColor]]; // REMOVE
 //    [dock setDrawsBackground:YES]; // REMOVE
@@ -121,6 +171,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     btnPan = [[DRRButton alloc] initWithPaths:panPaths typeOfDrawing:panModes];
     [dock putCell:btnPan atRow:0 column:0];
     [dock sizeToCells];
+    [dock setState:NSOnState atRow:0 column:0];
     
     NSMutableArray * zoomPaths = [[NSMutableArray alloc] init];
     NSMutableArray * zoomModes = [[NSMutableArray alloc] init];
@@ -145,7 +196,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     
     
     [self addSubview:dock];
-
+    
     //    NSCell * btnMoveView = [[DRRbuttonMoveView alloc] init];
     //    NSCell * btnPlay = [[DRRbuttonDrawPlay alloc] init];
     //    NSCell * btnZoomSlider = [[DRRbuttonZoomSlider alloc] init];
@@ -162,6 +213,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     
     viewPrevResizeWasInLive = NO;
     validLine = NO;
+    customCursor = DRAW;
     
     // inizializzo l'array di linee disegnate e le proprietà
     linesContainer = [[NSMutableArray alloc] init];
@@ -169,6 +221,8 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     pathLines = [NSBezierPath bezierPath];
     
     screenRect = [[NSScreen mainScreen] frame];
+    v2w = [NSAffineTransform transform];
+    w2v = [NSAffineTransform transform];
     
     // Dimensione bottoni della dock, spessore line del disegno interno. Rotondità tasti.
     cellsize = NSMakeSize(32, 32);
@@ -190,94 +244,6 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     
     return NSMakeRect(x, y, w, h);
 }
-
-
-//- (NSRect)computeRectFromArray:(NSMutableArray *)points moveBorder:(CGFloat)border {
-//    
-//    if (points != NULL) {
-//        NSInteger ptlen = [points count];
-//        switch (ptlen) {
-//            // 0 punti nell'array, ritorno un rettangolo vuoto
-//            case 0:
-//                NSLog(@"computeRectFromArray: l'array era vuoto, l'NSRect avrà componenti nulle");
-//                return NSMakeRect(0, 0, 0, 0);
-//                break;
-//            // Ritorno un rettangolo che contiene quel punto
-//            case 1: {
-//                NSPoint pt = [(DRRPointObj *) [points firstObject] getPoint];
-//                return NSMakeRect(pt.x - 1 - border, pt.y - 1 - border, pt.x + 1 + 2*border, pt.y + 1 + 2*border);
-//                break;
-//            }
-//            default: {
-//                NSPoint pt0 = [(DRRPointObj *) [points firstObject] getPoint];
-//                NSPoint pt1 = [(DRRPointObj *) [points objectAtIndex:1] getPoint];
-//                NSRect rect = NSMakeRect(fmin(pt0.x, pt1.x), fmin(pt0.y, pt1.y), fabs(pt1.x - pt0.x), fabs(pt1.y - pt0.y));
-//                NSInteger i = 2;
-//                
-//                // Per ogni punto oltre il secondo guardo se sta fuori o dentro il mio rettangolo e controllo una coordinata per volta
-//                for (i = 2; i < ptlen; i++) {
-//                    NSPoint pt = [(DRRPointObj *) [points objectAtIndex:i] getPoint];
-//                    
-//                    if ((rect.origin.x + rect.size.width) < pt.x)
-//                        rect.size.width = pt.x - rect.origin.x;
-//                    else if ((rect.origin.x) > pt.x)
-//                        rect.origin.x = pt.x;
-//                    
-//                    if ((rect.origin.y + rect.size.height) < pt.y)
-//                        rect.size.height = pt.y - rect.origin.y;
-//                    else if ((rect.origin.y) > pt.y)
-//                        rect.origin.y = pt.y;
-//                }
-/////               FIXME non funziona credo... nella rightmouseup nella removepoint chiamo questa ma non aggiorna la linea...
-//
-//                rect.origin.x -= border;
-//                rect.origin.y -= border;
-//                rect.size.width += (2 * border);
-//                rect.size.height += (2 * border);
-//                
-//                return rect;
-//                break;
-//
-//                
-
-//                NSPoint pt0 = [(DRRPointObj *) [points firstObject] getPoint];
-////                CGFloat leftX = pt0.x;
-////                CGFloat rightX = pt0.x;
-////                CGFloat topY = pt0.y;
-////                CGFloat bottomY = pt0.y;
-//                NSRect rect = NSMakeRect(pt0.x, pt0.y, 1, 1);
-//                NSInteger i = 1;
-//                
-//                for (i = 1; i < ptlen; i++) {
-//                    NSPoint pt = [(DRRPointObj *) [points objectAtIndex:i] getPoint];
-//                    
-//                    rect.origin.x = fmin(rect.origin.x, pt.x);
-//                    rect.origin.y = fmin(rect.origin.y, pt.y);
-//                    rect.size.width = fmax(rect.size.width, fabs(pt.x - rect.origin.x));
-//                    rect.size.height = fmax(rect.size.height, fabs(pt.y - rect.origin.y));
-//                }
-//                
-//                rect.origin.x -= border;
-//                rect.origin.y -= border;
-//                rect.size.width += (2 * border);
-//                rect.size.height += (2 * border);
-//                
-//                return rect;
-//                break;
-//
-//                CGFloat x = fmin(p1.x, p2.x) - border; CGFloat y = fmin(p1.y, p2.y) - border;
-//                CGFloat raww = p2.x - p1.x; CGFloat rawh = p2.y - p1.y;
-//                CGFloat w = fabs(raww) + 2*border; CGFloat h = fabs(rawh) + 2*border;
-//                
-//                            }
-//        } // fine switch
-//    }
-//    else {
-//        NSLog(@"computeRectFromArray: puntatore array null, l'NSRect avrà componenti nulle");
-//        errno = EINVAL;
-//        return NSMakeRect(0, 0, 0, 0);
-//    }
-//}
 
 
 - (void)addEmptyLine {
@@ -399,11 +365,16 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 //- (IBAction)cellPressed:(id)sender {   [sender setState:NSOnState]; }
 //- (IBAction)cellPressedNoMore:(id)sender { [sender setState:NSOffState]; }
 
-- (void)transform:(NSSize)dimensions {
-    // TODO
+- (void)move:(NSSize)mstep {
+    [w2v translateXBy:mstep.width
+                  yBy:mstep.height];
+    [v2w translateXBy:(-1 * mstep.width)
+                  yBy:(-1 * mstep.height)];
+    
+    [self setNeedsDisplay];
 }
 
-- (void)scale:(CGFloat)factor {
+- (void)scale:(CGFloat)sstep {
     // TODO
 }
 
@@ -420,6 +391,12 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     DRRButton * btn = [dock selectedCell];
     
     if (btn == btnDrawFree || btn == btnDrawLine) {
+
+        if (customCursor != DRAW) {
+            [[NSCursor arrowCursor] set];
+            customCursor = DRAW;
+//            customCursorNext = DRAW;
+        }
         
         // controllo se il mouse è vicino ad un punto precedente...
         nearpointIdx = findAdiacentVertex(linesContainer, pview);
@@ -461,6 +438,26 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
         }
         
     } // fine btnDrawFree || btnDrawLine
+    
+    else if (btn == btnPan) {
+        if (customCursor != PANACTIVE) {
+            [[NSCursor closedHandCursor] set];
+            customCursor = PANACTIVE;
+//            customCursorNext = PANACTIVE;
+        }
+        
+        prevmouseXY = pwindow;
+    }
+    
+    else if (btn == btnZoom) {
+        if (customCursor != ZOOM) {
+            [[NSCursor resizeUpDownCursor] set];
+            customCursor = ZOOM;
+//            customCursorNext = ZOOM;
+        }
+        
+        prevmouseXY = pwindow;
+    }
     
     #if defined(DEBUGLINES) || defined(DEBUGLINESHIST)
     [self setNeedsDisplayInRect:NSMakeRect(self.frame.size.width - 55, 0, self.frame.size.width, 50)];
@@ -526,6 +523,40 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
         [self setNeedsDisplayInRect:dirtyRect];
         
     } // fine btnDrawLine
+    
+    else if (btn == btnPan) {
+//        if (customCursor == PANACTIVE) {
+//            [[NSCursor closedHandCursor] set];
+//            customCursor = PANWAIT;
+//            customCursorNext = PANWAIT;
+//        }
+    }
+    
+    else if (btn == btnZoom) {
+
+        direction_t dir;
+        customcursor_t expectedCursor;
+        CGFloat diff = pwindow.y - prevmouseXY.y;
+        
+        if (diff >= 0) {
+            dir = UP;
+            expectedCursor = ZOOMIN;
+            if (customCursor != expectedCursor) {
+                [[NSCursor resizeUpCursor] set];
+                customCursor = expectedCursor;
+            }
+        }
+        else {
+            dir = DOWN;
+            expectedCursor = ZOOMOUT;
+            if (customCursor != expectedCursor) {
+                [[NSCursor resizeDownCursor] set];
+                customCursor = expectedCursor;
+            }
+        }
+        
+//            customCursorNext = ZOOM;
+    }
     
     #if defined(DEBUGLINES) || defined(DEBUGLINESHIST)
     [self setNeedsDisplayInRect:NSMakeRect(self.frame.size.width - 55, 0, self.frame.size.width, 50)];
@@ -610,6 +641,16 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
         
     }
     
+    else if (btn == btnPan) {
+        customCursor = PANWAIT;
+        [[NSCursor openHandCursor] set];
+    }
+    
+    else if (btn == btnZoom) {
+        customCursor = ZOOM;
+        [[NSCursor resizeUpDownCursor] set];
+    }
+    
     #if defined(DEBUGLINES) || defined(DEBUGLINESHIST)
     [self setNeedsDisplayInRect:NSMakeRect(self.frame.size.width - 55, 0, self.frame.size.width, 50)];
     #endif
@@ -663,6 +704,37 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
 //}
 
 
+- (void)updateCursorM {
+    
+    DRRButton * btn = [dock selectedCell];
+    
+    if (btn == btnDrawFree) {
+        if (customCursor != DRAW) {
+        [[NSCursor arrowCursor] set];
+        customCursor = DRAW;
+//        customCursorNext = DRAW;
+        }
+    }
+    
+    else if (btn == btnPan) {
+        if (customCursor != PANWAIT) {
+            [[NSCursor openHandCursor] set];
+            customCursor = PANWAIT;
+//            customCursorNext = PANACTIVE;
+        }
+    }
+    
+    else if (btn == btnZoom) {
+        if (customCursor != ZOOM) {
+            [[NSCursor resizeUpDownCursor] set];
+            customCursor = ZOOM;
+//            customCursorNext = ZOOM;
+        }
+    }
+
+}
+
+
 - (BOOL)inLiveResize {
     BOOL isInLive = [super inLiveResize];
     if (!isInLive) {
@@ -687,6 +759,19 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
     pathSinglePoint = [NSBezierPath bezierPath];
     #endif
 
+//    DRRButton * btn = [dock selectedCell];
+    
+//    if (btn == btnPan) {
+//        if (leftpressed)
+//            [[NSCursor closedHandCursor] set];
+//        else
+//            [[NSCursor openHandCursor] set];
+//    }
+//    else if (btn == btnZoom) {
+//        [[NSCursor resizeUpDownCursor] set];
+//    }
+    
+    
     [[NSColor blackColor] set];
     
     if ([self inLiveResize]) {

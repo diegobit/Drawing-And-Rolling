@@ -300,30 +300,30 @@ void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutabl
 
 - (void)setDefaultItemProperties {
     dockPrevResizeWasInLive = NO;
-    cellHighlighted = NSMakePoint(-1, -1);
+//    cellHighlighted = NSMakePoint(-1, -1);
 }
 
-- (void)highlightCell:(BOOL)flag atRow:(NSInteger)row column:(NSInteger)column {
-    [super highlightCell:flag atRow:row column:column];
-    [self setHighlightedCell:row atColumn:column];
-}
-
-- (NSPoint)getHighlightedCell {
-    return cellHighlighted;
-}
-
-- (void)setHighlightedCell:(NSInteger)row atColumn:(NSInteger)column {
-    cellHighlighted.x = column;
-    cellHighlighted.y = row;
-}
-
-- (BOOL)hasHighlightedCell {
-    NSPoint cell = [self getHighlightedCell];
-    if ((cell.x > -1) && (cell.y > -1))
-        return YES;
-    else
-        return NO;
-}
+//- (void)highlightCell:(BOOL)flag atRow:(NSInteger)row column:(NSInteger)column {
+//    [super highlightCell:flag atRow:row column:column];
+//    [self setHighlightedCell:row atColumn:column];
+//}
+//
+//- (NSPoint)getHighlightedCell {
+//    return cellHighlighted;
+//}
+//
+//- (void)setHighlightedCell:(NSInteger)row atColumn:(NSInteger)column {
+//    cellHighlighted.x = column;
+//    cellHighlighted.y = row;
+//}
+//
+//- (BOOL)hasHighlightedCell {
+//    NSPoint cell = [self getHighlightedCell];
+//    if ((cell.x > -1) && (cell.y > -1))
+//        return YES;
+//    else
+//        return NO;
+//}
 
 // metodi per ricevere e settare il rettangolo del controllo oppure la sua origine e le dimensioni
 //- (NSPoint)getFrameOrigin { return self.frame.origin; }
@@ -345,18 +345,21 @@ void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutabl
 //}
 
 
-//- (void)mouseDown:(NSEvent *)theEvent {
-//    
-//    #ifdef DEBUGDOCKMOUSECORR
-//    NSLog(@"+mouseDown Dock");
-//    #endif
-//    
-//    [super mouseDown:theEvent];
+- (void)mouseDown:(NSEvent *)theEvent {
+    
+    #ifdef DEBUGDOCKMOUSECORR
+    NSLog(@"+mouseDown Dock");
+    #endif
+    
+    
 //    if ([self hasHighlightedCell]) {
 //        NSPoint cell = [self getHighlightedCell];
 //        [self highlightCell:NO atRow:cell.y column:cell.x];
 //    }
-//}
+    
+    [super mouseDown:theEvent];
+    [self.dockdelegate updateCursor:self];
+}
 
 //- (void)mouseDragged { }
 //

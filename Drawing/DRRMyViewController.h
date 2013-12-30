@@ -15,6 +15,7 @@
 //#define DEBUGLINES
 #define DEBUGLINESHIST
 //#define DEBUGMOUSECORR
+#define DEBUGPROTOCOL
 
 // costanti per indicare se una funzione: (1) non ha trovato l'elemento cercato; (2) parametro non valido
 #define NOTFOUND -11
@@ -23,6 +24,8 @@
 // distanza tra due punti per essere considerati adiacenti
 #define PTDISTANCE 12.0
 
+typedef enum customcursor {PANWAIT, PANACTIVE, ZOOM, ZOOMIN, ZOOMOUT, DRAW} customcursor_t;
+typedef enum direction {UP, DOWN, LEFT, RIGHT} direction_t;
 
 @interface DRRSegmentIdx : NSObject
 
@@ -46,11 +49,13 @@
  */
 NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
 
+NSInteger fsign(CGFloat n);
+
 
 /**
  *  Parte principale dell'applicazione.
  */
-@interface DRRMyViewController : NSControl {
+@interface DRRMyViewController : NSControl <dockToView> {
     
 //    IBOutlet NSController *controller;
     
@@ -62,6 +67,10 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
     // e coordinata iniziale del trascinamento per la cronologia
     NSPoint prevmouseXY;
     NSRect screenRect;
+    NSAffineTransform * v2w;
+    NSAffineTransform * w2v;
+    customcursor_t customCursor;
+//    customcursor_t customCursorNext;
     
     // Matrice che gestisce i bottoni dell'interfaccia. Grandezza controllo. Rotondità del bordo dei tasti.
     // Spessore linea del disegno interno dei controlli.
@@ -78,11 +87,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
     // array e altro per contenere i punti del mouse da convertire in linee
     NSMutableArray * linesContainer;
     NSMutableArray * BezierPathsToDraw;
-    
     NSMutableArray * linesHistory;
-//    BOOL lastPtOfLine;
-//    BOOL firstPtOfLine;
-//    NSInteger idxFirstPtOfLine;
     
     // Variabile booleana che indica se la linea che sto disegnando è nuova o verrà ancorata ad una vecchia
     BOOL thisIsANewLine;
@@ -96,7 +101,7 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
     // Variabile booleana per sapere se la linea temporanea della linea retta è valida
     BOOL validLine;
     
-    // path che contengono le linee da disegnare e i punti in cui viene rilevato il mouse
+    // path che contiene le linee da disegnare e i punti in cui viene rilevato il mouse
     NSRect dirtyRect;
     NSBezierPath * pathLines, * pathSinglePoint;
     
@@ -120,8 +125,8 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
 - (void)addLineToHistory;
 - (void)removeLatestLine;
 
-- (void)transform:(NSSize)dimensions;
-- (void)scale:(CGFloat)factor;
+- (void)move:(NSSize)mstep;
+- (void)scale:(CGFloat)sstep;
 
 //- (IBAction)cellPressed:(id)sender;
 
@@ -133,12 +138,10 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
 
 //- (void)setNeedsDisplay;
 //- (void)setNeedsDisplayInRect:(NSRect)invalidRect;
+- (void)updateCursorM;
 - (BOOL)inLiveResize;
 - (void)drawRect:(NSRect)dirtyRect;
 
 @end
-
-
-
 
 
