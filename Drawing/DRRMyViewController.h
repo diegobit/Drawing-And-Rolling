@@ -13,9 +13,10 @@
 //#define DEBUGINIT
 //#define DEBUGDRAW
 //#define DEBUGLINES
-#define DEBUGLINESHIST
+//#define DEBUGLINESHIST
+//#define DEBUGMATRIX
 //#define DEBUGMOUSECORR
-#define DEBUGPROTOCOL
+//#define DEBUGPROTOCOL
 
 // costanti per indicare se una funzione: (1) non ha trovato l'elemento cercato; (2) parametro non valido
 #define NOTFOUND -11
@@ -67,10 +68,16 @@ NSInteger fsign(CGFloat n);
     // e coordinata iniziale del trascinamento per la cronologia
     NSPoint prevmouseXY;
     NSRect screenRect;
-    NSAffineTransform * v2w;
-    NSAffineTransform * w2v;
+    
+//    NSRect prevFrame;
+//    NSAffineTransform * windowSizeTrans;
+    NSAffineTransform * v2wTrans;
+    NSAffineTransform * v2wScale;
+    NSAffineTransform * w2vTrans;
+    NSAffineTransform * w2vScale;
     customcursor_t customCursor;
-//    customcursor_t customCursorNext;
+    CGFloat maxZoomFactor;
+    CGFloat minZoomFactor;
     
     // Matrice che gestisce i bottoni dell'interfaccia. Grandezza controllo. Rotondità del bordo dei tasti.
     // Spessore linea del disegno interno dei controlli.
@@ -109,10 +116,17 @@ NSInteger fsign(CGFloat n);
 
 //- (NSPoint)convertToScreenFromLocalPoint:(NSPoint)point relativeToView:(NSView *)view;
 
+//@property NSRect prevFrame;
+
 - (id)initWithFrame:(NSRect)frameRect;
 - (void)awakeFromNib;
 - (id)initWithCoder:(NSCoder *)aDecoder;
 
+//- (void)viewDidMoveToWindow;
+//- (void)windowResized:(NSNotification *)notification;
+//- (BOOL)preservesContentDuringLiveResize;
+- (void) setFrameSize:(NSSize)newSize;
+    
 /** Metodi per calcolare il retangolo contenente dei punti dati, oppure la distanza tra due punti */
 - (NSRect)computeRect:(NSPoint)p1 secondPoint:(NSPoint)p2 moveBorder:(CGFloat)border;
 //- (NSRect)computeRectFromArray:(NSMutableArray *)points moveBorder:(CGFloat)border;
@@ -125,8 +139,8 @@ NSInteger fsign(CGFloat n);
 - (void)addLineToHistory;
 - (void)removeLatestLine;
 
-- (void)move:(NSSize)mstep;
-- (void)scale:(CGFloat)sstep;
+- (void)move:(BOOL)invalidate translation:(NSSize)mstep;
+- (BOOL)scale:(CGFloat)sstep maxZoom:(CGFloat)upperbound minZoom:(CGFloat)lowerbound;
 
 //- (IBAction)cellPressed:(id)sender;
 
@@ -138,7 +152,6 @@ NSInteger fsign(CGFloat n);
 
 //- (void)setNeedsDisplay;
 //- (void)setNeedsDisplayInRect:(NSRect)invalidRect;
-- (void)updateCursorM;
 - (BOOL)inLiveResize;
 - (void)drawRect:(NSRect)dirtyRect;
 

@@ -303,6 +303,11 @@ void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutabl
 //    cellHighlighted = NSMakePoint(-1, -1);
 }
 
+//- (BOOL)preservesContentDuringLiveResize {
+//    NSLog(@"pres - dock");
+//    return YES;
+//}
+
 //- (void)highlightCell:(BOOL)flag atRow:(NSInteger)row column:(NSInteger)column {
 //    [super highlightCell:flag atRow:row column:column];
 //    [self setHighlightedCell:row atColumn:column];

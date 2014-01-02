@@ -68,6 +68,7 @@ void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutabl
 - (id)initWithCoder:(NSCoder *)aDecoder;
 - (void)setDefaultItemProperties;
 
+//- (BOOL)preservesContentDuringLiveResize;
 //- (void)highlightCell:(BOOL)flag atRow:(NSInteger)row column:(NSInteger)column;
 //- (NSPoint)getHighlightedCell;
 //- (void)setHighlightedCell:(NSInteger)row atColumn:(NSInteger)column;

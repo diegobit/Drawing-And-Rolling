@@ -125,6 +125,8 @@ NSInteger fsign(CGFloat n) {
     
 }
 
+
+
 - (id)initWithFrame:(NSRect)frameRect {
     
     #ifdef DEBUGINIT
@@ -151,7 +153,6 @@ NSInteger fsign(CGFloat n) {
     #ifdef DEBUGINIT
     NSLog(@"awakeFromNib myView");
     #endif
-    
     [super awakeFromNib];
     [self setItemPropertiesToDefault];
     
@@ -196,6 +197,7 @@ NSInteger fsign(CGFloat n) {
     
     
     [self addSubview:dock];
+    [dock.dockdelegate updateCursor:self];
     
     //    NSCell * btnMoveView = [[DRRbuttonMoveView alloc] init];
     //    NSCell * btnPlay = [[DRRbuttonDrawPlay alloc] init];
@@ -211,9 +213,12 @@ NSInteger fsign(CGFloat n) {
     NSLog(@"setItemProperties myView");
     #endif
     
+//    self.prevFrame = self.frame;
     viewPrevResizeWasInLive = NO;
     validLine = NO;
     customCursor = DRAW;
+    maxZoomFactor = 4;
+    minZoomFactor = 0.25;
     
     // inizializzo l'array di linee disegnate e le proprietà
     linesContainer = [[NSMutableArray alloc] init];
@@ -221,8 +226,10 @@ NSInteger fsign(CGFloat n) {
     pathLines = [NSBezierPath bezierPath];
     
     screenRect = [[NSScreen mainScreen] frame];
-    v2w = [NSAffineTransform transform];
-    w2v = [NSAffineTransform transform];
+    v2wTrans = [NSAffineTransform transform];
+    v2wScale = [NSAffineTransform transform];
+    w2vTrans = [NSAffineTransform transform];
+    w2vScale = [NSAffineTransform transform];
     
     // Dimensione bottoni della dock, spessore line del disegno interno. Rotondità tasti.
     cellsize = NSMakeSize(32, 32);
@@ -234,13 +241,78 @@ NSInteger fsign(CGFloat n) {
     dirtyRect = NSMakeRect(0, 0, 1, 1);
 }
 
+//- (void)viewDidMoveToWindow {
+//    
+//    [[NSNotificationCenter defaultCenter] addObserver:self
+//                                             selector:@selector(windowResized:) name:NSWindowDidResizeNotification
+//                                               object:[self window]];
+//}
+//
+//- (void)windowResized:(NSNotification *)notification {
+//
+//    CGFloat moveX = (self.frame.size.width - self.prevFrame.size.width) / 2;
+//    CGFloat moveY = (self.frame.size.height - self.prevFrame.size.height) / 2;
+//    
+//    [w2vTrans translateXBy:moveX yBy:moveY];
+//    
+//    self.prevFrame = self.frame;
+//    
+//}
+//
+//- (BOOL)preservesContentDuringLiveResize {
+////    super.preservesContentDuringLiveResize = YES;
+//    NSLog(@"pres - myview");
+////    [super preservesContentDuringLiveResize];
+////    [dock preservesContentDuringLiveResize];
+//    return YES;
+//}
 
+- (void) setFrameSize:(NSSize)newSize {
+    
+    #ifdef DEBUGMATRIX
+    NSLog(@"myView:setFrameSize");
+    #endif
+    
+    // Voglio utilizzare il centro della vista come punto di ancoraggio: calcolo la posizione del centro prima del ridimensionamento e la posizione del nuovo centro dopo. Traslo le matrici della differenza delle loro coordinate.
+
+
+    NSPoint pview_before = NSMakePoint(self.frame.origin.x + self.frame.size.width / 2,
+                                self.frame.origin.y + self.frame.size.height / 2);
+    NSPoint pworld_before = [v2wScale transformPoint:[v2wTrans transformPoint:pview_before]];
+    
+    NSPoint pview_after = NSMakePoint(self.frame.origin.x + newSize.width / 2,
+                                      self.frame.origin.y + newSize.height / 2);
+    NSPoint pworld_after = [v2wScale transformPoint:[v2wTrans transformPoint:pview_after]];
+    
+    NSSize diff = NSMakeSize(pworld_after.x - pworld_before.x, pworld_after.y - pworld_before.y);
+    [self move:NO translation:diff];
+
+    [super setFrameSize:newSize];
+    
+    // E' cambiata la dimensione della view, quindi va ridisegnata. Però preservo la zona precedente al ridimensionamento
+//    if ([self inLiveResize]) {
+//        NSRect rects[4];
+//        NSInteger count;
+//        
+//        [self getRectsExposedDuringLiveResize:rects count:&count];
+//        
+//        while (count-- > 0)
+//            [self setNeedsDisplayInRect:rects[count]];
+//    }
+    
+//    else
+//        [self setNeedsDisplay:YES];
+    
+}
 
 - (NSRect)computeRect:(NSPoint)p1 secondPoint:(NSPoint)p2 moveBorder:(CGFloat)border {
     
-    CGFloat x = fmin(p1.x, p2.x) - border; CGFloat y = fmin(p1.y, p2.y) - border;
+    NSPoint bb = [w2vScale transformPoint:NSMakePoint(border, border)];
+    CGFloat borderscaled = bb.x;
+    
+    CGFloat x = fmin(p1.x, p2.x) - borderscaled; CGFloat y = fmin(p1.y, p2.y) - borderscaled;
     CGFloat raww = p2.x - p1.x; CGFloat rawh = p2.y - p1.y;
-    CGFloat w = fabs(raww) + 2*border; CGFloat h = fabs(rawh) + 2*border;
+    CGFloat w = fabs(raww) + 2*borderscaled; CGFloat h = fabs(rawh) + 2*borderscaled;
     
     return NSMakeRect(x, y, w, h);
 }
@@ -333,7 +405,7 @@ NSInteger fsign(CGFloat n) {
         [linesHistory removeLastObject];
         
         
-//        [self setNeedsDisplayInRect:[self computeRectFromArray:dirtyPoints moveBorder:2]]; //TODO sarà più veloce calcolare il rettangolo o ridisegnare tutto?
+//        [self setNeedsDisplayInRect:[self computeRectFromArray:dirtyPoints moveBorder:1]]; //TODO sarà più veloce calcolare il rettangolo o ridisegnare tutto?
     }
     
     #ifdef DEBUGLINESHIST
@@ -365,17 +437,49 @@ NSInteger fsign(CGFloat n) {
 //- (IBAction)cellPressed:(id)sender {   [sender setState:NSOnState]; }
 //- (IBAction)cellPressedNoMore:(id)sender { [sender setState:NSOffState]; }
 
-- (void)move:(NSSize)mstep {
-    [w2v translateXBy:mstep.width
-                  yBy:mstep.height];
-    [v2w translateXBy:(-1 * mstep.width)
-                  yBy:(-1 * mstep.height)];
+- (void)move:(BOOL)invalidate translation:(NSSize)mstep {
+    [w2vTrans translateXBy:mstep.width yBy:mstep.height];
+    [v2wTrans translateXBy:(-1 * mstep.width) yBy:(-1 * mstep.height)];
     
-    [self setNeedsDisplay];
+    if (invalidate)
+        [self setNeedsDisplay];
 }
 
-- (void)scale:(CGFloat)sstep {
-    // TODO
+- (BOOL)scale:(CGFloat)sstep maxZoom:(CGFloat)upperbound minZoom:(CGFloat)lowerbound {
+    
+    BOOL reachedUpperB = NO;
+    BOOL reachedLowerB = NO;
+    NSPoint scalefactor = [w2vScale transformPoint:NSMakePoint(sstep, sstep)];
+    
+    if (scalefactor.x >= upperbound)
+        reachedUpperB = YES;
+    else if (scalefactor.x <= lowerbound)
+        reachedLowerB = YES;
+    
+    if ( (!reachedUpperB && !reachedLowerB) || (reachedUpperB && (sstep < 1)) || (reachedLowerB && (sstep > 1)) ) {
+        NSPoint pview = NSMakePoint(self.frame.origin.x + self.frame.size.width / 2,
+                                    self.frame.origin.y + self.frame.size.height / 2);
+        NSPoint pworld_before = [v2wScale transformPoint:pview];
+        
+        [w2vScale scaleBy:sstep];
+        [v2wScale scaleBy:(1 / sstep)];
+        
+        NSPoint pworld_after = [v2wScale transformPoint:pview];
+        NSSize diff = NSMakeSize(pworld_after.x - pworld_before.x, pworld_after.y - pworld_before.y);
+//        CGFloat diffX = pworld_after.x - pworld_before.x;
+//        CGFloat diffY = pworld_after.y - pworld_before.y;
+        
+        [self move:NO translation:diff];
+//        [w2vTrans translateXBy:diffX yBy:diffY];
+//        [v2wTrans translateXBy:(-1 * diffX) yBy:(-1 * diffY)];
+        
+        [self setNeedsDisplay];
+        
+        return YES;
+    }
+    
+    return NO;
+    
 }
 
 - (void)mouseDown:(NSEvent *)theEvent {
@@ -386,7 +490,10 @@ NSInteger fsign(CGFloat n) {
     
     leftpressed = YES;
     NSPoint pwindow = [theEvent locationInWindow];
-    NSPoint pview   = [self convertPoint:pwindow fromView:nil];
+    NSPoint pview = [self convertPoint:pwindow fromView:nil];
+//    NSPoint pbaseview = [w2v transformPoint:pview];
+    NSPoint pworld = [v2wScale transformPoint:pview];
+    pworld = [v2wTrans transformPoint:pworld];
     
     DRRButton * btn = [dock selectedCell];
     
@@ -399,7 +506,7 @@ NSInteger fsign(CGFloat n) {
         }
         
         // controllo se il mouse è vicino ad un punto precedente...
-        nearpointIdx = findAdiacentVertex(linesContainer, pview);
+        nearpointIdx = findAdiacentVertex(linesContainer, pworld);
         
         // ...si! Ancoro la nuova linea a quella.
         if (nearpointIdx.x != ARGERROR && nearpointIdx.x != NOTFOUND) {
@@ -411,13 +518,20 @@ NSInteger fsign(CGFloat n) {
             thisIsANewLine = NO;
             NSPoint nearpoint = [linesContainer[(NSInteger)nearpointIdx.x][(NSInteger)nearpointIdx.y] getPoint];
             
-            prevmouseXY = nearpoint;
+            prevmouseXY = [w2vTrans transformPoint:nearpoint];
+            prevmouseXY = [w2vScale transformPoint:prevmouseXY];
             
             // sposto il puntatore del mouse nella nuova posizione (coordinate schermo)
             NSRect frameRelativeToScreen = [self.window convertRectToScreen:self.frame];
-            NSPoint newpos = NSMakePoint(frameRelativeToScreen.origin.x + nearpoint.x,
-                                         (screenRect.size.height) - (frameRelativeToScreen.origin.y + nearpoint.y));
+            NSPoint nearpointview = [w2vTrans transformPoint:nearpoint];
+            nearpointview = [w2vScale transformPoint:nearpointview];
+            NSPoint newpos = NSMakePoint(frameRelativeToScreen.origin.x + nearpointview.x,
+                                         (screenRect.size.height) - (frameRelativeToScreen.origin.y + nearpointview.y));
             CGWarpMouseCursorPosition(newpos);
+//            NSRect frameRelativeToScreen = [self.window convertRectToScreen:self.frame];
+//            NSPoint newpos = NSMakePoint(frameRelativeToScreen.origin.x + nearpoint.x,
+//                                         (screenRect.size.height) - (frameRelativeToScreen.origin.y + nearpoint.y));
+//            CGWarpMouseCursorPosition(newpos);
         }
         
         // ...no! Aggiungo una nuova linea e il punto ad essa. Includo il caso in cui la funzione abbia restituito un errore per camuffarlo a runtime
@@ -426,15 +540,15 @@ NSInteger fsign(CGFloat n) {
             prevmouseXY = pwindow;
             
             [self addEmptyLine];
-            [self addPointToLatestLine:(&pview)];
+            [self addPointToLatestLine:(&pworld)];
             
             if (nearpointIdx.x == ARGERROR)
                 perror("myViewController: mouseDown: findAdiacentVertex");
         }
         
         if (btn == btnDrawLine) {
-            prevTempPoint = pwindow;
-            tempPoint = pwindow;
+            prevTempPoint = pworld;
+            tempPoint = pworld;
         }
         
     } // fine btnDrawFree || btnDrawLine
@@ -474,25 +588,29 @@ NSInteger fsign(CGFloat n) {
     
     NSPoint pwindow = [theEvent locationInWindow];
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
+    NSPoint pworld = [v2wScale transformPoint:pview];
+    pworld = [v2wTrans transformPoint:pworld];
+//    NSPoint pbaseview = [w2v transformPoint:pview];
     
     DRRButton * btn = [dock selectedCell];
     
     if (btn == btnDrawFree) {
         
         // Voglio evitare di avere troppi punti molto vicini, controllo la distanza tra questo punto e il precedente
-        CGFloat d = [self distanceBetweenPoint:prevmouseXY andPoint:pview];
+        NSPoint prevmouseXYworld = [v2wTrans transformPoint:[v2wScale transformPoint:prevmouseXY]];
+        CGFloat d = [self distanceBetweenPoint:prevmouseXYworld andPoint:pworld];
         
         if (d > 7) {
             atLeastOneStroke = YES;
             
             // Devo aggiungere i punti alla linea ancorata nella mouseDown senza crearne una nuova
             if (!thisIsANewLine)
-                [self addPointToIdxLine:(&pview) idxLinesArray:nearpointIdx.x];
+                [self addPointToIdxLine:(&pworld) idxLinesArray:nearpointIdx.x];
             // Creo nuova linea.
             else
-                [self addPointToLatestLine:(&pview)];
+                [self addPointToLatestLine:(&pworld)];
             
-            dirtyRect = [self computeRect:prevmouseXY secondPoint:pwindow moveBorder:2];
+            dirtyRect = [self computeRect:prevmouseXY secondPoint:pwindow moveBorder:1];
             [self setNeedsDisplayInRect:dirtyRect];
             
             prevmouseXY = pwindow;
@@ -508,17 +626,21 @@ NSInteger fsign(CGFloat n) {
     
     else if (btn == btnDrawLine) {
         
-        CGFloat d = [self distanceBetweenPoint:prevmouseXY andPoint:pwindow];
+        NSPoint prevmouseXYworld = [v2wTrans transformPoint:[v2wScale transformPoint:prevmouseXY]];
+        CGFloat d = [self distanceBetweenPoint:prevmouseXYworld andPoint:pworld];
         if (d > 7) {
             prevTempPoint = tempPoint;
-            tempPoint = pwindow;
+            tempPoint = pworld;
             validLine = YES;
         }
         else
             validLine = NO;
 
-        CGRect r1 = NSRectToCGRect([self computeRect:prevmouseXY secondPoint:prevTempPoint moveBorder:2]);
-        CGRect r2 = NSRectToCGRect([self computeRect:prevmouseXY secondPoint:tempPoint moveBorder:2]);
+        NSPoint prevTempPointview = [w2vScale transformPoint:[w2vTrans transformPoint:prevTempPoint]];
+        NSPoint tempPointview = [w2vScale transformPoint:[w2vTrans transformPoint:tempPoint]];
+        
+        CGRect r1 = NSRectToCGRect([self computeRect:prevmouseXY secondPoint:prevTempPointview moveBorder:1]);
+        CGRect r2 = NSRectToCGRect([self computeRect:prevmouseXY secondPoint:tempPointview moveBorder:1]);
         dirtyRect = NSRectFromCGRect(CGRectUnion(r1, r2));
         [self setNeedsDisplayInRect:dirtyRect];
         
@@ -530,30 +652,49 @@ NSInteger fsign(CGFloat n) {
 //            customCursor = PANWAIT;
 //            customCursorNext = PANWAIT;
 //        }
+        
+        NSSize diff = NSMakeSize(pwindow.x - prevmouseXY.x, pwindow.y - prevmouseXY.y);
+        
+        [self move:YES translation:diff];
+        
+        prevmouseXY = pwindow;
     }
     
     else if (btn == btnZoom) {
 
-        direction_t dir;
-        customcursor_t expectedCursor;
         CGFloat diff = pwindow.y - prevmouseXY.y;
+        CGFloat s = 1;
         
-        if (diff >= 0) {
-            dir = UP;
-            expectedCursor = ZOOMIN;
-            if (customCursor != expectedCursor) {
-                [[NSCursor resizeUpCursor] set];
-                customCursor = expectedCursor;
+        if (abs(diff) > 1) {
+            
+            if (diff > 0) {
+                if (customCursor != ZOOMIN) {
+                    [[NSCursor resizeUpCursor] set];
+                    customCursor = ZOOMIN;
+                }
+                
+                s = 1 + (diff * 0.005);
             }
-        }
-        else {
-            dir = DOWN;
-            expectedCursor = ZOOMOUT;
-            if (customCursor != expectedCursor) {
-                [[NSCursor resizeDownCursor] set];
-                customCursor = expectedCursor;
+            else {
+                if (customCursor != ZOOMOUT) {
+                    [[NSCursor resizeDownCursor] set];
+                    customCursor = ZOOMOUT;
+                }
+                
+                s = 1 - (diff * -1 * 0.005);
             }
+            
+            BOOL hasScaled = [self scale:s maxZoom:maxZoomFactor minZoom:minZoomFactor];
+            
+            if (!hasScaled) {
+                [[NSCursor resizeUpDownCursor] set];
+                customCursor = ZOOM;
+            }
+            
+            prevmouseXY = pwindow;
+            
         }
+        
         
 //            customCursorNext = ZOOM;
     }
@@ -574,6 +715,9 @@ NSInteger fsign(CGFloat n) {
     leftpressed = NO;
     NSPoint pwindow = [theEvent locationInWindow];
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
+    NSPoint pworld = [v2wScale transformPoint:pview];
+    pworld = [v2wTrans transformPoint:pworld];
+//    NSPoint pbaseview = [w2v transformPoint:pview];
     
     DRRButton * btn = [dock selectedCell];
     
@@ -610,7 +754,7 @@ NSInteger fsign(CGFloat n) {
         if (validLine) {
             // Devo aggiungere i punti alla linea ancorata nella mouseDown senza crearne una nuova oppure creare una nuova linea e aggiungerla alla cronologia
             if (!thisIsANewLine) {
-                [self addPointToIdxLine:(&pview) idxLinesArray:nearpointIdx.x];
+                [self addPointToIdxLine:(&pworld) idxLinesArray:nearpointIdx.x];
                 
                 NSInteger idxline = (NSInteger) nearpointIdx.x;
                 NSInteger idxstart = (NSInteger) nearpointIdx.y;
@@ -621,7 +765,7 @@ NSInteger fsign(CGFloat n) {
             }
             
             else {
-                [self addPointToLatestLine:(&pview)];
+                [self addPointToLatestLine:(&pworld)];
                 
                 NSInteger lastlineidx = [linesContainer count] - 1;
                 NSInteger lastpointidx = [linesContainer[lastlineidx] count] - 1;
@@ -629,7 +773,7 @@ NSInteger fsign(CGFloat n) {
                 [linesHistory addObject:idxs];
             }
             
-            dirtyRect = [self computeRect:prevmouseXY secondPoint:pwindow moveBorder:2];
+            dirtyRect = [self computeRect:prevmouseXY secondPoint:pwindow moveBorder:1];
             validLine = NO;
             [self setNeedsDisplayInRect:dirtyRect];
         }
@@ -750,10 +894,12 @@ NSInteger fsign(CGFloat n) {
 }
 
 
-- (void)drawRect:(NSRect)dirtyRect {
+- (void)drawRect:(NSRect)dirtRect {
     
     #ifdef DEBUGDRAW
-    NSLog(@"-drawRect myView");
+    NSRect r = dirtRect;
+    NSLog(@"-drawRect myView: o:%f^%f s:%f^%f", r.origin.x, r.origin.y,
+                                                  r.size.width, r.size.height);
     #endif
     #ifdef DEBUGLINES
     pathSinglePoint = [NSBezierPath bezierPath];
@@ -771,6 +917,8 @@ NSInteger fsign(CGFloat n) {
 //        [[NSCursor resizeUpDownCursor] set];
 //    }
     
+    [w2vScale concat];
+    [w2vTrans concat];
     
     [[NSColor blackColor] set];
     
@@ -814,10 +962,13 @@ NSInteger fsign(CGFloat n) {
         NSBezierPath * tempLine = [[NSBezierPath alloc] init];
         [tempLine setLineWidth:2];
         [[NSColor lightGrayColor] set];
-        [tempLine moveToPoint:prevmouseXY];
+        [tempLine moveToPoint:[v2wTrans transformPoint:[v2wScale transformPoint:prevmouseXY]]];
         [tempLine lineToPoint:tempPoint];
         [tempLine stroke];
     }
+    
+    [v2wTrans concat];
+    [v2wScale concat];
     
     // DEBUG: scrivo il numero di elementi nell'array delle linee e in quello della cronologia
     #if defined(DEBUGLINES) || defined(DEBUGLINESHIST)
