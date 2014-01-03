@@ -43,14 +43,14 @@
 
 
 
-void makeDrawFreeButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes) {
+void makeDrawFreeButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes) {
 
     NSBezierPath * border = [[NSBezierPath alloc] init];
     NSBezierPath * innerborder = [[NSBezierPath alloc] init];
     NSBezierPath * pencilpoint = [[NSBezierPath alloc] init];
     
     // Path per il bordo
-    [border appendBezierPathWithRoundedRect:frame xRadius:roundness yRadius:roundness];
+    [border appendBezierPathWithRoundedRect:frame xRadius:(roundness + 2) yRadius:(roundness + 2)];
     CGFloat bthickness = fmin(frame.size.width, frame.size.height) * 0.08;
     [innerborder appendBezierPathWithRoundedRect:NSMakeRect(frame.origin.x + bthickness, frame.origin.y + bthickness, frame.size.width - (2 * bthickness), frame.size.height - (2 * bthickness)) xRadius:roundness yRadius:roundness];
     
@@ -92,7 +92,7 @@ void makeDrawFreeButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMu
 }
 
 
-void makeDrawLineButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes) {
+void makeDrawLineButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes) {
     
     NSBezierPath * border = [[NSBezierPath alloc] init];
     NSBezierPath * innerborder = [[NSBezierPath alloc] init];
@@ -129,7 +129,7 @@ void makeDrawLineButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMu
     
 }
 
-void makePanButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes) {
+void makePanButton(NSRect frame, NSMutableArray * paths, NSMutableArray * modes) {
     
     NSBezierPath * border = [[NSBezierPath alloc] init];
     NSBezierPath * innerborder = [[NSBezierPath alloc] init];
@@ -207,7 +207,7 @@ void makePanButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutable
 }
 
 
-void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes) {
+void makeZoomButton(NSRect frame, NSMutableArray * paths, NSMutableArray * modes) {
     
     NSBezierPath * border = [[NSBezierPath alloc] init];
     NSBezierPath * innerborder = [[NSBezierPath alloc] init];
@@ -258,6 +258,62 @@ void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutabl
 }
 
 
+void makeBackButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes) {
+    
+    NSBezierPath * border = [[NSBezierPath alloc] init];
+    NSBezierPath * innerborder = [[NSBezierPath alloc] init];
+    NSBezierPath * arrow = [[NSBezierPath alloc] init];
+    
+    // Path per il bordo
+    [border appendBezierPathWithRoundedRect:frame xRadius:(roundness + 2) yRadius:(roundness + 2)];
+    CGFloat bthickness = fmin(frame.size.width, frame.size.height) * 0.08;
+    [innerborder appendBezierPathWithRoundedRect:NSMakeRect(frame.origin.x + bthickness, frame.origin.y + bthickness, frame.size.width - (2 * bthickness), frame.size.height - (2 * bthickness)) xRadius:roundness yRadius:roundness];
+    
+    // Coordinate per il disegno interno.
+    NSPoint arrowLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.18,
+                                    frame.origin.y + frame.size.height * 0.38);
+    NSPoint arrowTop = NSMakePoint(frame.origin.x + frame.size.width * 0.39,
+                                   frame.origin.y + frame.size.height * 0.17);
+    NSPoint arrowMiddleTop = NSMakePoint(frame.origin.x + frame.size.width * 0.40,
+                                         frame.origin.y + frame.size.height * 0.28);
+    NSPoint arrowMiddleTopCurve1 = NSMakePoint(frame.origin.x + frame.size.width * 0.70,
+                                               frame.origin.y + frame.size.height * 0.30);
+    NSPoint arrowMiddleTopCurve2 = NSMakePoint(frame.origin.x + frame.size.width * 0.94,
+                                               frame.origin.y + frame.size.height * 0.48);
+    NSPoint arrowTail = NSMakePoint(frame.origin.x + frame.size.width * 0.62,
+                                    frame.origin.y + frame.size.height * 0.84);
+    NSPoint arrowTailCurve1 = NSMakePoint(frame.origin.x + frame.size.width * 0.67,
+                                               frame.origin.y + frame.size.height * 0.62);
+    NSPoint arrowtailCurve2 = NSMakePoint(frame.origin.x + frame.size.width * 0.74,
+                                               frame.origin.y + frame.size.height * 0.48);
+    NSPoint arrowMiddleBottom = NSMakePoint(frame.origin.x + frame.size.width * 0.40,
+                                            frame.origin.y + frame.size.height * 0.48);
+    NSPoint arrowBottom = NSMakePoint(frame.origin.x + frame.size.width * 0.39,
+                                      frame.origin.y + frame.size.height * 0.59);
+    
+    
+    // Path matita
+    [arrow moveToPoint:arrowLeft];
+    [arrow lineToPoint:arrowTop];
+    [arrow lineToPoint:arrowMiddleTop];
+    [arrow curveToPoint:arrowTail controlPoint1:arrowMiddleTopCurve1 controlPoint2:arrowMiddleTopCurve2];
+    [arrow curveToPoint:arrowMiddleBottom controlPoint1:arrowTailCurve1 controlPoint2:arrowtailCurve2];
+    [arrow lineToPoint:arrowBottom];
+    
+    // Aggiungo i paths all'array paths e imposto le preferenze di disegno in modes
+    [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:innerborder]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor blackColor] drawingMode:FILL]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:arrow]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
+    
+}
+
+
+
 
 @implementation DRRDock
 
@@ -300,6 +356,8 @@ void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutabl
 
 - (void)setDefaultItemProperties {
     dockPrevResizeWasInLive = NO;
+    self.prevSelectedCell = [self selectedCell];
+//    SEL callMethod = @selector(callMyViewMethod:);
 //    cellHighlighted = NSMakePoint(-1, -1);
 }
 
@@ -356,14 +414,25 @@ void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutabl
     NSLog(@"+mouseDown Dock");
     #endif
     
-    
 //    if ([self hasHighlightedCell]) {
 //        NSPoint cell = [self getHighlightedCell];
 //        [self highlightCell:NO atRow:cell.y column:cell.x];
 //    }
-    
     [super mouseDown:theEvent];
+    
+    id cell = [self selectedCell];
+    NSInteger row, column;
+    [self getRow:&row column:&column ofCell:self.prevSelectedCell];
+    if ([cell class] == [DRRActionButton class]) // TODO non mi convince...
+        [self setState:NSOnState atRow:row column:column];
+    else
+        self.prevSelectedCell = cell;
+    
     [self.dockdelegate updateCursor:self];
+//    if (btn ==) {
+//        statements
+//    }
+    
 }
 
 //- (void)mouseDragged { }
@@ -410,34 +479,9 @@ void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutabl
 - (id)initWithPaths:(NSMutableArray*)paths typeOfDrawing:(NSMutableArray*)modes {
     self = [super init];
     if (self) {
-        btnpaths = paths;
-        btnmodes = modes;
+        self.btnpaths = paths;
+        self.btnmodes = modes;
     }
-//    // Path per il bordo
-//    [border appendBezierPathWithRoundedRect:self.frame xRadius:self.roundness yRadius:self.roundness];
-//    [innerborder appendBezierPathWithRoundedRect:NSMakeRect(self.frame.origin.x + 3, self.frame.origin.y + 3, self.frame.size.width - 6, self.frame.size.height - 6) xRadius:self.roundness yRadius:self.roundness];
-//    
-//    // Path matita
-//    [pencilpoint moveToPoint:NSMakePoint(leftX, bottomY)];
-//    [pencilpoint lineToPoint:NSMakePoint(leftX, topY)];
-//    [pencilpoint lineToPoint:NSMakePoint(rightX, bottomY)];
-//    [pencilback moveToPoint:NSMakePoint(leftX, topY)];
-//    [pencilback lineToPoint:backTopLeft];
-//    [pencilback lineToPoint:backBottomRight];
-//    
-//    // Coordinate per il disegno del triangolo della matita.
-//    leftX = self.frame.size.width * 0.23;
-//    bottomY = self.frame.size.height * 0.23;
-//    topY = self.frame.size.height * 0.33;
-//    rightX = self.frame.size.width * 0.33;
-//    backTopLeft = NSMakePoint(self.frame.size.width * 0.71, self.frame.size.height * 0.81);
-//    backBottomRight = NSMakePoint(self.frame.size.width * 0.81, self.frame.size.height * 0.71);
-//    // Contorno matita.
-//    linewidth = (self.frame.size.width + self.frame.size.height) / 100;
-//    if (linewidth < 1) { linewidth = 1; }
-    
-    
-    
     return self;
 }
 
@@ -447,29 +491,25 @@ void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutabl
     return self;
 }
 
-//- (void)mouseDown:(NSEvent *)theEvent { [self setState:NSOnState]; }
-////- (void)mouseDragged { }
-//- (void)mouseUp:(NSEvent *)theEvent { [self setState:NSOffState]; }
-
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     
     #ifdef DEBUGDOCKDRAW
-    NSLog(@"-drawInterior btnDrawFreely");
+    NSLog(@"-drawInterior DRRButton");
     #endif
     
     //    NSColor * prevColor; ///// TODO salvare colore precedente
     if ([self isHighlighted]) {
-        DRRDrawingProperties * border = (DRRDrawingProperties *) btnmodes[0];
+        DRRDrawingProperties * border = (DRRDrawingProperties *) self.btnmodes[0];
         border.color = [NSColor grayColor];
     }
     else {
-        DRRDrawingProperties * border = (DRRDrawingProperties *) btnmodes[0];
+        DRRDrawingProperties * border = (DRRDrawingProperties *) self.btnmodes[0];
         border.color = [NSColor whiteColor];
     }
     
-    [btnpaths enumerateObjectsUsingBlock:^(DRRPathObj * pathobj, NSUInteger idx, BOOL *stop) {
+    [self.btnpaths enumerateObjectsUsingBlock:^(DRRPathObj * pathobj, NSUInteger idx, BOOL *stop) {
         NSBezierPath * path = pathobj.path;
-        NSColor * color = ((DRRDrawingProperties *) btnmodes[idx]).color;
+        NSColor * color = ((DRRDrawingProperties *) self.btnmodes[idx]).color;
         
         if (idx == 0) {
             if ([self isHighlighted])
@@ -479,13 +519,75 @@ void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutabl
         }
         [color set];
         
-        if (((DRRDrawingProperties *) btnmodes[idx]).drawingMode == FILL)
+        if (((DRRDrawingProperties *) self.btnmodes[idx]).drawingMode == FILL)
             [path fill];
         else
             [path stroke];
-
     }];
+
 }
 
+@end
+
+
+
+
+@implementation DRRActionButton
+
++ (Class)cellClass {
+	return [DRRActionButton class];
+}
+
+- (id)initWithPaths:(NSMutableArray*)paths typeOfDrawing:(NSMutableArray*)modes {
+    self = [super init];
+    if (self) {
+        self.btnpaths = paths;
+        self.btnmodes = modes;
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    self = [super initWithCoder:aDecoder];
+    //    if (self) { }
+    return self;
+}
+
+- (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+    
+    #ifdef DEBUGDOCKDRAW
+    NSLog(@"-drawInterior DRRActionButton");
+    #endif
+    
+    //    NSColor * prevColor; ///// TODO salvare colore precedente
+    if ([self isHighlighted]) {
+        DRRDrawingProperties * border = (DRRDrawingProperties *) self.btnmodes[0];
+        border.color = [NSColor grayColor];
+    }
+    else {
+        DRRDrawingProperties * border = (DRRDrawingProperties *) self.btnmodes[0];
+        border.color = [NSColor whiteColor];
+    }
+    
+    [self.btnpaths enumerateObjectsUsingBlock:^(DRRPathObj * pathobj, NSUInteger idx, BOOL *stop) {
+        NSBezierPath * path = pathobj.path;
+        NSColor * color = ((DRRDrawingProperties *) self.btnmodes[idx]).color;
+        
+        if (idx == 0) {
+            if ([self isHighlighted])
+                color = [NSColor greenColor];
+//            else if ([self state])
+//                color = [NSColor greenColor];
+        }
+        [color set];
+        
+        if (((DRRDrawingProperties *) self.btnmodes[idx]).drawingMode == FILL)
+            [path fill];
+        else
+            [path stroke];
+    }];
+    
+}
 
 @end
+

@@ -39,16 +39,17 @@ typedef enum drawingmodes {STROKE, FILL} drawingmode_t;
 @end
 
 
-
-void makeDrawFreeButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes);
-void makeDrawLineButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes);
-void makePanButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes);
-void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutableArray * paths, NSMutableArray * modes);
+void makePanButton(NSRect frame, NSMutableArray * paths, NSMutableArray * modes);
+void makeZoomButton(NSRect frame, NSMutableArray * paths, NSMutableArray * modes);
+void makeDrawFreeButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
+void makeDrawLineButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
+void makeBackButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
 
 
 
 @protocol dockToView
 - (void)updateCursor:(id)sender;
+//- (void)callMyViewMethod:(id)sender;
 @end
 
 
@@ -59,6 +60,7 @@ void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutabl
 //    NSPoint cellHighlighted;
 }
 
+@property id prevSelectedCell;
 @property id <dockToView> dockdelegate;
 
 - (id)init;
@@ -91,43 +93,30 @@ void makeZoomButton(NSRect frame, CGFloat roundness, CGFloat linewidth, NSMutabl
 
 
 
-@interface DRRButton : NSCell {
-    
-    NSMutableArray * btnpaths;
-    NSMutableArray * btnmodes;
-//    // Un path per il bordo (serve per disegnarlo e per l'hitTest) e un path per il disegno al suo interno.
-//    NSBezierPath * border;
-//    NSBezierPath * innerborder;
-//    NSBezierPath * pencilpoint;
-//    NSBezierPath * pencilback;
-//    
-//    // Coordinate per il disegno del triangolo della punta della matita
-//    CGFloat leftX;
-//    CGFloat bottomY;
-//    CGFloat topY;
-//    CGFloat rightX;
-//    // Coordinate per il resto della matita
-//    NSPoint backTopLeft;
-//    NSPoint backBottomRight;
-//    // Spessore contorno matita
-//    CGFloat linewidth;
-}
+@interface DRRButton : NSCell
 
-//@property NSSize size;
-//@property CGFloat roundness;
+@property NSMutableArray * btnpaths;
+@property NSMutableArray * btnmodes;
+
 + (Class)cellClass;
 
 - (id)initWithPaths:(NSMutableArray*)paths typeOfDrawing:(NSMutableArray*)modes;
 
-//- (id)setPathsToDraw:(NSMutableArray *)paths;
-//
-//- (id)setPathsDrawingMode:(NSMutableArray *)mode;
-//
-//- (void)mouseDown:(NSEvent *)theEvent;
-////- (void)mouseDragged:(NSEvent *)theEvent;
-//- (void)mouseUp:(NSEvent *)theEvent;
-
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
 
+@end
+
+
+
+@interface DRRActionButton : NSActionCell
+
+@property NSMutableArray * btnpaths;
+@property NSMutableArray * btnmodes;
+
++ (Class)cellClass;
+
+- (id)initWithPaths:(NSMutableArray*)paths typeOfDrawing:(NSMutableArray*)modes;
+
+- (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
 
 @end

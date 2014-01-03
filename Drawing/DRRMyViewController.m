@@ -125,6 +125,10 @@ NSInteger fsign(CGFloat n) {
     
 }
 
+//- (void)removeLatestLineFromButton:(id)sender {
+//    [self removeLatestLine];
+//}
+
 
 
 - (id)initWithFrame:(NSRect)frameRect {
@@ -160,7 +164,7 @@ NSInteger fsign(CGFloat n) {
                                      mode:NSRadioModeMatrix
                                 cellClass:[DRRButton class]
                              numberOfRows:1
-                          numberOfColumns:4];
+                          numberOfColumns:5];
     [dock setDockdelegate:self];
     [dock setCellSize:cellsize];
 //    [dock setBackgroundColor:[NSColor lightGrayColor]]; // REMOVE
@@ -168,43 +172,49 @@ NSInteger fsign(CGFloat n) {
     
     NSMutableArray * panPaths = [[NSMutableArray alloc] init];
     NSMutableArray * panModes = [[NSMutableArray alloc] init];
-    makePanButton(NSMakeRect(dock.frame.origin.x, dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), roundness, linewidth, panPaths, panModes);
+    makePanButton(NSMakeRect(dock.frame.origin.x, dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), panPaths, panModes);
     btnPan = [[DRRButton alloc] initWithPaths:panPaths typeOfDrawing:panModes];
     [dock putCell:btnPan atRow:0 column:0];
     [dock sizeToCells];
-    [dock setState:NSOnState atRow:0 column:0];
     
     NSMutableArray * zoomPaths = [[NSMutableArray alloc] init];
     NSMutableArray * zoomModes = [[NSMutableArray alloc] init];
-    makeZoomButton(NSMakeRect(dock.frame.origin.x + 1 + (1 * dock.cellSize.width), dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), roundness, linewidth, zoomPaths, zoomModes);
+    makeZoomButton(NSMakeRect(dock.frame.origin.x + 1 + (1 * dock.cellSize.width), dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), zoomPaths, zoomModes);
     btnZoom = [[DRRButton alloc] initWithPaths:zoomPaths typeOfDrawing:zoomModes];
     [dock putCell:btnZoom atRow:0 column:1];
     [dock sizeToCells];
     
     NSMutableArray * drawFreePaths = [[NSMutableArray alloc] init];
     NSMutableArray * drawFreeModes = [[NSMutableArray alloc] init];
-    makeDrawFreeButton(NSMakeRect(dock.frame.origin.x + 2 + (2 * dock.cellSize.width), dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), roundness, linewidth, drawFreePaths, drawFreeModes);
+    makeDrawFreeButton(NSMakeRect(dock.frame.origin.x + 2 + (2 * dock.cellSize.width), dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), roundness, drawFreePaths, drawFreeModes);
     btnDrawFree = [[DRRButton alloc] initWithPaths:drawFreePaths typeOfDrawing:drawFreeModes];
     [dock putCell:btnDrawFree atRow:0 column:2];
     [dock sizeToCells];
+    [dock setState:NSOnState atRow:0 column:2];
+    dock.prevSelectedCell = [dock cellAtRow:0 column:2];
     
     NSMutableArray * drawLinePaths = [[NSMutableArray alloc] init];
     NSMutableArray * drawLineModes = [[NSMutableArray alloc] init];
-    makeDrawLineButton(NSMakeRect(dock.frame.origin.x + 3 + (3 * dock.cellSize.width), dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), roundness, linewidth, drawLinePaths, drawLineModes);
+    makeDrawLineButton(NSMakeRect(dock.frame.origin.x + 3 + (3 * dock.cellSize.width), dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), roundness, drawLinePaths, drawLineModes);
     btnDrawLine = [[DRRButton alloc] initWithPaths:drawLinePaths typeOfDrawing:drawLineModes];
     [dock putCell:btnDrawLine atRow:0 column:3];
     [dock sizeToCells];
     
+    NSMutableArray * backPaths = [[NSMutableArray alloc] init];
+    NSMutableArray * backModes = [[NSMutableArray alloc] init];
+    makeBackButton(NSMakeRect(dock.frame.origin.x + 4 + (4 * dock.cellSize.width), dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), roundness, backPaths, backModes);
+    btnBack = [[DRRActionButton alloc] initWithPaths:backPaths typeOfDrawing:backModes];
+    [dock putCell:btnBack atRow:0 column:4];
+    [dock sizeToCells];
+    SEL undo = @selector(removeLatestLine);
+    [[dock cellAtRow:0 column:4] setAction:undo];
+    [[dock cellAtRow:0 column:4] setTarget:self];
+
     
     [self addSubview:dock];
     [dock.dockdelegate updateCursor:self];
     
-    //    NSCell * btnMoveView = [[DRRbuttonMoveView alloc] init];
     //    NSCell * btnPlay = [[DRRbuttonDrawPlay alloc] init];
-    //    NSCell * btnZoomSlider = [[DRRbuttonZoomSlider alloc] init];
-    
-//
-    
 }
 
 - (void)setItemPropertiesToDefault {
@@ -241,31 +251,6 @@ NSInteger fsign(CGFloat n) {
     dirtyRect = NSMakeRect(0, 0, 1, 1);
 }
 
-//- (void)viewDidMoveToWindow {
-//    
-//    [[NSNotificationCenter defaultCenter] addObserver:self
-//                                             selector:@selector(windowResized:) name:NSWindowDidResizeNotification
-//                                               object:[self window]];
-//}
-//
-//- (void)windowResized:(NSNotification *)notification {
-//
-//    CGFloat moveX = (self.frame.size.width - self.prevFrame.size.width) / 2;
-//    CGFloat moveY = (self.frame.size.height - self.prevFrame.size.height) / 2;
-//    
-//    [w2vTrans translateXBy:moveX yBy:moveY];
-//    
-//    self.prevFrame = self.frame;
-//    
-//}
-//
-//- (BOOL)preservesContentDuringLiveResize {
-////    super.preservesContentDuringLiveResize = YES;
-//    NSLog(@"pres - myview");
-////    [super preservesContentDuringLiveResize];
-////    [dock preservesContentDuringLiveResize];
-//    return YES;
-//}
 
 - (void) setFrameSize:(NSSize)newSize {
     
@@ -273,35 +258,17 @@ NSInteger fsign(CGFloat n) {
     NSLog(@"myView:setFrameSize");
     #endif
     
-    // Voglio utilizzare il centro della vista come punto di ancoraggio: calcolo la posizione del centro prima del ridimensionamento e la posizione del nuovo centro dopo. Traslo le matrici della differenza delle loro coordinate.
-
-
+    // Voglio utilizzare il centro della vista come punto di ancoraggio: calcolo la posizione del centro per entrambi i frame (corrente e futuro) e passo la differenza alla funzione di traslazione, penserà lei alla scalatura.
     NSPoint pview_before = NSMakePoint(self.frame.origin.x + self.frame.size.width / 2,
                                 self.frame.origin.y + self.frame.size.height / 2);
-    NSPoint pworld_before = [v2wScale transformPoint:[v2wTrans transformPoint:pview_before]];
-    
     NSPoint pview_after = NSMakePoint(self.frame.origin.x + newSize.width / 2,
                                       self.frame.origin.y + newSize.height / 2);
-    NSPoint pworld_after = [v2wScale transformPoint:[v2wTrans transformPoint:pview_after]];
-    
-    NSSize diff = NSMakeSize(pworld_after.x - pworld_before.x, pworld_after.y - pworld_before.y);
+
+    NSSize diff = NSMakeSize(pview_after.x - pview_before.x, pview_after.y - pview_before.y);
+
     [self move:NO translation:diff];
 
     [super setFrameSize:newSize];
-    
-    // E' cambiata la dimensione della view, quindi va ridisegnata. Però preservo la zona precedente al ridimensionamento
-//    if ([self inLiveResize]) {
-//        NSRect rects[4];
-//        NSInteger count;
-//        
-//        [self getRectsExposedDuringLiveResize:rects count:&count];
-//        
-//        while (count-- > 0)
-//            [self setNeedsDisplayInRect:rects[count]];
-//    }
-    
-//    else
-//        [self setNeedsDisplay:YES];
     
 }
 
@@ -400,11 +367,10 @@ NSInteger fsign(CGFloat n) {
         if ([line count] == 0) {
             [linesContainer removeObjectAtIndex:idxs.idxline];
         }
-//        }
         
         [linesHistory removeLastObject];
         
-        
+        [self setNeedsDisplay];
 //        [self setNeedsDisplayInRect:[self computeRectFromArray:dirtyPoints moveBorder:1]]; //TODO sarà più veloce calcolare il rettangolo o ridisegnare tutto?
     }
     
@@ -438,8 +404,15 @@ NSInteger fsign(CGFloat n) {
 //- (IBAction)cellPressedNoMore:(id)sender { [sender setState:NSOffState]; }
 
 - (void)move:(BOOL)invalidate translation:(NSSize)mstep {
-    [w2vTrans translateXBy:mstep.width yBy:mstep.height];
-    [v2wTrans translateXBy:(-1 * mstep.width) yBy:(-1 * mstep.height)];
+    NSPoint pview = self.frame.origin;
+    NSPoint pworld = [v2wTrans transformPoint:[v2wScale transformPoint:pview]];
+    NSPoint pviewmoved = NSMakePoint(pview.x + mstep.width, pview.y + mstep.height);
+    NSPoint pworldmoved = [v2wTrans transformPoint:[v2wScale transformPoint:pviewmoved]];
+    
+    NSSize diff = NSMakeSize(pworldmoved.x - pworld.x, pworldmoved.y - pworld.y);
+    
+    [w2vTrans translateXBy:diff.width yBy:diff.height];
+    [v2wTrans translateXBy:(-1 * diff.width) yBy:(-1 * diff.height)];
     
     if (invalidate)
         [self setNeedsDisplay];
@@ -457,21 +430,30 @@ NSInteger fsign(CGFloat n) {
         reachedLowerB = YES;
     
     if ( (!reachedUpperB && !reachedLowerB) || (reachedUpperB && (sstep < 1)) || (reachedLowerB && (sstep > 1)) ) {
+//        NSPoint pview = NSMakePoint(self.frame.origin.x + self.frame.size.width / 2,
+//                                    self.frame.origin.y + self.frame.size.height / 2);
+//        NSPoint pworld_before = [v2wScale transformPoint:pview];
+//        
+//        [w2vScale scaleBy:sstep];
+//        [v2wScale scaleBy:(1 / sstep)];
+//        
+//        NSPoint pworld_after = [v2wScale transformPoint:pview];
+//        NSSize diff = NSMakeSize(pworld_after.x - pworld_before.x, pworld_after.y - pworld_before.y);
+
+        // Siccome la funzione di traslazione della matrice tiene conto della scalatura passando due paia di coordinate in coordinate mondo, allora passo alla funzione lo spostamento del centro con la scalatura in coordinate vista.
         NSPoint pview = NSMakePoint(self.frame.origin.x + self.frame.size.width / 2,
                                     self.frame.origin.y + self.frame.size.height / 2);
-        NSPoint pworld_before = [v2wScale transformPoint:pview];
-        
+        NSPoint pworld = [v2wScale transformPoint:pview];
+
         [w2vScale scaleBy:sstep];
         [v2wScale scaleBy:(1 / sstep)];
+
+        NSPoint pview_after = [w2vScale transformPoint:pworld];
+        NSSize diff = NSMakeSize(pview.x - pview_after.x, pview.y - pview_after.y);
+
         
-        NSPoint pworld_after = [v2wScale transformPoint:pview];
-        NSSize diff = NSMakeSize(pworld_after.x - pworld_before.x, pworld_after.y - pworld_before.y);
-//        CGFloat diffX = pworld_after.x - pworld_before.x;
-//        CGFloat diffY = pworld_after.y - pworld_before.y;
         
         [self move:NO translation:diff];
-//        [w2vTrans translateXBy:diffX yBy:diffY];
-//        [v2wTrans translateXBy:(-1 * diffX) yBy:(-1 * diffY)];
         
         [self setNeedsDisplay];
         
@@ -823,7 +805,7 @@ NSInteger fsign(CGFloat n) {
     
     if (rightpressed) {
         [self removeLatestLine];
-        [self setNeedsDisplay]; // TODO setneedsdisplay sarebbe meglio più selettivo, chiamato dalla remove
+//        [self setNeedsDisplay]; // TODO setneedsdisplay sarebbe meglio più selettivo, chiamato dalla remove
         rightpressed = NO;
     }
 }
@@ -848,35 +830,35 @@ NSInteger fsign(CGFloat n) {
 //}
 
 
-- (void)updateCursorM {
-    
-    DRRButton * btn = [dock selectedCell];
-    
-    if (btn == btnDrawFree) {
-        if (customCursor != DRAW) {
-        [[NSCursor arrowCursor] set];
-        customCursor = DRAW;
-//        customCursorNext = DRAW;
-        }
-    }
-    
-    else if (btn == btnPan) {
-        if (customCursor != PANWAIT) {
-            [[NSCursor openHandCursor] set];
-            customCursor = PANWAIT;
-//            customCursorNext = PANACTIVE;
-        }
-    }
-    
-    else if (btn == btnZoom) {
-        if (customCursor != ZOOM) {
-            [[NSCursor resizeUpDownCursor] set];
-            customCursor = ZOOM;
-//            customCursorNext = ZOOM;
-        }
-    }
-
-}
+//- (void)updateCursorM {
+//    
+//    DRRButton * btn = [dock selectedCell];
+//    
+//    if (btn == btnDrawFree) {
+//        if (customCursor != DRAW) {
+//        [[NSCursor arrowCursor] set];
+//        customCursor = DRAW;
+////        customCursorNext = DRAW;
+//        }
+//    }
+//    
+//    else if (btn == btnPan) {
+//        if (customCursor != PANWAIT) {
+//            [[NSCursor openHandCursor] set];
+//            customCursor = PANWAIT;
+////            customCursorNext = PANACTIVE;
+//        }
+//    }
+//    
+//    else if (btn == btnZoom) {
+//        if (customCursor != ZOOM) {
+//            [[NSCursor resizeUpDownCursor] set];
+//            customCursor = ZOOM;
+////            customCursorNext = ZOOM;
+//        }
+//    }
+//
+//}
 
 
 - (BOOL)inLiveResize {

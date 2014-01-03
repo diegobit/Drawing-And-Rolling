@@ -86,10 +86,11 @@ NSInteger fsign(CGFloat n);
     CGFloat roundness;
     CGFloat linewidth;
     
-    DRRButton * btnDrawFree;
-    DRRButton * btnDrawLine;
     DRRButton * btnPan;
     DRRButton * btnZoom;
+    DRRButton * btnDrawFree;
+    DRRButton * btnDrawLine;
+    DRRActionButton * btnBack;
     
     // array e altro per contenere i punti del mouse da convertire in linee
     NSMutableArray * linesContainer;

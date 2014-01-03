@@ -59,6 +59,7 @@
 		F11DFEB918560DE9001A17AA /* DrawingTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DrawingTests.m; sourceTree = "<group>"; };
 		F11DFEC318560E36001A17AA /* DRRMyViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRMyViewController.h; sourceTree = "<group>"; };
 		F11DFEC418560E36001A17AA /* DRRMyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRMyViewController.m; sourceTree = "<group>"; };
+		F139D7ED1875DFDC005C4511 /* Drawing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Drawing.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,6 +125,7 @@
 		F11DFE9518560DE8001A17AA /* Drawing */ = {
 			isa = PBXGroup;
 			children = (
+				F139D7ED1875DFDC005C4511 /* Drawing.entitlements */,
 				F11DFEA118560DE8001A17AA /* DRRAppDelegate.h */,
 				F11DFEA218560DE8001A17AA /* DRRAppDelegate.m */,
 				F11DFEC318560E36001A17AA /* DRRMyViewController.h */,
@@ -217,6 +219,13 @@
 				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = "Diego Giorgini";
 				TargetAttributes = {
+					F11DFE8B18560DE8001A17AA = {
+						SystemCapabilities = {
+							com.apple.Sandbox = {
+								enabled = 0;
+							};
+						};
+					};
 					F11DFEAC18560DE9001A17AA = {
 						TestTargetID = F11DFE8B18560DE8001A17AA;
 					};
@@ -402,10 +411,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Drawing/Drawing-Prefix.pch";
 				INFOPLIST_FILE = "Drawing/Drawing-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -415,10 +426,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Drawing/Drawing-Prefix.pch";
 				INFOPLIST_FILE = "Drawing/Drawing-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
