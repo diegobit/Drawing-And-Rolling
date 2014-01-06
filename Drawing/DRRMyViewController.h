@@ -15,7 +15,7 @@
 //#define DEBUGLINES
 //#define DEBUGLINESHIST
 //#define DEBUGMATRIX
-//#define DEBUGMOUSECORR
+#define DEBUGMOUSECORR
 //#define DEBUGPROTOCOL
 
 // costanti per indicare se una funzione: (1) non ha trovato l'elemento cercato; (2) parametro non valido
@@ -91,6 +91,7 @@ NSInteger fsign(CGFloat n);
     DRRButton * btnDrawFree;
     DRRButton * btnDrawLine;
     DRRActionButton * btnBack;
+    DRRActionButton * btnSave;
     
     // array e altro per contenere i punti del mouse da convertire in linee
     NSMutableArray * linesContainer;
@@ -99,6 +100,8 @@ NSInteger fsign(CGFloat n);
     
     // Variabile booleana che indica se la linea che sto disegnando è nuova o verrà ancorata ad una vecchia
     BOOL thisIsANewLine;
+//    // Variabile per sapere se il mouse si trova in un punto vicino ad un punto di ancoraggio
+//    BOOL isMouseNearAPoint;
     // Coppia di indici per individuare il punto a cui si ancorerà la nuova linea. Valido solo se vale thisIsANewLine
     NSPoint nearpointIdx;
     // Variabile booleana per sapere se è stata disegnata almeno una linea con i mouse dragged della mano libera
@@ -111,7 +114,7 @@ NSInteger fsign(CGFloat n);
     
     // path che contiene le linee da disegnare e i punti in cui viene rilevato il mouse
     NSRect dirtyRect;
-    NSBezierPath * pathLines, * pathSinglePoint;
+    NSBezierPath * pathLines, * pathSinglePoint; //, * pathNearPoint;
     
 }
 
@@ -122,11 +125,14 @@ NSInteger fsign(CGFloat n);
 - (id)initWithFrame:(NSRect)frameRect;
 - (void)awakeFromNib;
 - (id)initWithCoder:(NSCoder *)aDecoder;
+- (void)setItemPropertiesToDefault;
+
+- (BOOL)saveToFile;
 
 //- (void)viewDidMoveToWindow;
 //- (void)windowResized:(NSNotification *)notification;
 //- (BOOL)preservesContentDuringLiveResize;
-- (void) setFrameSize:(NSSize)newSize;
+- (void)setFrameSize:(NSSize)newSize;
     
 /** Metodi per calcolare il retangolo contenente dei punti dati, oppure la distanza tra due punti */
 - (NSRect)computeRect:(NSPoint)p1 secondPoint:(NSPoint)p2 moveBorder:(CGFloat)border;

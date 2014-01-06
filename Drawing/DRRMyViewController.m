@@ -164,7 +164,7 @@ NSInteger fsign(CGFloat n) {
                                      mode:NSRadioModeMatrix
                                 cellClass:[DRRButton class]
                              numberOfRows:1
-                          numberOfColumns:5];
+                          numberOfColumns:6];
     [dock setDockdelegate:self];
     [dock setCellSize:cellsize];
 //    [dock setBackgroundColor:[NSColor lightGrayColor]]; // REMOVE
@@ -210,6 +210,16 @@ NSInteger fsign(CGFloat n) {
     [[dock cellAtRow:0 column:4] setAction:undo];
     [[dock cellAtRow:0 column:4] setTarget:self];
 
+    NSMutableArray * savePaths = [[NSMutableArray alloc] init];
+    NSMutableArray * saveModes = [[NSMutableArray alloc] init];
+    makeSaveButton(NSMakeRect(dock.frame.origin.x + 5 + (5 * dock.cellSize.width), dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), roundness, savePaths, saveModes);
+    btnSave = [[DRRActionButton alloc] initWithPaths:savePaths typeOfDrawing:saveModes];
+    [dock putCell:btnSave atRow:0 column:5];
+    [dock sizeToCells];
+    SEL save = @selector(saveToFile);
+    [[dock cellAtRow:0 column:5] setAction:save];
+    [[dock cellAtRow:0 column:5] setTarget:self];
+    
     
     [self addSubview:dock];
     [dock.dockdelegate updateCursor:self];
@@ -226,14 +236,17 @@ NSInteger fsign(CGFloat n) {
 //    self.prevFrame = self.frame;
     viewPrevResizeWasInLive = NO;
     validLine = NO;
+//    isMouseNearAPoint = NO;
     customCursor = DRAW;
     maxZoomFactor = 4;
     minZoomFactor = 0.25;
     
-    // inizializzo l'array di linee disegnate e le proprietà
+    // inizializzo l'array di linee disegnate, le proprietà e altri paths
     linesContainer = [[NSMutableArray alloc] init];
     linesHistory = [[NSMutableArray alloc] init];
     pathLines = [NSBezierPath bezierPath];
+//    pathNearPoint = [NSBezierPath bezierPath];
+//    [pathNearPoint setLineWidth:2];
     
     screenRect = [[NSScreen mainScreen] frame];
     v2wTrans = [NSAffineTransform transform];
@@ -245,11 +258,66 @@ NSInteger fsign(CGFloat n) {
     cellsize = NSMakeSize(32, 32);
     linewidth = (cellsize.width + cellsize.height) / 32;
     if (linewidth < 1) { linewidth = 1; }
-    roundness = 8;
+    roundness = (cellsize.width + cellsize.height) / 8;
     
     thisIsANewLine = YES;
     dirtyRect = NSMakeRect(0, 0, 1, 1);
 }
+
+
+
+- (BOOL)saveToFile {
+    
+    NSArray * fileTypes = [NSArray arrayWithObjects:@"sav", nil];
+//    NSStringEncoding enc
+    
+    NSSavePanel * sp = [NSSavePanel savePanel];
+    [sp setCanCreateDirectories:YES];
+    [sp setCanSelectHiddenExtension:YES];
+    [sp setAllowedFileTypes:fileTypes];
+    sp.title = @"Save map to disk";
+    
+    if ([sp runModal] == NSFileHandlingPanelOKButton) {
+        NSURL * fileURL = [sp URL];
+//        NSString * filepath = [[sp URL] absoluteString];
+        NSString * fullstring = @"";
+//        NSFileHandle * fhandle = [NSFileHandle fileHandleForWritingAtPath:filepath];
+        
+//        NSFileManager *morphedFileManager;
+//        NSFileManager * fileManager = [NSFileManager defaultManager];
+//        if ([fileManager fileExistsAtPath:filepath] == NO) {
+//            NSLog (@"creo file vuoto");
+//            [fileManager createFileAtPath: filepath
+//                                 contents: [sp.title dataUsingEncoding:NSUTF8StringEncoding]
+//                               attributes: nil];
+//        }
+
+        [linesContainer enumerateObjectsUsingBlock:^(id line, NSUInteger idx, BOOL *stop) {
+            NSString * linestring = [line componentsJoinedByString:@" "];
+            
+            [linestring writeToURL:fileURL atomically:YES encoding:NSUTF8StringEncoding error:NULL];
+//            [fhandle seekToEndOfFile];
+//            [fhandle writeData:[linestring dataUsingEncoding:NSUTF8StringEncoding]];
+//            [string writeToFile:[filepath absoluteString] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
+            
+
+        }];
+//        NSString * pa = @"pappa";
+//        [fhandle writeData:[pa dataUsingEncoding:NSUTF8StringEncoding]];
+//        [fhandle closeFile];
+    }
+    
+    else {
+        
+    }
+    
+    
+    
+    
+    return true;
+    
+}
+
 
 
 - (void) setFrameSize:(NSSize)newSize {
@@ -464,6 +532,40 @@ NSInteger fsign(CGFloat n) {
     
 }
 
+
+
+//- (void)mouseMoved:(NSEvent *)theEvent {
+//    
+//    #ifdef DEBUGMOUSECORR
+//    NSLog(@"+mouseMoved");
+//    #endif
+//    
+//    [super mouseMoved:theEvent];
+//    
+//    NSPoint pwindow = [theEvent locationInWindow];
+//    NSPoint pview = [self convertPoint:pwindow fromView:nil];
+//    NSPoint pworld = [v2wTrans transformPoint:[v2wScale transformPoint:pview]];
+//
+//    // controllo se il mouse è vicino ad un punto precedente...
+//    nearpointIdx = findAdiacentVertex(linesContainer, pworld);
+//    
+//    // ...si! Ancoro la nuova linea a quella.
+//    if (nearpointIdx.x != ARGERROR && nearpointIdx.x != NOTFOUND) {
+//        
+//        #ifdef DEBUGLINES
+//        NSLog(@"Trovato punto di ancoraggio (mouseMoved)");
+//        #endif
+//        
+//        isMouseNearAPoint = YES;
+////        NSPoint nearpoint = [linesContainer[(NSInteger)nearpointIdx.x][(NSInteger)nearpointIdx.y] getPoint];
+////        
+////        prevmouseXY = [w2vTrans transformPoint:nearpoint];
+////        prevmouseXY = [w2vScale transformPoint:prevmouseXY];
+//        
+//    }
+//    
+//}
+
 - (void)mouseDown:(NSEvent *)theEvent {
     
     #ifdef DEBUGMOUSECORR
@@ -473,9 +575,7 @@ NSInteger fsign(CGFloat n) {
     leftpressed = YES;
     NSPoint pwindow = [theEvent locationInWindow];
     NSPoint pview = [self convertPoint:pwindow fromView:nil];
-//    NSPoint pbaseview = [w2v transformPoint:pview];
-    NSPoint pworld = [v2wScale transformPoint:pview];
-    pworld = [v2wTrans transformPoint:pworld];
+    NSPoint pworld = [v2wTrans transformPoint:[v2wScale transformPoint:pview]];
     
     DRRButton * btn = [dock selectedCell];
     
@@ -948,6 +1048,20 @@ NSInteger fsign(CGFloat n) {
         [tempLine lineToPoint:tempPoint];
         [tempLine stroke];
     }
+    
+//    if (isMouseNearAPoint) {
+//        NSPoint nearpoint = [linesContainer[(NSInteger)nearpointIdx.x][(NSInteger)nearpointIdx.y] getPoint];
+////        [pathNearPoint moveToPoint:nearpoint];
+//        [pathNearPoint appendBezierPathWithOvalInRect:NSMakeRect(nearpoint.x - 6, nearpoint.y - 6, 12, 12)];
+//        [[NSColor redColor] set];
+//        [pathNearPoint setLineWidth:2];
+//        
+//        [pathNearPoint stroke];
+//        [self setNeedsDisplay];
+//    }
+//    nearpoint = [w2vTrans transformPoint:nearpoint];
+//    prevmouseXY = [w2vScale transformPoint:prevmouseXY];
+    
     
     [v2wTrans concat];
     [v2wScale concat];
