@@ -35,8 +35,8 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
                                         
                                         // ...cerco i punti i cui indici sono il primo e l'ultimo della linea
                                         NSInteger endidx = [line count] - 1;
-                                        NSPoint startp = [line[0] getPoint];
-                                        NSPoint endp = [line[endidx] getPoint];
+                                        NSPoint startp = [line[0] pointValue];
+                                        NSPoint endp = [line[endidx] pointValue];
                                         
                                         // e controllo la loro distanza dal mio punto: punto finale...
                                         if ((abs(endp.x - pt.x) <= PTDISTANCE) && (abs(endp.y - pt.y) <= PTDISTANCE) && !((abs(endp.x - pt.x) > PTDISTANCE*0.7) && (abs(endp.y - pt.y) > PTDISTANCE*0.7))) {
@@ -48,7 +48,8 @@ NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
                                             *stop = YES; found = YES;
                                             
                                             // rigiro l'array in modo da poter continuare la linea aggiungendo punti alla fine
-                                            DRRPointObj * temp;
+//                                            DRRPointObj * temp;
+                                            NSValue * temp;
                                             NSInteger i, j;
                                             for (i = 0, j = [line count] - 1; i < j; i++, j--) {
                                                 temp = line[i];
@@ -160,11 +161,22 @@ NSInteger fsign(CGFloat n) {
     [super awakeFromNib];
     [self setItemPropertiesToDefault];
     
+    // Dimensione bottoni della dock, spessore line del disegno interno. Rotondità tasti.
+    cellsize = NSMakeSize(36, 36);
+    linewidth = (cellsize.width + cellsize.height) / 32;
+    if (linewidth < 1) { linewidth = 1; }
+    roundness = (cellsize.width + cellsize.height) / 8;
+    
+    // nome base salvataggio file. Estensioni
+    filesavename = @"map";
+    fileTypes = [NSArray arrayWithObjects:@"sav", nil];
+    
+    // Creo la dock e i bottoni
     dock = [[DRRDock alloc] initWithFrame:NSMakeRect(0, 0, 1, 1)
                                      mode:NSRadioModeMatrix
                                 cellClass:[DRRButton class]
                              numberOfRows:1
-                          numberOfColumns:6];
+                          numberOfColumns:7];
     [dock setDockdelegate:self];
     [dock setCellSize:cellsize];
 //    [dock setBackgroundColor:[NSColor lightGrayColor]]; // REMOVE
@@ -219,12 +231,23 @@ NSInteger fsign(CGFloat n) {
     SEL save = @selector(saveToFile);
     [[dock cellAtRow:0 column:5] setAction:save];
     [[dock cellAtRow:0 column:5] setTarget:self];
+
+    NSMutableArray * loadPaths = [[NSMutableArray alloc] init];
+    NSMutableArray * loadModes = [[NSMutableArray alloc] init];
+    makeLoadButton(NSMakeRect(dock.frame.origin.x + 6 + (6 * dock.cellSize.width), dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), roundness, loadPaths, loadModes);
+    btnLoad = [[DRRActionButton alloc] initWithPaths:loadPaths typeOfDrawing:loadModes];
+    [dock putCell:btnLoad atRow:0 column:6];
+    [dock sizeToCells];
+    SEL load = @selector(loadFromFile);
+    [[dock cellAtRow:0 column:6] setAction:load];
+    [[dock cellAtRow:0 column:6] setTarget:self];
     
     
     [self addSubview:dock];
     [dock.dockdelegate updateCursor:self];
     
     //    NSCell * btnPlay = [[DRRbuttonDrawPlay alloc] init];
+    
 }
 
 - (void)setItemPropertiesToDefault {
@@ -236,6 +259,8 @@ NSInteger fsign(CGFloat n) {
 //    self.prevFrame = self.frame;
     viewPrevResizeWasInLive = NO;
     validLine = NO;
+    thisIsANewLine = YES;
+    dirtyRect = NSMakeRect(0, 0, 1, 1);
 //    isMouseNearAPoint = NO;
     customCursor = DRAW;
     maxZoomFactor = 4;
@@ -254,73 +279,99 @@ NSInteger fsign(CGFloat n) {
     w2vTrans = [NSAffineTransform transform];
     w2vScale = [NSAffineTransform transform];
     
-    // Dimensione bottoni della dock, spessore line del disegno interno. Rotondità tasti.
-    cellsize = NSMakeSize(32, 32);
-    linewidth = (cellsize.width + cellsize.height) / 32;
-    if (linewidth < 1) { linewidth = 1; }
-    roundness = (cellsize.width + cellsize.height) / 8;
-    
-    thisIsANewLine = YES;
-    dirtyRect = NSMakeRect(0, 0, 1, 1);
-}
+    }
 
 
 
-- (BOOL)saveToFile {
+- (void)saveToFile {
     
-    NSArray * fileTypes = [NSArray arrayWithObjects:@"sav", nil];
-//    NSStringEncoding enc
+    NSSavePanel * panel = [NSSavePanel savePanel];
+    [panel setCanCreateDirectories:YES];
+    [panel setCanSelectHiddenExtension:YES];
+    [panel setAllowedFileTypes:fileTypes];
+    [panel setNameFieldStringValue:filesavename];
+    [panel setTitle:@"Save map to file"];
     
-    NSSavePanel * sp = [NSSavePanel savePanel];
-    [sp setCanCreateDirectories:YES];
-    [sp setCanSelectHiddenExtension:YES];
-    [sp setAllowedFileTypes:fileTypes];
-    sp.title = @"Save map to disk";
-    
-    if ([sp runModal] == NSFileHandlingPanelOKButton) {
-        NSURL * fileURL = [sp URL];
-//        NSString * filepath = [[sp URL] absoluteString];
-        NSString * fullstring = @"";
-//        NSFileHandle * fhandle = [NSFileHandle fileHandleForWritingAtPath:filepath];
+    if ([panel runModal] == NSFileHandlingPanelOKButton) {
+        NSURL * fileURL = [panel URL];
+        filesavename = [[[fileURL absoluteString] lastPathComponent] stringByDeletingPathExtension];
+        NSMutableString * fullstring = [[NSMutableString alloc] initWithString:@""];
         
-//        NSFileManager *morphedFileManager;
-//        NSFileManager * fileManager = [NSFileManager defaultManager];
-//        if ([fileManager fileExistsAtPath:filepath] == NO) {
-//            NSLog (@"creo file vuoto");
-//            [fileManager createFileAtPath: filepath
-//                                 contents: [sp.title dataUsingEncoding:NSUTF8StringEncoding]
-//                               attributes: nil];
-//        }
-
+        // scorro le linee dell'array
         [linesContainer enumerateObjectsUsingBlock:^(id line, NSUInteger idx, BOOL *stop) {
-            NSString * linestring = [line componentsJoinedByString:@" "];
+            if (idx > 0)
+                [fullstring appendString:@"\n"]; // divido le linee con \n
             
-            [linestring writeToURL:fileURL atomically:YES encoding:NSUTF8StringEncoding error:NULL];
-//            [fhandle seekToEndOfFile];
-//            [fhandle writeData:[linestring dataUsingEncoding:NSUTF8StringEncoding]];
-//            [string writeToFile:[filepath absoluteString] atomically:YES encoding:NSUTF8StringEncoding error:NULL];
-            
-
+            // per ogni punto della linea, aggiungo il punto ad una stringa
+            [line enumerateObjectsUsingBlock:^(id point, NSUInteger idx, BOOL *stop) {
+                NSPoint pview = [w2vScale transformPoint:[w2vTrans transformPoint:[point pointValue]]];
+                NSString * pstr = NSStringFromPoint(pview);
+                [fullstring appendString:pstr];
+                [fullstring appendString:@";"];
+            }];
         }];
-//        NSString * pa = @"pappa";
-//        [fhandle writeData:[pa dataUsingEncoding:NSUTF8StringEncoding]];
-//        [fhandle closeFile];
-    }
-    
-    else {
         
+        [fullstring writeToURL:fileURL atomically:YES encoding:NSUTF8StringEncoding error:NULL];
     }
     
+}
+
+- (void)loadFromFile {
     
+    NSOpenPanel * panel = [NSOpenPanel openPanel];
+    [panel setCanCreateDirectories:NO];
+    [panel setCanChooseFiles:YES];
+    [panel setAllowsMultipleSelection:NO];
+    [panel setCanSelectHiddenExtension:YES];
+    [panel setAllowedFileTypes:fileTypes];
+    [panel setTitle:@"Load map from file"];
     
-    
-    return true;
+    if ([panel runModal] == NSFileHandlingPanelOKButton) {
+        NSStringEncoding * enc = NULL;
+        NSError *__autoreleasing * err = NULL;
+        NSString * filecontent = [NSString stringWithContentsOfURL:[panel URLs][0] usedEncoding:enc error:err];
+        
+        if (filecontent != nil) {
+            
+            [self setItemPropertiesToDefault];
+            
+            NSArray * rawlines = [filecontent componentsSeparatedByString:@"\n"];
+            
+            [rawlines enumerateObjectsUsingBlock:^(NSString * strline, NSUInteger idxline, BOOL *stop) {
+                
+                // Prendo la stringa con dentro i punti (in forma {37, 40};{54, 60} ), li separo aggiungendoli ad un NSArray. Poi creo un NSMutableArray. Poi scorro questi punti, i converto da stringa a NSPoint e poi li incapsulo in un NSValue per aggiungerli al NSMutableArray.
+                NSArray * strpointline = [strline componentsSeparatedByString:@";"];
+                NSMutableArray * line = [[NSMutableArray alloc] init];
+                [strpointline enumerateObjectsUsingBlock:^(NSString * strpoint, NSUInteger idxp, BOOL *stop) {
+                    NSPoint point = NSPointFromString(strpoint);
+                    if (point.x != 0 && point.y != 0)
+                        [line addObject:[NSValue valueWithPoint:point]];
+                }];
+                
+                [linesContainer addObject:line];
+                
+                // creo anche una nuova history di linee, non è proprio uguale a quella di prima...
+                DRRSegmentIdx * idxs = [[DRRSegmentIdx alloc] initWithIndex:idxline indexTwo:0 indexThree:[line count] - 1];
+                [linesHistory addObject:idxs]; // TODO mgliorare history
+                
+            }];
+            
+            [self setNeedsDisplay];
+            
+        }
+        
+        else {
+            NSAlert *alert = [[NSAlert alloc] init];
+            [alert addButtonWithTitle:@"OK"];
+            [alert setMessageText:@"Errore nel caricamento del file"];
+        }
+        
+    } // fine panel richiesta file
     
 }
 
 
-
-- (void) setFrameSize:(NSSize)newSize {
+- (void)setFrameSize:(NSSize)newSize {
     
     #ifdef DEBUGMATRIX
     NSLog(@"myView:setFrameSize");
@@ -369,11 +420,11 @@ NSInteger fsign(CGFloat n) {
 }
 
 
-- (void)addPointToLatestLine:(NSPoint*)p {
+- (void)addPointToLatestLine:(NSPoint *)p {
     if (p != NULL) {
-        DRRPointObj * pobj = [[DRRPointObj alloc] initWithPoint:p];
+//        DRRPointObj * pobj = [[DRRPointObj alloc] initWithPoint:p];
         NSInteger last = [linesContainer count] - 1;
-        [linesContainer[last] addObject:pobj];
+        [linesContainer[last] addObject:[NSValue valueWithPoint:*p]];
     }
     else
         errno = EINVAL;
@@ -382,8 +433,8 @@ NSInteger fsign(CGFloat n) {
 
 - (void)addPointToIdxLine:(NSPoint*)p idxLinesArray:(NSInteger)idx {
     if (p != NULL) {
-        DRRPointObj * pobj = [[DRRPointObj alloc] initWithPoint:p];
-        [linesContainer[idx] addObject:pobj];
+//        DRRPointObj * pobj = [[DRRPointObj alloc] initWithPoint:p];
+        [linesContainer[idx] addObject:[NSValue valueWithPoint:*p]];
     }
     else
         errno = EINVAL;
@@ -598,7 +649,7 @@ NSInteger fsign(CGFloat n) {
             #endif
             
             thisIsANewLine = NO;
-            NSPoint nearpoint = [linesContainer[(NSInteger)nearpointIdx.x][(NSInteger)nearpointIdx.y] getPoint];
+            NSPoint nearpoint = [linesContainer[(NSInteger)nearpointIdx.x][(NSInteger)nearpointIdx.y] pointValue];
             
             prevmouseXY = [w2vTrans transformPoint:nearpoint];
             prevmouseXY = [w2vScale transformPoint:prevmouseXY];
@@ -1017,7 +1068,7 @@ NSInteger fsign(CGFloat n) {
             if ([line count] > 0) {
                 // aggiungo ogni punto della linea al path
                 [line enumerateObjectsUsingBlock:^(id point, NSUInteger ipoint, BOOL *stop2) {
-                    NSPoint p = [point getPoint];
+                    NSPoint p = [point pointValue];
                     #ifdef DEBUGLINES
                     [pathSinglePoint appendBezierPathWithOvalInRect:NSMakeRect(p.x - 2, p.y - 2, 4, 4)];
                     #endif
@@ -1025,7 +1076,7 @@ NSInteger fsign(CGFloat n) {
                     if (ipoint == 0)
                         [pathLines moveToPoint:p];
                     else
-                        [pathLines lineToPoint:[point getPoint]];
+                        [pathLines lineToPoint:[point pointValue]];
                 }];
                 
                 [[NSColor blackColor] set];

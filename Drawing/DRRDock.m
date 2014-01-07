@@ -359,7 +359,7 @@ void makeSaveButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     NSPoint arrowPoint_Right = NSMakePoint(frame.origin.x + frame.size.width * 0.66,
                                            frame.origin.y + frame.size.height * 0.38);
     
-    // Path matita
+    // Path freccia
     [container moveToPoint:contExt_bottomLeft];
     [container lineToPoint:contExt_topLeft];
     [container lineToPoint:contInt_topLeft];
@@ -387,6 +387,85 @@ void makeSaveButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     [paths addObject:[[DRRPathObj alloc] initWithPath:container]];
     [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
 
+    [paths addObject:[[DRRPathObj alloc] initWithPath:arrow]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
+    
+}
+
+void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes) {
+    
+    NSBezierPath * border = [[NSBezierPath alloc] init];
+    NSBezierPath * innerborder = [[NSBezierPath alloc] init];
+    NSBezierPath * container = [[NSBezierPath alloc] init];
+    NSBezierPath * arrow = [[NSBezierPath alloc] init];
+    
+    // Path per il bordo
+    [border appendBezierPathWithRoundedRect:frame xRadius:(roundness + 2) yRadius:(roundness + 2)];
+    CGFloat bthickness = fmin(frame.size.width, frame.size.height) * 0.08;
+    [innerborder appendBezierPathWithRoundedRect:NSMakeRect(frame.origin.x + bthickness, frame.origin.y + bthickness, frame.size.width - (2 * bthickness), frame.size.height - (2 * bthickness)) xRadius:roundness yRadius:roundness];
+    
+    // Coordinate per il disegno interno.
+    NSPoint contExt_topLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.20,
+                                          frame.origin.y + frame.size.height * 0.30);
+    NSPoint contExt_bottomLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.20,
+                                             frame.origin.y + frame.size.height * 0.75);
+    NSPoint contExt_bottomRight = NSMakePoint(frame.origin.x + frame.size.width * 0.79,
+                                              frame.origin.y + frame.size.height * 0.75);
+    NSPoint contExt_topRight = NSMakePoint(frame.origin.x + frame.size.width * 0.79,
+                                           frame.origin.y + frame.size.height * 0.30);
+    
+    NSPoint contInt_topLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.28,
+                                          frame.origin.y + frame.size.height * 0.30);
+    NSPoint contInt_bottomLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.28,
+                                             frame.origin.y + frame.size.height * 0.64);
+    NSPoint contInt_bottomRight = NSMakePoint(frame.origin.x + frame.size.width * 0.71,
+                                              frame.origin.y + frame.size.height * 0.64);
+    NSPoint contInt_topRight = NSMakePoint(frame.origin.x + frame.size.width * 0.71,
+                                           frame.origin.y + frame.size.height * 0.30);
+    
+    NSPoint arrowBack_topLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.43,
+                                            frame.origin.y + frame.size.height * 0.36);
+    NSPoint arrowBack_topRight = NSMakePoint(frame.origin.x + frame.size.width * 0.56,
+                                             frame.origin.y + frame.size.height * 0.36);
+    NSPoint arrowBack_bottomRight = NSMakePoint(frame.origin.x + frame.size.width * 0.56,
+                                                frame.origin.y + frame.size.height * 0.58);
+    NSPoint arrowBack_bottomLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.43,
+                                               frame.origin.y + frame.size.height * 0.58);
+    NSPoint arrowPoint_Left = NSMakePoint(frame.origin.x + frame.size.width * 0.33,
+                                          frame.origin.y + frame.size.height * 0.36);
+    NSPoint arrowPoint_Top = NSMakePoint(frame.origin.x + frame.size.width * 0.495,
+                                            frame.origin.y + frame.size.height * 0.15);
+    NSPoint arrowPoint_Right = NSMakePoint(frame.origin.x + frame.size.width * 0.66,
+                                           frame.origin.y + frame.size.height * 0.36);
+    
+    // Path freccia
+    [container moveToPoint:contExt_bottomLeft];
+    [container lineToPoint:contExt_topLeft];
+    [container lineToPoint:contInt_topLeft];
+    [container lineToPoint:contInt_bottomLeft];
+    [container lineToPoint:contInt_bottomRight];
+    [container lineToPoint:contInt_topRight];
+    [container lineToPoint:contExt_topRight];
+    [container lineToPoint:contExt_bottomRight];
+    
+    [arrow moveToPoint:arrowBack_bottomLeft];
+    [arrow lineToPoint:arrowBack_topLeft];
+    [arrow lineToPoint:arrowPoint_Left];
+    [arrow lineToPoint:arrowPoint_Top];
+    [arrow lineToPoint:arrowPoint_Right];
+    [arrow lineToPoint:arrowBack_topRight];
+    [arrow lineToPoint:arrowBack_bottomRight];
+    
+    // Aggiungo i paths all'array paths e imposto le preferenze di disegno in modes
+    [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:innerborder]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor blackColor] drawingMode:FILL]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:container]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
+    
     [paths addObject:[[DRRPathObj alloc] initWithPath:arrow]];
     [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
     

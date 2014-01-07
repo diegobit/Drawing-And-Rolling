@@ -7,7 +7,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "DRRPointObj.h"
+//#import "DRRPointObj.h"
 #import "DRRDock.h"
 
 //#define DEBUGINIT
@@ -15,7 +15,7 @@
 //#define DEBUGLINES
 //#define DEBUGLINESHIST
 //#define DEBUGMATRIX
-#define DEBUGMOUSECORR
+//#define DEBUGMOUSECORR
 //#define DEBUGPROTOCOL
 
 // costanti per indicare se una funzione: (1) non ha trovato l'elemento cercato; (2) parametro non valido
@@ -92,6 +92,10 @@ NSInteger fsign(CGFloat n);
     DRRButton * btnDrawLine;
     DRRActionButton * btnBack;
     DRRActionButton * btnSave;
+    DRRActionButton * btnLoad;
+    
+    NSString * filesavename; // ultimo nome file inserito dall'utente durante il salvataggio
+    NSArray * fileTypes; // array di stringhe con le estensioni per salvare la mappa
     
     // array e altro per contenere i punti del mouse da convertire in linee
     NSMutableArray * linesContainer;
@@ -127,7 +131,8 @@ NSInteger fsign(CGFloat n);
 - (id)initWithCoder:(NSCoder *)aDecoder;
 - (void)setItemPropertiesToDefault;
 
-- (BOOL)saveToFile;
+- (void)saveToFile;
+- (void)loadFromFile;
 
 //- (void)viewDidMoveToWindow;
 //- (void)windowResized:(NSNotification *)notification;
