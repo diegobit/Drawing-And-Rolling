@@ -11,6 +11,8 @@
 //#define DEBUGDOCKDRAW
 //#define DEBUGDOCKMOUSECORR
 
+
+
 typedef enum drawingmodes {STROKE, FILL} drawingmode_t;
 
 
@@ -20,8 +22,6 @@ typedef enum drawingmodes {STROKE, FILL} drawingmode_t;
 @property NSBezierPath * path;
 
 - (id)initWithPath:(NSBezierPath *)p;
-//- (NSBezierPath *)getPoint;
-//- (void)setPath:(NSBezierPath *)p;
 
 @end
 
@@ -39,6 +39,7 @@ typedef enum drawingmodes {STROKE, FILL} drawingmode_t;
 @end
 
 
+
 void makePanButton(NSRect frame, NSMutableArray * paths, NSMutableArray * modes);
 void makeZoomButton(NSRect frame, NSMutableArray * paths, NSMutableArray * modes);
 void makeDrawFreeButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
@@ -48,17 +49,15 @@ void makeSaveButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
 
 
+
 @protocol dockToView
 - (void)updateCursor:(id)sender;
-//- (void)callMyViewMethod:(id)sender;
 @end
 
 
 
 @interface DRRDock : NSMatrix {
-//    id delegate;
     BOOL dockPrevResizeWasInLive;
-//    NSPoint cellHighlighted;
 }
 
 @property id prevSelectedCell;
@@ -71,24 +70,11 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 - (id)initWithCoder:(NSCoder *)aDecoder;
 - (void)setDefaultItemProperties;
 
-//- (BOOL)preservesContentDuringLiveResize;
-//- (void)highlightCell:(BOOL)flag atRow:(NSInteger)row column:(NSInteger)column;
-//- (NSPoint)getHighlightedCell;
-//- (void)setHighlightedCell:(NSInteger)row atColumn:(NSInteger)column;
-//- (BOOL)hasHighlightedCell;
+//- (BOOL)inLiveResize;
 
-//@property (readonly) NSRect frame;
-//- (NSPoint)getFrameOrigin;
-//- (NSSize)getFrameSize;
-//- (void)setFrameOrigin:(NSPoint)o;
-//- (void)setFrameSize:(NSSize)s;
-
-//- (BOOL)hitTest:(NSPoint)p;
-- (void)mouseDown:(NSEvent *)theEvent;
-//- (void)mouseDragged:(NSEvent *)theEvent;
-//- (void)mouseUp:(NSEvent *)theEvent;
-//
 //- (void)drawRect:(NSRect)dirtyRect;
+
+- (void)mouseDown:(NSEvent *)theEvent;
 
 @end
 

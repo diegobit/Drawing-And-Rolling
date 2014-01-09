@@ -9,6 +9,7 @@
 #import "DRRMyViewController.h"
 
 
+
 @implementation DRRSegmentIdx
 
 - (id)initWithIndex:(NSInteger)iline indexTwo:(NSInteger)istartpt indexThree:(NSInteger)iendpt {
@@ -24,113 +25,8 @@
 @end
 
 
-NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt) {
-    __block NSPoint doubleidx;
-    __block BOOL found = NO;
-    if (linesarr != NULL) {
-        if ([linesarr count] > 0) {
-            // comincio il ciclo: per ogni oggetto dell'array (NSMutableArray di NSPoint)...
-            [linesarr enumerateObjectsWithOptions:NSEnumerationReverse
-                                    usingBlock:^(id line, NSUInteger idx, BOOL *stop) {
-                                        
-                                        // ...cerco i punti i cui indici sono il primo e l'ultimo della linea
-                                        NSInteger endidx = [line count] - 1;
-                                        NSPoint startp = [line[0] pointValue];
-                                        NSPoint endp = [line[endidx] pointValue];
-                                        
-                                        // e controllo la loro distanza dal mio punto: punto finale...
-                                        if ((abs(endp.x - pt.x) <= PTDISTANCE) && (abs(endp.y - pt.y) <= PTDISTANCE) && !((abs(endp.x - pt.x) > PTDISTANCE*0.7) && (abs(endp.y - pt.y) > PTDISTANCE*0.7))) {
-                                            *stop = YES; found = YES;
-                                            doubleidx = NSMakePoint(idx, endidx);
-                                        }
-                                        // ...e punto iniziale
-                                        else if ((abs(startp.x - pt.x) <= PTDISTANCE) && (abs(startp.y - pt.y) <= PTDISTANCE) && !((abs(startp.x - pt.x) > PTDISTANCE*0.7) && (abs(startp.y - pt.y) > PTDISTANCE*0.7))) {
-                                            *stop = YES; found = YES;
-                                            
-                                            // rigiro l'array in modo da poter continuare la linea aggiungendo punti alla fine
-//                                            DRRPointObj * temp;
-                                            NSValue * temp;
-                                            NSInteger i, j;
-                                            for (i = 0, j = [line count] - 1; i < j; i++, j--) {
-                                                temp = line[i];
-                                                line[i] = line[j];
-                                                line[j] = temp;
-                                            }
-                                            
-                                            doubleidx = NSMakePoint(idx, endidx);
-                                        }
-                                    }];
-        }
-        
-        // arrivo qui solo se l'array delle linee è vuoto oppure se non ho trovato un punto adiacente al mio
-        if (!found) doubleidx.x = NOTFOUND;
-        return doubleidx;
-
-    }
-    else {
-        doubleidx.x = ARGERROR;
-        errno = EINVAL;
-        return doubleidx;
-    }
-}
-
-NSInteger fsign(CGFloat n) {
-    if (n > 0) return 1;
-    if (n < 0) return -1;
-    return 0;
-}
-
-
-//@implementation superView:DRRMyViewController<dockDelegate>
-//
-//- (void)updateCursor:(id)sender {
-//    
-//}
-//
-//@end
-
 
 @implementation DRRMyViewController
-
-- (void)updateCursor:(id)sender {
-    
-    #ifdef DEBUGPROTOCOL
-    NSLog(@"DRRMyViewController: Protocol DockToView: updateCursor");
-    #endif
-    
-    DRRButton * btn = [dock selectedCell];
-    
-    if (btn == btnDrawFree) {
-        if (customCursor != DRAW) {
-            [[NSCursor arrowCursor] set];
-            customCursor = DRAW;
-            //        customCursorNext = DRAW;
-        }
-    }
-    
-    else if (btn == btnPan) {
-        if (customCursor != PANWAIT) {
-            [[NSCursor openHandCursor] set];
-            customCursor = PANWAIT;
-            //            customCursorNext = PANACTIVE;
-        }
-    }
-    
-    else if (btn == btnZoom) {
-        if (customCursor != ZOOM) {
-            [[NSCursor resizeUpDownCursor] set];
-            customCursor = ZOOM;
-            //            customCursorNext = ZOOM;
-        }
-    }
-    
-}
-
-//- (void)removeLatestLineFromButton:(id)sender {
-//    [self removeLatestLine];
-//}
-
-
 
 - (id)initWithFrame:(NSRect)frameRect {
     
@@ -139,18 +35,19 @@ NSInteger fsign(CGFloat n) {
     #endif
 
     self = [super initWithFrame:frameRect];
-//    if (self) { }
     return self;
+    
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
+    
     #ifdef DEBUGINIT
     NSLog(@"initWithCoder myView");
     #endif
     
     self = [super initWithCoder:aDecoder];
-//    if (self) { }
     return self;
+    
 }
 
 - (void)awakeFromNib {
@@ -158,6 +55,7 @@ NSInteger fsign(CGFloat n) {
     #ifdef DEBUGINIT
     NSLog(@"awakeFromNib myView");
     #endif
+    
     [super awakeFromNib];
     [self setItemPropertiesToDefault];
     
@@ -179,29 +77,24 @@ NSInteger fsign(CGFloat n) {
                           numberOfColumns:7];
     [dock setDockdelegate:self];
     [dock setCellSize:cellsize];
-//    [dock setBackgroundColor:[NSColor lightGrayColor]]; // REMOVE
-//    [dock setDrawsBackground:YES]; // REMOVE
     
     NSMutableArray * panPaths = [[NSMutableArray alloc] init];
     NSMutableArray * panModes = [[NSMutableArray alloc] init];
     makePanButton(NSMakeRect(dock.frame.origin.x, dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), panPaths, panModes);
     btnPan = [[DRRButton alloc] initWithPaths:panPaths typeOfDrawing:panModes];
     [dock putCell:btnPan atRow:0 column:0];
-    [dock sizeToCells];
     
     NSMutableArray * zoomPaths = [[NSMutableArray alloc] init];
     NSMutableArray * zoomModes = [[NSMutableArray alloc] init];
     makeZoomButton(NSMakeRect(dock.frame.origin.x + 1 + (1 * dock.cellSize.width), dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), zoomPaths, zoomModes);
     btnZoom = [[DRRButton alloc] initWithPaths:zoomPaths typeOfDrawing:zoomModes];
     [dock putCell:btnZoom atRow:0 column:1];
-    [dock sizeToCells];
     
     NSMutableArray * drawFreePaths = [[NSMutableArray alloc] init];
     NSMutableArray * drawFreeModes = [[NSMutableArray alloc] init];
     makeDrawFreeButton(NSMakeRect(dock.frame.origin.x + 2 + (2 * dock.cellSize.width), dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), roundness, drawFreePaths, drawFreeModes);
     btnDrawFree = [[DRRButton alloc] initWithPaths:drawFreePaths typeOfDrawing:drawFreeModes];
     [dock putCell:btnDrawFree atRow:0 column:2];
-    [dock sizeToCells];
     [dock setState:NSOnState atRow:0 column:2];
     dock.prevSelectedCell = [dock cellAtRow:0 column:2];
     
@@ -210,14 +103,12 @@ NSInteger fsign(CGFloat n) {
     makeDrawLineButton(NSMakeRect(dock.frame.origin.x + 3 + (3 * dock.cellSize.width), dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), roundness, drawLinePaths, drawLineModes);
     btnDrawLine = [[DRRButton alloc] initWithPaths:drawLinePaths typeOfDrawing:drawLineModes];
     [dock putCell:btnDrawLine atRow:0 column:3];
-    [dock sizeToCells];
     
     NSMutableArray * backPaths = [[NSMutableArray alloc] init];
     NSMutableArray * backModes = [[NSMutableArray alloc] init];
     makeBackButton(NSMakeRect(dock.frame.origin.x + 4 + (4 * dock.cellSize.width), dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), roundness, backPaths, backModes);
     btnBack = [[DRRActionButton alloc] initWithPaths:backPaths typeOfDrawing:backModes];
     [dock putCell:btnBack atRow:0 column:4];
-    [dock sizeToCells];
     SEL undo = @selector(removeLatestLine);
     [[dock cellAtRow:0 column:4] setAction:undo];
     [[dock cellAtRow:0 column:4] setTarget:self];
@@ -227,7 +118,6 @@ NSInteger fsign(CGFloat n) {
     makeSaveButton(NSMakeRect(dock.frame.origin.x + 5 + (5 * dock.cellSize.width), dock.frame.origin.y, dock.cellSize.width, dock.cellSize.height), roundness, savePaths, saveModes);
     btnSave = [[DRRActionButton alloc] initWithPaths:savePaths typeOfDrawing:saveModes];
     [dock putCell:btnSave atRow:0 column:5];
-    [dock sizeToCells];
     SEL save = @selector(saveToFile);
     [[dock cellAtRow:0 column:5] setAction:save];
     [[dock cellAtRow:0 column:5] setTarget:self];
@@ -256,12 +146,10 @@ NSInteger fsign(CGFloat n) {
     NSLog(@"setItemProperties myView");
     #endif
     
-//    self.prevFrame = self.frame;
     viewPrevResizeWasInLive = NO;
     validLine = NO;
     thisIsANewLine = YES;
     dirtyRect = NSMakeRect(0, 0, 1, 1);
-//    isMouseNearAPoint = NO;
     customCursor = DRAW;
     maxZoomFactor = 4;
     minZoomFactor = 0.25;
@@ -270,8 +158,6 @@ NSInteger fsign(CGFloat n) {
     linesContainer = [[NSMutableArray alloc] init];
     linesHistory = [[NSMutableArray alloc] init];
     pathLines = [NSBezierPath bezierPath];
-//    pathNearPoint = [NSBezierPath bezierPath];
-//    [pathNearPoint setLineWidth:2];
     
     screenRect = [[NSScreen mainScreen] frame];
     v2wTrans = [NSAffineTransform transform];
@@ -279,7 +165,7 @@ NSInteger fsign(CGFloat n) {
     w2vTrans = [NSAffineTransform transform];
     w2vScale = [NSAffineTransform transform];
     
-    }
+}
 
 
 
@@ -371,23 +257,49 @@ NSInteger fsign(CGFloat n) {
 }
 
 
-- (void)setFrameSize:(NSSize)newSize {
+
+- (NSPoint)findAdiacentVertex:(NSPoint) pt {
     
-    #ifdef DEBUGMATRIX
-    NSLog(@"myView:setFrameSize");
-    #endif
+    __block NSPoint doubleidx;
+    __block BOOL found = NO;
     
-    // Voglio utilizzare il centro della vista come punto di ancoraggio: calcolo la posizione del centro per entrambi i frame (corrente e futuro) e passo la differenza alla funzione di traslazione, penserà lei alla scalatura.
-    NSPoint pview_before = NSMakePoint(self.frame.origin.x + self.frame.size.width / 2,
-                                self.frame.origin.y + self.frame.size.height / 2);
-    NSPoint pview_after = NSMakePoint(self.frame.origin.x + newSize.width / 2,
-                                      self.frame.origin.y + newSize.height / 2);
-
-    NSSize diff = NSMakeSize(pview_after.x - pview_before.x, pview_after.y - pview_before.y);
-
-    [self move:NO translation:diff];
-
-    [super setFrameSize:newSize];
+    if ([linesContainer count] > 0) {
+        // comincio il ciclo: per ogni oggetto dell'array (NSMutableArray di NSPoint)...
+        [linesContainer enumerateObjectsWithOptions:NSEnumerationReverse
+                                   usingBlock:^(id line, NSUInteger idx, BOOL *stop) {
+                                       
+                                       // ...cerco i punti i cui indici sono il primo e l'ultimo della linea
+                                       NSInteger endidx = [line count] - 1;
+                                       NSPoint startp = [line[0] pointValue];
+                                       NSPoint endp = [line[endidx] pointValue];
+                                       
+                                       // e controllo la loro distanza dal mio punto: punto finale...
+                                       if ((abs(endp.x - pt.x) <= PTDISTANCE) && (abs(endp.y - pt.y) <= PTDISTANCE) && !((abs(endp.x - pt.x) > PTDISTANCE*0.7) && (abs(endp.y - pt.y) > PTDISTANCE*0.7))) {
+                                           *stop = YES; found = YES;
+                                           doubleidx = NSMakePoint(idx, endidx);
+                                       }
+                                       // ...e punto iniziale
+                                       else if ((abs(startp.x - pt.x) <= PTDISTANCE) && (abs(startp.y - pt.y) <= PTDISTANCE) && !((abs(startp.x - pt.x) > PTDISTANCE*0.7) && (abs(startp.y - pt.y) > PTDISTANCE*0.7))) {
+                                           *stop = YES; found = YES;
+                                           
+                                           // rigiro l'array in modo da poter continuare la linea aggiungendo punti alla fine
+                                           //                                            DRRPointObj * temp;
+                                           NSValue * temp;
+                                           NSInteger i, j;
+                                           for (i = 0, j = [line count] - 1; i < j; i++, j--) {
+                                               temp = line[i];
+                                               line[i] = line[j];
+                                               line[j] = temp;
+                                           }
+                                           
+                                           doubleidx = NSMakePoint(idx, endidx);
+                                       }
+                                   }];
+    }
+    
+    // arrivo qui solo se l'array delle linee è vuoto oppure se non ho trovato un punto adiacente al mio
+    if (!found) doubleidx.x = NOTFOUND;
+    return doubleidx;
     
 }
 
@@ -403,45 +315,48 @@ NSInteger fsign(CGFloat n) {
     return NSMakeRect(x, y, w, h);
 }
 
-
-- (void)addEmptyLine {
-    // Aggiorno l'array di linee con una vuota e l'array per la cronologia delle linee
-    NSMutableArray * line = [[NSMutableArray alloc] init];
-    [linesContainer addObject:line];
-}
-
-
 - (CGFloat)distanceBetweenPoint:(NSPoint)p1 andPoint:(NSPoint)p2 {
+
     CGFloat dX = abs(p1.x - p2.x);
     CGFloat dY = abs(p1.y - p2.y);
     CGFloat d = sqrt((dX*dX) + (dY*dY)); ///// TODO migliora!
     
     return d;
+    
 }
 
 
+
+- (void)addEmptyLine {
+
+    NSMutableArray * line = [[NSMutableArray alloc] init];
+    [linesContainer addObject:line];
+    
+}
+
 - (void)addPointToLatestLine:(NSPoint *)p {
+    
     if (p != NULL) {
-//        DRRPointObj * pobj = [[DRRPointObj alloc] initWithPoint:p];
         NSInteger last = [linesContainer count] - 1;
         [linesContainer[last] addObject:[NSValue valueWithPoint:*p]];
     }
     else
         errno = EINVAL;
+    
 }
 
-
 - (void)addPointToIdxLine:(NSPoint*)p idxLinesArray:(NSInteger)idx {
+    
     if (p != NULL) {
-//        DRRPointObj * pobj = [[DRRPointObj alloc] initWithPoint:p];
         [linesContainer[idx] addObject:[NSValue valueWithPoint:*p]];
     }
     else
         errno = EINVAL;
+    
 }
 
-
 - (void)addLineToHistory {
+    
     if (!thisIsANewLine) {
         NSInteger idxline = (NSInteger) nearpointIdx.x;
         NSInteger idxstart = (NSInteger) nearpointIdx.y;
@@ -456,10 +371,11 @@ NSInteger fsign(CGFloat n) {
         DRRSegmentIdx * idxs = [[DRRSegmentIdx alloc] initWithIndex:lastlineidx indexTwo:0 indexThree:lastpointidx];
         [linesHistory addObject:idxs];
     }
+    
 }
 
-
 - (void)removeLatestLine {
+    
     if ([linesHistory count] > 0) {
         
         #ifdef DEBUGLINESHIST
@@ -497,32 +413,13 @@ NSInteger fsign(CGFloat n) {
     else
         NSLog(@"removeLatestLine: Nessuna una limea da rimuovere");
     #endif
+    
 }
 
-//NSRect frameRelativeToWindow = [self convertRect:myView.bounds toView:nil];
-//NSRect frameRelativeToScreen = [self.window convertRectToScreen:frameInWindow];
 
-//- (NSPoint)convertToScreenFromLocalPoint:(NSPoint)point relativeToView:(NSView *)view {
-//	NSPoint windowPoint = [view convertPoint:point toView:nil];
-//    NSPoint screenPoint = [[view window] convertBaseToScreen:windowPoint];
-//
-//	return screenPoint;
-//}
-
-//- (void)moveMouseToScreenPoint:(NSPoint)point
-//{
-//	CGPoint cgPoint = NSPointToCGPoint(point);
-//
-//	CGSetLocalEventsSuppressionInterval(0.0);
-//	CGWarpMouseCursorPosition(cgPoint);
-//	CGSetLocalEventsSuppressionInterval(0.25);
-//}
-
-
-//- (IBAction)cellPressed:(id)sender {   [sender setState:NSOnState]; }
-//- (IBAction)cellPressedNoMore:(id)sender { [sender setState:NSOffState]; }
 
 - (void)move:(BOOL)invalidate translation:(NSSize)mstep {
+    
     NSPoint pview = self.frame.origin;
     NSPoint pworld = [v2wTrans transformPoint:[v2wScale transformPoint:pview]];
     NSPoint pviewmoved = NSMakePoint(pview.x + mstep.width, pview.y + mstep.height);
@@ -535,6 +432,7 @@ NSInteger fsign(CGFloat n) {
     
     if (invalidate)
         [self setNeedsDisplay];
+    
 }
 
 - (BOOL)scale:(CGFloat)sstep maxZoom:(CGFloat)upperbound minZoom:(CGFloat)lowerbound {
@@ -549,15 +447,6 @@ NSInteger fsign(CGFloat n) {
         reachedLowerB = YES;
     
     if ( (!reachedUpperB && !reachedLowerB) || (reachedUpperB && (sstep < 1)) || (reachedLowerB && (sstep > 1)) ) {
-//        NSPoint pview = NSMakePoint(self.frame.origin.x + self.frame.size.width / 2,
-//                                    self.frame.origin.y + self.frame.size.height / 2);
-//        NSPoint pworld_before = [v2wScale transformPoint:pview];
-//        
-//        [w2vScale scaleBy:sstep];
-//        [v2wScale scaleBy:(1 / sstep)];
-//        
-//        NSPoint pworld_after = [v2wScale transformPoint:pview];
-//        NSSize diff = NSMakeSize(pworld_after.x - pworld_before.x, pworld_after.y - pworld_before.y);
 
         // Siccome la funzione di traslazione della matrice tiene conto della scalatura passando due paia di coordinate in coordinate mondo, allora passo alla funzione lo spostamento del centro con la scalatura in coordinate vista.
         NSPoint pview = NSMakePoint(self.frame.origin.x + self.frame.size.width / 2,
@@ -577,16 +466,176 @@ NSInteger fsign(CGFloat n) {
         [self setNeedsDisplay];
         
         return YES;
+        
     }
     
     return NO;
     
 }
 
+- (void)updateCursor:(id)sender {
+    
+    #ifdef DEBUGPROTOCOL
+    NSLog(@"DRRMyViewController: Protocol DockToView: updateCursor");
+    #endif
+    
+    DRRButton * btn = [dock selectedCell];
+    
+    if (btn == btnDrawFree) {
+        if (customCursor != DRAW) {
+            [[NSCursor arrowCursor] set];
+            customCursor = DRAW;
+        }
+    }
+    
+    else if (btn == btnPan) {
+        if (customCursor != PANWAIT) {
+            [[NSCursor openHandCursor] set];
+            customCursor = PANWAIT;
+        }
+    }
+    
+    else if (btn == btnZoom) {
+        if (customCursor != ZOOM) {
+            [[NSCursor resizeUpDownCursor] set];
+            customCursor = ZOOM;
+        }
+    }
+    
+}
+
+
+
+- (void)setFrameSize:(NSSize)newSize {
+    
+    #ifdef DEBUGMATRIX
+    NSLog(@"myView:setFrameSize");
+    #endif
+    
+    // Voglio utilizzare il centro della vista come punto di ancoraggio: calcolo la posizione del centro per entrambi i frame (corrente e futuro) e passo la differenza alla funzione di traslazione, penserà lei alla scalatura.
+    NSPoint pview_before = NSMakePoint(self.frame.origin.x + self.frame.size.width / 2,
+                                       self.frame.origin.y + self.frame.size.height / 2);
+    NSPoint pview_after = NSMakePoint(self.frame.origin.x + newSize.width / 2,
+                                      self.frame.origin.y + newSize.height / 2);
+    
+    NSSize diff = NSMakeSize(pview_after.x - pview_before.x, pview_after.y - pview_before.y);
+    
+    [self move:NO translation:diff];
+    
+    [super setFrameSize:newSize];
+    
+}
+
+- (BOOL)inLiveResize {
+    
+    BOOL isInLive = [super inLiveResize];
+    if (!isInLive) {
+        if (viewPrevResizeWasInLive) {
+            viewPrevResizeWasInLive = NO;
+            [self setNeedsDisplay];
+        }
+    }
+    else
+        viewPrevResizeWasInLive = YES;
+    
+    return isInLive;
+    
+}
+
+
+
+- (void)drawRect:(NSRect)dirtRect {
+    
+    #ifdef DEBUGDRAW
+    NSRect r = dirtRect;
+    NSLog(@"-drawRect myView: o:%f^%f s:%f^%f", r.origin.x, r.origin.y,
+          r.size.width, r.size.height);
+    #endif
+    #ifdef DEBUGLINES
+    pathSinglePoint = [NSBezierPath bezierPath];
+    #endif
+    
+    [w2vScale concat];
+    [w2vTrans concat];
+    
+    [[NSColor blackColor] set];
+    
+    if ([self inLiveResize]) {
+        [[NSGraphicsContext currentContext] setShouldAntialias: NO];
+        [pathLines setLineWidth: 1.2];
+    }
+    else
+        [pathLines setLineWidth: 2];
+    
+    // per ogni linea del contenitore creo un path con NSBezierPath
+    if ([linesContainer count] > 0) {
+        [linesContainer enumerateObjectsUsingBlock:^(id line, NSUInteger iline, BOOL *stop1) {
+            if ([line count] > 0) {
+                // aggiungo ogni punto della linea al path
+                [line enumerateObjectsUsingBlock:^(id point, NSUInteger ipoint, BOOL *stop2) {
+                    NSPoint p = [point pointValue];
+                    #ifdef DEBUGLINES
+                    [pathSinglePoint appendBezierPathWithOvalInRect:NSMakeRect(p.x - 2, p.y - 2, 4, 4)];
+                    #endif
+                    
+                    if (ipoint == 0)
+                        [pathLines moveToPoint:p];
+                    else
+                        [pathLines lineToPoint:[point pointValue]];
+                }];
+                
+                [[NSColor blackColor] set];
+                [pathLines stroke];
+                [pathLines removeAllPoints];
+                
+                #ifdef DEBUGLINES
+                [[NSColor redColor] set]; [pathSinglePoint fill]; [pathSinglePoint removeAllPoints];
+                #endif
+            }
+        }];
+    }
+    
+    // disegno la linea retta temporanea
+    if (validLine) {
+        NSBezierPath * tempLine = [[NSBezierPath alloc] init];
+        [tempLine setLineWidth:2];
+        [[NSColor lightGrayColor] set];
+        [tempLine moveToPoint:[v2wTrans transformPoint:[v2wScale transformPoint:prevmouseXY]]];
+        [tempLine lineToPoint:tempPoint];
+        [tempLine stroke];
+    }
+    
+    //    if (isMouseNearAPoint) {
+    //        NSPoint nearpoint = [linesContainer[(NSInteger)nearpointIdx.x][(NSInteger)nearpointIdx.y] getPoint];
+    ////        [pathNearPoint moveToPoint:nearpoint];
+    //        [pathNearPoint appendBezierPathWithOvalInRect:NSMakeRect(nearpoint.x - 6, nearpoint.y - 6, 12, 12)];
+    //        [[NSColor redColor] set];
+    //        [pathNearPoint setLineWidth:2];
+    //
+    //        [pathNearPoint stroke];
+    //        [self setNeedsDisplay];
+    //    }
+    //    nearpoint = [w2vTrans transformPoint:nearpoint];
+    //    prevmouseXY = [w2vScale transformPoint:prevmouseXY];
+    
+    [v2wTrans concat];
+    [v2wScale concat];
+    
+    // DEBUG: scrivo il numero di elementi nell'array delle linee e in quello della cronologia
+    #if defined(DEBUGLINES) || defined(DEBUGLINESHIST)
+    [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] setAlignment:NSLeftTextAlignment];
+    NSDictionary *attr = [NSDictionary dictionaryWithObject:style forKey:NSParagraphStyleAttributeName];
+    NSString * lCont_str = [NSString stringWithFormat:@"%li", (long)[linesContainer count]];
+    NSString * lHist_str = [NSString stringWithFormat:@"%li", (long)[linesHistory count]];
+    [lCont_str drawInRect:NSMakeRect(self.frame.size.width - 52, 0, 20, 15) withAttributes:attr];
+    [lHist_str drawInRect:NSMakeRect(self.frame.size.width - 22, 0, 40, 15) withAttributes:attr];
+    #endif
+    
+}
+
 
 
 //- (void)mouseMoved:(NSEvent *)theEvent {
-//    
 //    #ifdef DEBUGMOUSECORR
 //    NSLog(@"+mouseMoved");
 //    #endif
@@ -609,12 +658,9 @@ NSInteger fsign(CGFloat n) {
 //        
 //        isMouseNearAPoint = YES;
 ////        NSPoint nearpoint = [linesContainer[(NSInteger)nearpointIdx.x][(NSInteger)nearpointIdx.y] getPoint];
-////        
-////        prevmouseXY = [w2vTrans transformPoint:nearpoint];
-////        prevmouseXY = [w2vScale transformPoint:prevmouseXY];
+////        prevmouseXY = [w2vTrans transformPoint:nearpoint]; //        prevmouseXY = [w2vScale transformPoint:prevmouseXY];
 //        
 //    }
-//    
 //}
 
 - (void)mouseDown:(NSEvent *)theEvent {
@@ -635,14 +681,13 @@ NSInteger fsign(CGFloat n) {
         if (customCursor != DRAW) {
             [[NSCursor arrowCursor] set];
             customCursor = DRAW;
-//            customCursorNext = DRAW;
         }
         
         // controllo se il mouse è vicino ad un punto precedente...
-        nearpointIdx = findAdiacentVertex(linesContainer, pworld);
+        nearpointIdx = [self findAdiacentVertex:pworld];
         
         // ...si! Ancoro la nuova linea a quella.
-        if (nearpointIdx.x != ARGERROR && nearpointIdx.x != NOTFOUND) {
+        if (nearpointIdx.x != NOTFOUND) {
             
             #ifdef DEBUGLINES
             NSLog(@"Trovato punto di ancoraggio");
@@ -661,10 +706,7 @@ NSInteger fsign(CGFloat n) {
             NSPoint newpos = NSMakePoint(frameRelativeToScreen.origin.x + nearpointview.x,
                                          (screenRect.size.height) - (frameRelativeToScreen.origin.y + nearpointview.y));
             CGWarpMouseCursorPosition(newpos);
-//            NSRect frameRelativeToScreen = [self.window convertRectToScreen:self.frame];
-//            NSPoint newpos = NSMakePoint(frameRelativeToScreen.origin.x + nearpoint.x,
-//                                         (screenRect.size.height) - (frameRelativeToScreen.origin.y + nearpoint.y));
-//            CGWarpMouseCursorPosition(newpos);
+            
         }
         
         // ...no! Aggiungo una nuova linea e il punto ad essa. Includo il caso in cui la funzione abbia restituito un errore per camuffarlo a runtime
@@ -690,7 +732,6 @@ NSInteger fsign(CGFloat n) {
         if (customCursor != PANACTIVE) {
             [[NSCursor closedHandCursor] set];
             customCursor = PANACTIVE;
-//            customCursorNext = PANACTIVE;
         }
         
         prevmouseXY = pwindow;
@@ -700,7 +741,6 @@ NSInteger fsign(CGFloat n) {
         if (customCursor != ZOOM) {
             [[NSCursor resizeUpDownCursor] set];
             customCursor = ZOOM;
-//            customCursorNext = ZOOM;
         }
         
         prevmouseXY = pwindow;
@@ -712,7 +752,6 @@ NSInteger fsign(CGFloat n) {
     
 }
 
-
 - (void)mouseDragged:(NSEvent *)theEvent {
     
     #ifdef DEBUGMOUSECORR
@@ -723,7 +762,6 @@ NSInteger fsign(CGFloat n) {
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
     NSPoint pworld = [v2wScale transformPoint:pview];
     pworld = [v2wTrans transformPoint:pworld];
-//    NSPoint pbaseview = [w2v transformPoint:pview];
     
     DRRButton * btn = [dock selectedCell];
     
@@ -780,17 +818,12 @@ NSInteger fsign(CGFloat n) {
     } // fine btnDrawLine
     
     else if (btn == btnPan) {
-//        if (customCursor == PANACTIVE) {
-//            [[NSCursor closedHandCursor] set];
-//            customCursor = PANWAIT;
-//            customCursorNext = PANWAIT;
-//        }
         
         NSSize diff = NSMakeSize(pwindow.x - prevmouseXY.x, pwindow.y - prevmouseXY.y);
-        
         [self move:YES translation:diff];
         
         prevmouseXY = pwindow;
+        
     }
     
     else if (btn == btnZoom) {
@@ -827,17 +860,14 @@ NSInteger fsign(CGFloat n) {
             prevmouseXY = pwindow;
             
         }
-        
-        
-//            customCursorNext = ZOOM;
-    }
+
+    } // fine btnZoom
     
     #if defined(DEBUGLINES) || defined(DEBUGLINESHIST)
     [self setNeedsDisplayInRect:NSMakeRect(self.frame.size.width - 55, 0, self.frame.size.width, 50)];
     #endif
 
 }
-
 
 - (void)mouseUp:(NSEvent *)theEvent {
     
@@ -850,7 +880,6 @@ NSInteger fsign(CGFloat n) {
     NSPoint pview   = [self convertPoint:pwindow fromView:nil];
     NSPoint pworld = [v2wScale transformPoint:pview];
     pworld = [v2wTrans transformPoint:pworld];
-//    NSPoint pbaseview = [w2v transformPoint:pview];
     
     DRRButton * btn = [dock selectedCell];
     
@@ -934,7 +963,6 @@ NSInteger fsign(CGFloat n) {
     
 }
 
-
 - (void)rightMouseDown:(NSEvent *)theEvent {
     
     #ifdef DEBUGMOUSECORR
@@ -947,7 +975,6 @@ NSInteger fsign(CGFloat n) {
     }
 }
 
-
 - (void)rightMouseUp:(NSEvent *)theEvent {
     
     #ifdef DEBUGMOUSECORR
@@ -956,198 +983,9 @@ NSInteger fsign(CGFloat n) {
     
     if (rightpressed) {
         [self removeLatestLine];
-//        [self setNeedsDisplay]; // TODO setneedsdisplay sarebbe meglio più selettivo, chiamato dalla remove
         rightpressed = NO;
     }
 }
 
 
-//- (void)setNeedsDisplay {
-//    [super setNeedsDisplay];
-////    [dock setNeedsDisplay];
-//}
-
-
-//- (void)setNeedsDisplayInRect:(NSRect)invalidRect {
-//    [super setNeedsDisplayInRect:invalidRect];
-//    
-////    if (CGRectIntersectsRect(dock.frame, invalidRect)) {
-////        [dock setNeedsDisplayInRect:invalidRect];
-////    }
-////    if ([dock]) {
-////        [dock setNeedsDisplayInRect:invalidRect];
-////    }
-//
-//}
-
-
-//- (void)updateCursorM {
-//    
-//    DRRButton * btn = [dock selectedCell];
-//    
-//    if (btn == btnDrawFree) {
-//        if (customCursor != DRAW) {
-//        [[NSCursor arrowCursor] set];
-//        customCursor = DRAW;
-////        customCursorNext = DRAW;
-//        }
-//    }
-//    
-//    else if (btn == btnPan) {
-//        if (customCursor != PANWAIT) {
-//            [[NSCursor openHandCursor] set];
-//            customCursor = PANWAIT;
-////            customCursorNext = PANACTIVE;
-//        }
-//    }
-//    
-//    else if (btn == btnZoom) {
-//        if (customCursor != ZOOM) {
-//            [[NSCursor resizeUpDownCursor] set];
-//            customCursor = ZOOM;
-////            customCursorNext = ZOOM;
-//        }
-//    }
-//
-//}
-
-
-- (BOOL)inLiveResize {
-    BOOL isInLive = [super inLiveResize];
-    if (!isInLive) {
-        if (viewPrevResizeWasInLive) {
-            viewPrevResizeWasInLive = NO;
-            [self setNeedsDisplay];
-        }
-    }
-    else
-        viewPrevResizeWasInLive = YES;
-    
-    return isInLive;
-}
-
-
-- (void)drawRect:(NSRect)dirtRect {
-    
-    #ifdef DEBUGDRAW
-    NSRect r = dirtRect;
-    NSLog(@"-drawRect myView: o:%f^%f s:%f^%f", r.origin.x, r.origin.y,
-                                                  r.size.width, r.size.height);
-    #endif
-    #ifdef DEBUGLINES
-    pathSinglePoint = [NSBezierPath bezierPath];
-    #endif
-
-//    DRRButton * btn = [dock selectedCell];
-    
-//    if (btn == btnPan) {
-//        if (leftpressed)
-//            [[NSCursor closedHandCursor] set];
-//        else
-//            [[NSCursor openHandCursor] set];
-//    }
-//    else if (btn == btnZoom) {
-//        [[NSCursor resizeUpDownCursor] set];
-//    }
-    
-    [w2vScale concat];
-    [w2vTrans concat];
-    
-    [[NSColor blackColor] set];
-    
-    if ([self inLiveResize]) {
-        [[NSGraphicsContext currentContext] setShouldAntialias: NO];
-        [pathLines setLineWidth: 1.2];
-    }
-    else
-        [pathLines setLineWidth: 2];
-    
-    // per ogni linea del contenitore creo un path con NSBezierPath
-    if ([linesContainer count] > 0) {
-        [linesContainer enumerateObjectsUsingBlock:^(id line, NSUInteger iline, BOOL *stop1) {
-            if ([line count] > 0) {
-                // aggiungo ogni punto della linea al path
-                [line enumerateObjectsUsingBlock:^(id point, NSUInteger ipoint, BOOL *stop2) {
-                    NSPoint p = [point pointValue];
-                    #ifdef DEBUGLINES
-                    [pathSinglePoint appendBezierPathWithOvalInRect:NSMakeRect(p.x - 2, p.y - 2, 4, 4)];
-                    #endif
-                    
-                    if (ipoint == 0)
-                        [pathLines moveToPoint:p];
-                    else
-                        [pathLines lineToPoint:[point pointValue]];
-                }];
-                
-                [[NSColor blackColor] set];
-                [pathLines stroke];
-                [pathLines removeAllPoints];
-                
-                #ifdef DEBUGLINES
-                [[NSColor redColor] set]; [pathSinglePoint fill]; [pathSinglePoint removeAllPoints];
-                #endif
-            }
-        }];
-    }
-    
-    // disegno la linea retta temporanea
-    if (validLine) {
-        NSBezierPath * tempLine = [[NSBezierPath alloc] init];
-        [tempLine setLineWidth:2];
-        [[NSColor lightGrayColor] set];
-        [tempLine moveToPoint:[v2wTrans transformPoint:[v2wScale transformPoint:prevmouseXY]]];
-        [tempLine lineToPoint:tempPoint];
-        [tempLine stroke];
-    }
-    
-//    if (isMouseNearAPoint) {
-//        NSPoint nearpoint = [linesContainer[(NSInteger)nearpointIdx.x][(NSInteger)nearpointIdx.y] getPoint];
-////        [pathNearPoint moveToPoint:nearpoint];
-//        [pathNearPoint appendBezierPathWithOvalInRect:NSMakeRect(nearpoint.x - 6, nearpoint.y - 6, 12, 12)];
-//        [[NSColor redColor] set];
-//        [pathNearPoint setLineWidth:2];
-//        
-//        [pathNearPoint stroke];
-//        [self setNeedsDisplay];
-//    }
-//    nearpoint = [w2vTrans transformPoint:nearpoint];
-//    prevmouseXY = [w2vScale transformPoint:prevmouseXY];
-    
-    
-    [v2wTrans concat];
-    [v2wScale concat];
-    
-    // DEBUG: scrivo il numero di elementi nell'array delle linee e in quello della cronologia
-    #if defined(DEBUGLINES) || defined(DEBUGLINESHIST)
-    NSMutableParagraphStyle *style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
-    [style setAlignment:NSLeftTextAlignment];
-    NSDictionary *attr = [NSDictionary dictionaryWithObject:style forKey:NSParagraphStyleAttributeName];
-    NSInteger lCont_len = [linesContainer count]; NSInteger lHist_len = [linesHistory count];
-    NSString * lCont_str = [NSString stringWithFormat:@"%li", (long)lCont_len];
-    NSString * lHist_str = [NSString stringWithFormat:@"%li", (long)lHist_len];
-    [lCont_str drawInRect:NSMakeRect(self.frame.size.width - 52, 0, 20, 15) withAttributes:attr];
-    [lHist_str drawInRect:NSMakeRect(self.frame.size.width - 22, 0, 40, 15) withAttributes:attr];
-    #endif
-    
-//    if (CGRectIntersectsRect(dock.frame, dirtyRect)) {
-//        [dock drawCellInside:[dock cellAtRow:0 column:0]];
-//        [dock drawCellInside:[dock cellAtRow:0 column:1]];
-    
-//        [dock setNeedsDisplay:YES];
-//        [dock selectCellAtRow:0 column:0];
-//        [dock updateCell:[dock cellAtRow:0 column:0]];
-//    }
-
-//    [self setNeedsDisplayInRect:[controls[0] frame]];
-//    [self updateCell:controls[0]];
-//    [controls[0] drawFrame:[controls[0] frame] inView:self];
-//    [self drawCellInside:btn1];
-    
-}
-
 @end
-
-
-
-
-

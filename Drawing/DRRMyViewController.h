@@ -7,7 +7,6 @@
 //
 
 #import <Cocoa/Cocoa.h>
-//#import "DRRPointObj.h"
 #import "DRRDock.h"
 
 //#define DEBUGINIT
@@ -18,15 +17,17 @@
 //#define DEBUGMOUSECORR
 //#define DEBUGPROTOCOL
 
-// costanti per indicare se una funzione: (1) non ha trovato l'elemento cercato; (2) parametro non valido
-#define NOTFOUND -11
-#define ARGERROR -10
+// costanti per indicare se una funzione:
+#define NOTFOUND -11    // non ha trovato l'elemento cercato
+#define ARGERROR -10    // parametro non valido
 
-// distanza tra due punti per essere considerati adiacenti
-#define PTDISTANCE 12.0
+#define PTDISTANCE 12.0 // distanza tra due punti per essere considerati adiacenti
+
+
 
 typedef enum customcursor {PANWAIT, PANACTIVE, ZOOM, ZOOMIN, ZOOMOUT, DRAW} customcursor_t;
-typedef enum direction {UP, DOWN, LEFT, RIGHT} direction_t;
+
+
 
 @interface DRRSegmentIdx : NSObject
 
@@ -39,43 +40,26 @@ typedef enum direction {UP, DOWN, LEFT, RIGHT} direction_t;
 @end
 
 
-/**
- *  Funzione che cerca nell'array di linee passato come parametro un punto che sia adiacente a pt.
- *  I punti tra cui si cerca sono i vertici di ogni linea dell'array.
- *  Per "adiacenti" si intende che i due punti sono ad una certa distanza limitata da PTDISTANCE
- *
- *  Restituisce una coppia di indici dentro un NSPoint:
- *      "x" è l'indice nell'array linesarr.
- *      "y" è l'indice del punto nella linea.
- */
-NSPoint findAdiacentVertex(NSMutableArray * linesarr, NSPoint pt);
 
-NSInteger fsign(CGFloat n);
-
-
-/**
- *  Parte principale dell'applicazione.
- */
 @interface DRRMyViewController : NSControl <dockToView> {
     
-//    IBOutlet NSController *controller;
-    
+    /// Indica se il tasto sinistro del mouse è premuto nel momento del controllo.
     BOOL leftpressed;
+    /// Indica se il tasto destro del mouse è premuto nel momento del controllo.
     BOOL rightpressed;
-    BOOL viewPrevResizeWasInLive;    
-    
-    // coordinata precedente mouse per mouseDragged (ridisegno solo zona cambiata)
-    // e coordinata iniziale del trascinamento per la cronologia
+    /// Indica se l'ultimo rididegno della vista era un ridimensionamento.
+    BOOL viewPrevResizeWasInLive;
+    /// coordinata precedente del mouse per mouseDragged.
     NSPoint prevmouseXY;
+    /// Rettangolo dello schermo.
     NSRect screenRect;
+    customcursor_t customCursor;
     
-//    NSRect prevFrame;
-//    NSAffineTransform * windowSizeTrans;
     NSAffineTransform * v2wTrans;
     NSAffineTransform * v2wScale;
     NSAffineTransform * w2vTrans;
     NSAffineTransform * w2vScale;
-    customcursor_t customCursor;
+    
     CGFloat maxZoomFactor;
     CGFloat minZoomFactor;
     
@@ -97,55 +81,60 @@ NSInteger fsign(CGFloat n);
     NSString * filesavename; // ultimo nome file inserito dall'utente durante il salvataggio
     NSArray * fileTypes; // array di stringhe con le estensioni per salvare la mappa
     
-    // array e altro per contenere i punti del mouse da convertire in linee
+    /// array e altro per contenere i punti del mouse da convertire in linee
     NSMutableArray * linesContainer;
     NSMutableArray * BezierPathsToDraw;
     NSMutableArray * linesHistory;
     
-    // Variabile booleana che indica se la linea che sto disegnando è nuova o verrà ancorata ad una vecchia
+    /// Variabile booleana che indica se la linea che sto disegnando è nuova o verrà ancorata ad una vecchia
     BOOL thisIsANewLine;
-//    // Variabile per sapere se il mouse si trova in un punto vicino ad un punto di ancoraggio
-//    BOOL isMouseNearAPoint;
-    // Coppia di indici per individuare il punto a cui si ancorerà la nuova linea. Valido solo se vale thisIsANewLine
+    /// Coppia di indici per individuare il punto a cui si ancorerà la nuova linea. Valido solo se vale thisIsANewLine
     NSPoint nearpointIdx;
-    // Variabile booleana per sapere se è stata disegnata almeno una linea con i mouse dragged della mano libera
+    /// Variabile booleana per sapere se è stata disegnata almeno una linea con i mouse dragged della mano libera
     BOOL atLeastOneStroke;
-    // Variabile temporanea dove tenere il punto durante il drawLine della linea retta
+    /// Variabile temporanea dove tenere il punto durante il drawLine della linea retta
     NSPoint tempPoint;
     NSPoint prevTempPoint;
-    // Variabile booleana per sapere se la linea temporanea della linea retta è valida
+    /// Variabile booleana per sapere se la linea temporanea della linea retta è valida
     BOOL validLine;
     
-    // path che contiene le linee da disegnare e i punti in cui viene rilevato il mouse
+    /// path che contiene le linee da disegnare e i punti in cui viene rilevato il mouse
     NSRect dirtyRect;
     NSBezierPath * pathLines, * pathSinglePoint; //, * pathNearPoint;
     
 }
 
-//- (NSPoint)convertToScreenFromLocalPoint:(NSPoint)point relativeToView:(NSView *)view;
-
-//@property NSRect prevFrame;
-
 - (id)initWithFrame:(NSRect)frameRect;
-- (void)awakeFromNib;
 - (id)initWithCoder:(NSCoder *)aDecoder;
+- (void)awakeFromNib;
 - (void)setItemPropertiesToDefault;
 
 - (void)saveToFile;
 - (void)loadFromFile;
 
-//- (void)viewDidMoveToWindow;
-//- (void)windowResized:(NSNotification *)notification;
-//- (BOOL)preservesContentDuringLiveResize;
-- (void)setFrameSize:(NSSize)newSize;
-    
-/** Metodi per calcolare il retangolo contenente dei punti dati, oppure la distanza tra due punti */
+/*! Trova i punti adiacenti al punto passato come parametro. Cerca tra le linee già disegnate (LinesContainer). Controlla solo i vertici delle linee.
+ \param pt il punto da cercare.
+ \returns una coppia di indici dentro un NSPoint:
+            "x" è l'indice nell'array linesarr;
+            "y" è l'indice del punto nella linea;
+ */
+- (NSPoint)findAdiacentVertex:(NSPoint) pt;
+/*! Calcola il rettangolo contenente i due punti passati come parametri.
+ \param p1 Il primo dei due punti.
+ \param p2 L'altro punto.
+ \param border Indica quanto deve essere ridimensionato il rettangolo: positivo ingrandisce, negativo rimpicciolisce.
+ \returns il rettangolo calcolato.
+ */
 - (NSRect)computeRect:(NSPoint)p1 secondPoint:(NSPoint)p2 moveBorder:(CGFloat)border;
-//- (NSRect)computeRectFromArray:(NSMutableArray *)points moveBorder:(CGFloat)border;
-- (void)addEmptyLine;
+/*! Calcola la distanza tra due punti.
+ \param p1 Il primo dei due punti.
+ \param p2 L'altro punto.
+ \returns Il valore della distanza.
+ */
 - (CGFloat)distanceBetweenPoint:(NSPoint)p1 andPoint:(NSPoint)p2;
 
 /** Metodi per aggiungere linee da disegnare e rimuoverle */
+- (void)addEmptyLine;
 - (void)addPointToLatestLine:(NSPoint*)p;
 - (void)addPointToIdxLine:(NSPoint*)p idxLinesArray:(NSInteger)idx;
 - (void)addLineToHistory;
@@ -153,19 +142,18 @@ NSInteger fsign(CGFloat n);
 
 - (void)move:(BOOL)invalidate translation:(NSSize)mstep;
 - (BOOL)scale:(CGFloat)sstep maxZoom:(CGFloat)upperbound minZoom:(CGFloat)lowerbound;
+- (void)updateCursor:(id)sender;
 
-//- (IBAction)cellPressed:(id)sender;
+- (void)setFrameSize:(NSSize)newSize;
+- (BOOL)inLiveResize;
+
+- (void)drawRect:(NSRect)dirtyRect;
 
 - (void)mouseDown:(NSEvent *)theEvent;
 - (void)mouseDragged:(NSEvent *)theEvent;
 - (void)mouseUp:(NSEvent *)theEvent;
 - (void)rightMouseDown:(NSEvent *)theEvent;
 - (void)rightMouseUp:(NSEvent *)theEvent;
-
-//- (void)setNeedsDisplay;
-//- (void)setNeedsDisplayInRect:(NSRect)invalidRect;
-- (BOOL)inLiveResize;
-- (void)drawRect:(NSRect)dirtyRect;
 
 @end
 

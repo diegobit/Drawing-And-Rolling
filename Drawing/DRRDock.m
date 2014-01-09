@@ -8,6 +8,8 @@
 
 #import "DRRDock.h"
 
+
+
 @implementation DRRDrawingProperties
 
 + (DRRDrawingProperties *)initWithColor:(NSColor *)color drawingMode:(drawingmode_t)mode {
@@ -27,6 +29,9 @@
 @end
 
 
+
+
+
 @implementation DRRPathObj
 
 - (id)initWithPath:(NSBezierPath *)p {
@@ -36,8 +41,6 @@
     }
     return self;
 }
-//- (NSBezierPath *)getPoint;
-//- (void)setPath:(NSBezierPath *)p;
 
 @end
 
@@ -104,8 +107,6 @@ void makeDrawLineButton(NSRect frame, CGFloat roundness, NSMutableArray * paths,
     [innerborder appendBezierPathWithRoundedRect:NSMakeRect(frame.origin.x + bthickness, frame.origin.y + bthickness, frame.size.width - (2 * bthickness), frame.size.height - (2 * bthickness)) xRadius:roundness yRadius:roundness];
     
     // Coordinate per il disegno interno della matita.
-//    NSPoint bottom = NSMakePoint(frame.size.width * 0.22, frame.size.height * 0.77);
-//    NSPoint top = NSMakePoint(frame.size.width * 0.88, frame.size.height * 0.23);
     NSPoint bottomleft = NSMakePoint(frame.origin.x + frame.size.width * 0.20, frame.origin.y + frame.size.height * 0.75);
     NSPoint bottomright = NSMakePoint(frame.origin.x + frame.size.width * 0.25, frame.origin.y + frame.size.height * 0.80);
     NSPoint topleft = NSMakePoint(frame.origin.x + frame.size.width * 0.75, frame.origin.y + frame.size.height * 0.20);
@@ -128,6 +129,7 @@ void makeDrawLineButton(NSRect frame, CGFloat roundness, NSMutableArray * paths,
     [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
     
 }
+
 
 void makePanButton(NSRect frame, NSMutableArray * paths, NSMutableArray * modes) {
     
@@ -392,6 +394,7 @@ void makeSaveButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     
 }
 
+
 void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes) {
     
     NSBezierPath * border = [[NSBezierPath alloc] init];
@@ -474,6 +477,7 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 
 
+
 @implementation DRRDock
 
 - (id)init {
@@ -516,55 +520,33 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 - (void)setDefaultItemProperties {
     dockPrevResizeWasInLive = NO;
     self.prevSelectedCell = [self selectedCell];
-//    SEL callMethod = @selector(callMyViewMethod:);
-//    cellHighlighted = NSMakePoint(-1, -1);
 }
 
-//- (BOOL)preservesContentDuringLiveResize {
-//    NSLog(@"pres - dock");
-//    return YES;
-//}
 
-//- (void)highlightCell:(BOOL)flag atRow:(NSInteger)row column:(NSInteger)column {
-//    [super highlightCell:flag atRow:row column:column];
-//    [self setHighlightedCell:row atColumn:column];
-//}
-//
-//- (NSPoint)getHighlightedCell {
-//    return cellHighlighted;
-//}
-//
-//- (void)setHighlightedCell:(NSInteger)row atColumn:(NSInteger)column {
-//    cellHighlighted.x = column;
-//    cellHighlighted.y = row;
-//}
-//
-//- (BOOL)hasHighlightedCell {
-//    NSPoint cell = [self getHighlightedCell];
-//    if ((cell.x > -1) && (cell.y > -1))
-//        return YES;
+
+//- (BOOL)inLiveResize {
+//    BOOL isInLive = [super inLiveResize];
+//    if (!isInLive) {
+//        if (dockPrevResizeWasInLive) {
+//            dockPrevResizeWasInLive = NO;
+//            [self setNeedsDisplay];
+//        }
+//    }
 //    else
-//        return NO;
-//}
-
-// metodi per ricevere e settare il rettangolo del controllo oppure la sua origine e le dimensioni
-//- (NSPoint)getFrameOrigin { return self.frame.origin; }
-//- (NSSize)getFrameSize    { return self.frame.size; }
-//- (void)setFrameOrigin:(NSPoint)o {
-//    NSSize temp = NSMakeSize(self.frame.size.width, self.frame.size.height);
-//    self.frame = NSMakeRect(o.x, o.y, temp.width, temp.height);
-//}
-//- (void)setFrameSize:(NSSize)s    { self.frame = NSMakeRect(self.frame.origin.x, self.frame.origin.y, s.width, s.height); }
-//- (NSSize)cellSize {
-//    return self.controlView.bounds.size;
+//        dockPrevResizeWasInLive = YES;
+//    
+//    return isInLive;
 //}
 
 
 
-// metodo che restituisce true se il punto passato è dentro al rettangolo del controllo
-//- (BOOL)hitTest:(NSPoint)p {
-//    return NSPointInRect(p, self.frame);
+//- (void)drawRect:(NSRect)dirtyRect {
+//    if ([self inLiveResize])
+//        [[NSGraphicsContext currentContext] setShouldAntialias: NO];
+//    
+//    [super drawRect:dirtyRect];
 //}
+
 
 
 - (void)mouseDown:(NSEvent *)theEvent {
@@ -573,10 +555,6 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     NSLog(@"+mouseDown Dock");
     #endif
     
-//    if ([self hasHighlightedCell]) {
-//        NSPoint cell = [self getHighlightedCell];
-//        [self highlightCell:NO atRow:cell.y column:cell.x];
-//    }
     [super mouseDown:theEvent];
     
     id cell = [self selectedCell];
@@ -588,42 +566,10 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
         self.prevSelectedCell = cell;
     
     [self.dockdelegate updateCursor:self];
-//    if (btn ==) {
-//        statements
-//    }
-    
-}
 
-//- (void)mouseDragged { }
-//
-//- (void)mouseUp { }
-//
-//- (void)drawRect:(NSRect)dirtyRect { }
-
-- (BOOL)inLiveResize {
-    BOOL isInLive = [super inLiveResize];
-    if (!isInLive) {
-        if (dockPrevResizeWasInLive) {
-            dockPrevResizeWasInLive = NO;
-            [self setNeedsDisplay];
-        }
-    }
-    else
-        dockPrevResizeWasInLive = YES;
-    
-    return isInLive;
-}
-
-- (void)drawRect:(NSRect)dirtyRect {
-    if ([self inLiveResize])
-        [[NSGraphicsContext currentContext] setShouldAntialias: NO];
-    
-    [super drawRect:dirtyRect];
 }
 
 @end
-
-
 
 
 
@@ -649,6 +595,8 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 //    if (self) { }
     return self;
 }
+
+
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     
@@ -691,6 +639,7 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 
 
+
 @implementation DRRActionButton
 
 + (Class)cellClass {
@@ -711,6 +660,8 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     //    if (self) { }
     return self;
 }
+
+
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
     
@@ -749,4 +700,3 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 }
 
 @end
-
