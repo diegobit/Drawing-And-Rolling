@@ -15,8 +15,8 @@
 + (DRRDrawingProperties *)initWithColor:(NSColor *)color drawingMode:(drawingmode_t)mode {
     DRRDrawingProperties * obj = [[DRRDrawingProperties alloc] init];
     if (obj) {
-        [obj setColor:color];
-        [obj setDrawingMode:mode];
+        obj.color = color;
+        obj.drawingMode = mode;
     }
     return obj;
 }
@@ -48,6 +48,8 @@
 
 void makeDrawFreeButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes) {
 
+    frame = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.width - 1, frame.size.height - 1); // TODO: sistemare la dimensione, forse i paths, però dovelo rimpicciolire così non va bene (per turri i bottoni)
+    
     NSBezierPath * border = [[NSBezierPath alloc] init];
     NSBezierPath * innerborder = [[NSBezierPath alloc] init];
     NSBezierPath * pencilpoint = [[NSBezierPath alloc] init];
@@ -97,6 +99,8 @@ void makeDrawFreeButton(NSRect frame, CGFloat roundness, NSMutableArray * paths,
 
 void makeDrawLineButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes) {
     
+    frame = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.width - 1, frame.size.height - 1);
+    
     NSBezierPath * border = [[NSBezierPath alloc] init];
     NSBezierPath * innerborder = [[NSBezierPath alloc] init];
     NSBezierPath * line = [[NSBezierPath alloc] init];
@@ -132,6 +136,8 @@ void makeDrawLineButton(NSRect frame, CGFloat roundness, NSMutableArray * paths,
 
 
 void makePanButton(NSRect frame, NSMutableArray * paths, NSMutableArray * modes) {
+    
+    frame = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.width - 1, frame.size.height - 1);
     
     NSBezierPath * border = [[NSBezierPath alloc] init];
     NSBezierPath * innerborder = [[NSBezierPath alloc] init];
@@ -211,6 +217,8 @@ void makePanButton(NSRect frame, NSMutableArray * paths, NSMutableArray * modes)
 
 void makeZoomButton(NSRect frame, NSMutableArray * paths, NSMutableArray * modes) {
     
+    frame = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.width - 1, frame.size.height - 1);
+    
     NSBezierPath * border = [[NSBezierPath alloc] init];
     NSBezierPath * innerborder = [[NSBezierPath alloc] init];
     NSBezierPath * lens = [[NSBezierPath alloc] init];
@@ -261,6 +269,8 @@ void makeZoomButton(NSRect frame, NSMutableArray * paths, NSMutableArray * modes
 
 
 void makeBackButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes) {
+    
+    frame = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.width - 1, frame.size.height - 1);
     
     NSBezierPath * border = [[NSBezierPath alloc] init];
     NSBezierPath * innerborder = [[NSBezierPath alloc] init];
@@ -316,6 +326,8 @@ void makeBackButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 
 void makeSaveButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes) {
+    
+    frame = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.width - 1, frame.size.height - 1);
     
     NSBezierPath * border = [[NSBezierPath alloc] init];
     NSBezierPath * innerborder = [[NSBezierPath alloc] init];
@@ -397,6 +409,8 @@ void makeSaveButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes) {
     
+    frame = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.width - 1, frame.size.height - 1);
+    
     NSBezierPath * border = [[NSBezierPath alloc] init];
     NSBezierPath * innerborder = [[NSBezierPath alloc] init];
     NSBezierPath * container = [[NSBezierPath alloc] init];
@@ -476,8 +490,213 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 
 
+void makePlayButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes) {
+    
+    frame = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.width - 1, frame.size.height - 1);
+    
+    NSBezierPath * border = [[NSBezierPath alloc] init];
+    NSBezierPath * innerborder = [[NSBezierPath alloc] init];
+    NSBezierPath * play = [[NSBezierPath alloc] init];
+    
+    // Path per il bordo
+    [border appendBezierPathWithRoundedRect:frame xRadius:(roundness + 2) yRadius:(roundness + 2)];
+    CGFloat bthickness = fmin(frame.size.width, frame.size.height) * 0.08;
+    [innerborder appendBezierPathWithRoundedRect:NSMakeRect(frame.origin.x + bthickness, frame.origin.y + bthickness, frame.size.width - (2 * bthickness), frame.size.height - (2 * bthickness)) xRadius:roundness yRadius:roundness];
+    
+    // Coordinate per il disegno interno.
+    NSPoint playTop = NSMakePoint(frame.origin.x + frame.size.width * 0.35,
+                                  frame.origin.y + frame.size.height * 0.26);
+    NSPoint playRight = NSMakePoint(frame.origin.x + frame.size.width * 0.69,
+                                  frame.origin.y + frame.size.height * 0.49);
+    NSPoint playBottom = NSMakePoint(frame.origin.x + frame.size.width * 0.35,
+                                  frame.origin.y + frame.size.height * 0.72);
+    
+    // Path
+    [play moveToPoint:playTop];
+    [play lineToPoint:playRight];
+    [play lineToPoint:playBottom];
+    
+    // Aggiungo i paths all'array paths e imposto le preferenze di disegno in modes
+    [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:innerborder]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor blackColor] drawingMode:FILL]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:play]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
+
+}
 
 
+
+void makePauseButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes) {
+    
+    frame = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.width - 1, frame.size.height - 1);
+    
+    NSBezierPath * border = [[NSBezierPath alloc] init];
+    NSBezierPath * innerborder = [[NSBezierPath alloc] init];
+    NSBezierPath * pauseLeft = [[NSBezierPath alloc] init];
+    NSBezierPath * pauseRight = [[NSBezierPath alloc] init];
+    
+    // Path per il bordo
+    [border appendBezierPathWithRoundedRect:frame xRadius:(roundness + 2) yRadius:(roundness + 2)];
+    CGFloat bthickness = fmin(frame.size.width, frame.size.height) * 0.08;
+    [innerborder appendBezierPathWithRoundedRect:NSMakeRect(frame.origin.x + bthickness, frame.origin.y + bthickness, frame.size.width - (2 * bthickness), frame.size.height - (2 * bthickness)) xRadius:roundness yRadius:roundness];
+    
+    // Coordinate per il disegno interno.
+    NSPoint pauseLeft_TopLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.34,
+                                            frame.origin.y + frame.size.height * 0.27);
+    NSPoint pauseLeft_TopRight = NSMakePoint(frame.origin.x + frame.size.width * 0.44,
+                                            frame.origin.y + frame.size.height * 0.27);
+    NSPoint pauseLeft_BottomRight = NSMakePoint(frame.origin.x + frame.size.width * 0.44,
+                                            frame.origin.y + frame.size.height * 0.71);
+    NSPoint pauseLeft_BottomLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.34,
+                                            frame.origin.y + frame.size.height * 0.71);
+
+    NSPoint pauseRight_TopLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.55,
+                                             frame.origin.y + frame.size.height * 0.27);
+    NSPoint pauseRight_TopRight = NSMakePoint(frame.origin.x + frame.size.width * 0.65,
+                                              frame.origin.y + frame.size.height * 0.27);
+    NSPoint pauseRight_BottomRight = NSMakePoint(frame.origin.x + frame.size.width * 0.65,
+                                                 frame.origin.y + frame.size.height * 0.71);
+    NSPoint pauseRight_BottomLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.55,
+                                                frame.origin.y + frame.size.height * 0.71);
+    
+    
+    // Path
+    [pauseLeft moveToPoint:pauseLeft_BottomLeft];
+    [pauseLeft lineToPoint:pauseLeft_TopLeft];
+    [pauseLeft lineToPoint:pauseLeft_TopRight];
+    [pauseLeft lineToPoint:pauseLeft_BottomRight];
+    [pauseRight moveToPoint:pauseRight_BottomLeft];
+    [pauseRight lineToPoint:pauseRight_TopLeft];
+    [pauseRight lineToPoint:pauseRight_TopRight];
+    [pauseRight lineToPoint:pauseRight_BottomRight];
+    
+    // Aggiungo i paths all'array paths e imposto le preferenze di disegno in modes
+    [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:innerborder]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor blackColor] drawingMode:FILL]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:pauseLeft]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:pauseRight]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
+    
+}
+
+
+
+
+void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes) {
+    
+    frame = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.width - 1, frame.size.height - 1);
+    
+    NSBezierPath * border = [[NSBezierPath alloc] init];
+    NSBezierPath * innerborder = [[NSBezierPath alloc] init];
+    NSBezierPath * stop = [[NSBezierPath alloc] init];
+    
+    // Path per il bordo
+    [border appendBezierPathWithRoundedRect:frame xRadius:(roundness + 2) yRadius:(roundness + 2)];
+    CGFloat bthickness = fmin(frame.size.width, frame.size.height) * 0.08;
+    [innerborder appendBezierPathWithRoundedRect:NSMakeRect(frame.origin.x + bthickness, frame.origin.y + bthickness, frame.size.width - (2 * bthickness), frame.size.height - (2 * bthickness)) xRadius:roundness yRadius:roundness];
+    
+    // Coordinate per il disegno interno.
+    NSPoint topLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.30,
+                                  frame.origin.y + frame.size.height * 0.29);
+    NSPoint topRight = NSMakePoint(frame.origin.x + frame.size.width * 0.69,
+                                   frame.origin.y + frame.size.height * 0.29);
+    NSPoint bottomRight = NSMakePoint(frame.origin.x + frame.size.width * 0.69,
+                                      frame.origin.y + frame.size.height * 0.69);
+    NSPoint bottomLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.30,
+                                     frame.origin.y + frame.size.height * 0.69);
+
+    // Path
+    [stop moveToPoint:topLeft];
+    [stop lineToPoint:topRight];
+    [stop lineToPoint:bottomRight];
+    [stop lineToPoint:bottomLeft];
+    
+    // Aggiungo i paths all'array paths e imposto le preferenze di disegno in modes
+    [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:innerborder]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor blackColor] drawingMode:FILL]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:stop]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor whiteColor] drawingMode:FILL]];
+    
+}
+
+
+
+
+@implementation DRRDockBar
+
+//- (void)setFrameSize:(NSSize)newSize {
+//    
+//    NSSize prevSize = self.frame.size;
+//    [super setFrameSize:newSize];
+//    
+//    if ([self inLiveResize]) {
+//        NSRect rects[4];
+//        NSInteger count;
+//        
+//        [self getRectsExposedDuringLiveResize:rects count:&count];
+//        if (prevSize.height - newSize.height < 0) {
+//            while (count-- > 0)
+//                [self setNeedsDisplayInRect:rects[count]];
+//        }
+//    }
+//    else {
+//        [super setNeedsDisplay:YES];
+//    }
+//    
+//}
+
+- (BOOL)preservesContentDuringLiveResize {
+    return YES;
+}
+
+//- (void)setNeedsDisplay:(BOOL)flag {
+//    if (flag) {
+////        NSRect bottomRect = NSMakeRect(self.frame.origin.x, self.frame.origin.y,
+////                                       self.frame.size.width, self.superview.)
+//    }
+//    
+//    [super setNeedsDisplay:NO];
+//}
+//
+//- (void)setNeedsDisplayInRect:(NSRect)invalidRect {
+//    
+//}
+
+- (void)drawRect:(NSRect)dirtyRect {
+    
+    #ifdef DEBUGDOCKDRAW
+    NSLog(@"-drawRect dockBar");
+    #endif
+    
+    [[NSColor colorWithCalibratedRed:0.89 green:0.89 blue:0.89 alpha:1] set];
+    NSRectFill(dirtyRect);
+}
+
+
+
+- (void)mouseDown:(NSEvent *)theEvent {
+    [super mouseDown:theEvent];
+}
+
+@end
+
+
+
+//<##>
 @implementation DRRDock
 
 - (id)init {
@@ -518,11 +737,20 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 }
 
 - (void)setDefaultItemProperties {
-    dockPrevResizeWasInLive = NO;
+//    dockPrevResizeWasInLive = NO;
     self.prevSelectedCell = [self selectedCell];
+    [self setWantsLayer:YES];
 }
 
 
+//- (void)setFrameSize:(NSSize)newSize {
+////    [super setFrameSize:newSize];
+//    
+//    CGFloat heightBetweenDockAndTop = fabs(newSize.height - self.frame.size.height);
+//    [self setFrameOrigin:NSMakePoint(self.frame.origin.x,
+//                                     self.superview.frame.origin.y + heightBetweenDockAndTop)];
+//    [self setNeedsDisplay:YES];
+//}
 
 //- (BOOL)inLiveResize {
 //    BOOL isInLive = [super inLiveResize];
@@ -538,13 +766,43 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 //    return isInLive;
 //}
 
+- (BOOL)preservesContentDuringLiveResize {
+    return YES;
+}
 
+//- (void)setNeedsDisplay:(BOOL)flag {
+//    
+//}
+//
+//- (void)setNeedsDisplayInRect:(NSRect)invalidRect {
+//    if (self.count == 0)
+//        [super setNeedsDisplayInRect:invalidRect];
+//    
+//}
 
-//- (void)drawRect:(NSRect)dirtyRect {
+#ifdef DEBUGDOCKDRAW
+- (void)drawRect:(NSRect)dirtyRect {
 //    if ([self inLiveResize])
 //        [[NSGraphicsContext currentContext] setShouldAntialias: NO];
+    NSLog(@"-drawInterior DRRDock");
+    
+    [super drawRect:dirtyRect];
+    
+}
+#endif
+
+
+
+//- (void)setState:(NSInteger)value atRow:(NSInteger)row column:(NSInteger)col {
+//    [super setState:value atRow:row column:col];
 //    
-//    [super drawRect:dirtyRect];
+//    NSCell * selectedcell = [self cellAtRow:row column:col];
+//    if ([selectedcell allowsMixedState]) {
+//        if ([selectedcell state] == NSOnState)
+//            [selectedcell setState:NSMixedState];
+//        else if ([selectedcell state] == NSMixedState)
+//            [selectedcell setState:NSOnState];
+//    }
 //}
 
 
@@ -616,14 +874,21 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     
     [self.btnpaths enumerateObjectsUsingBlock:^(DRRPathObj * pathobj, NSUInteger idx, BOOL *stop) {
         NSBezierPath * path = pathobj.path;
-        NSColor * color = ((DRRDrawingProperties *) self.btnmodes[idx]).color;
+        NSColor * color;
         
         if (idx == 0) {
             if ([self isHighlighted])
-                color = [NSColor lightGrayColor];
-            else if ([self state])
+                color = [NSColor yellowColor];
+            else if ([self state] == NSOnState)
                 color = [NSColor greenColor];
+//            else if ([self allowsMixedState] && [self state] == NSMixedState)
+//                color = [NSColor yellowColor];
+            else
+                color = [NSColor colorWithCalibratedRed:0.89 green:0.89 blue:0.89 alpha:1];
         }
+        else
+            color = ((DRRDrawingProperties *) self.btnmodes[idx]).color;
+        
         [color set];
         
         if (((DRRDrawingProperties *) self.btnmodes[idx]).drawingMode == FILL)
@@ -681,14 +946,22 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     
     [self.btnpaths enumerateObjectsUsingBlock:^(DRRPathObj * pathobj, NSUInteger idx, BOOL *stop) {
         NSBezierPath * path = pathobj.path;
-        NSColor * color = ((DRRDrawingProperties *) self.btnmodes[idx]).color;
+        NSColor * color;
         
         if (idx == 0) {
-            if ([self isHighlighted])
-                color = [NSColor greenColor];
-//            else if ([self state])
-//                color = [NSColor greenColor];
+            if ([self isHighlighted]) {
+                color = [NSColor yellowColor];
+                if ([self state] == NSOnState)
+                    color = [NSColor greenColor];
+            }
+//            else if ([self allowsMixedState] && [self state] == NSMixedState)
+//                color = [NSColor orangeColor];
+            else
+                color = [NSColor colorWithCalibratedRed:0.89 green:0.89 blue:0.89 alpha:1];
         }
+        else
+            color = ((DRRDrawingProperties *) self.btnmodes[idx]).color;
+        
         [color set];
         
         if (((DRRDrawingProperties *) self.btnmodes[idx]).drawingMode == FILL)

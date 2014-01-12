@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13A603" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="4514" systemVersion="13B42" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="4514"/>
     </dependencies>
@@ -651,11 +651,11 @@
             <windowCollectionBehavior key="collectionBehavior" fullScreenPrimary="YES"/>
             <rect key="contentRect" x="363" y="204" width="800" height="450"/>
             <rect key="screenRect" x="0.0" y="0.0" width="1366" height="768"/>
-            <view key="contentView" id="372">
+            <view key="contentView" wantsLayer="YES" id="372">
                 <rect key="frame" x="0.0" y="0.0" width="800" height="450"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="ESX-2k-6oY" customClass="DRRMyViewController">
+                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="ESX-2k-6oY" customClass="DRRMainView">
                         <rect key="frame" x="0.0" y="0.0" width="800" height="450"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     </customView>

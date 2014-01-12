@@ -7,15 +7,17 @@
 //
 
 #import <Cocoa/Cocoa.h>
-
+#import <SpriteKit/SpriteKit.h>
+#import "DRRScene.h"
+#import "DRRMainView.h"
 
 
 @interface DRRAppDelegate : NSObject <NSApplicationDelegate>
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
-
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag;
 
 @property (assign) IBOutlet NSWindow *window;
+//@property (assign) IBOutlet SKView *skView;
 
 @end

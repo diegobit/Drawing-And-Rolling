@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		F108A7AD185C9EE900AE183A /* DRRDock.m in Sources */ = {isa = PBXBuildFile; fileRef = F108A7AC185C9EE900AE183A /* DRRDock.m */; };
+		F10F0AFF187F13DD009AABA7 /* SpriteKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F10F0AFD187F134D009AABA7 /* SpriteKit.framework */; };
+		F10F0B48187F4372009AABA7 /* DRRScene.m in Sources */ = {isa = PBXBuildFile; fileRef = F10F0B47187F4372009AABA7 /* DRRScene.m */; };
 		F11DFE9018560DE8001A17AA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F11DFE8F18560DE8001A17AA /* Cocoa.framework */; };
 		F11DFE9A18560DE8001A17AA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F11DFE9818560DE8001A17AA /* InfoPlist.strings */; };
 		F11DFE9C18560DE8001A17AA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFE9B18560DE8001A17AA /* main.m */; };
@@ -19,7 +21,7 @@
 		F11DFEB018560DE9001A17AA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F11DFE8F18560DE8001A17AA /* Cocoa.framework */; };
 		F11DFEB818560DE9001A17AA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F11DFEB618560DE9001A17AA /* InfoPlist.strings */; };
 		F11DFEBA18560DE9001A17AA /* DrawingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFEB918560DE9001A17AA /* DrawingTests.m */; };
-		F11DFEC518560E36001A17AA /* DRRMyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFEC418560E36001A17AA /* DRRMyViewController.m */; };
+		F11DFEC518560E36001A17AA /* DRRMainVIew.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFEC418560E36001A17AA /* DRRMainVIew.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,6 +37,9 @@
 /* Begin PBXFileReference section */
 		F108A7AB185C9EE900AE183A /* DRRDock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRDock.h; sourceTree = "<group>"; };
 		F108A7AC185C9EE900AE183A /* DRRDock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRDock.m; sourceTree = "<group>"; };
+		F10F0AFD187F134D009AABA7 /* SpriteKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SpriteKit.framework; path = System/Library/Frameworks/SpriteKit.framework; sourceTree = SDKROOT; };
+		F10F0B46187F4372009AABA7 /* DRRScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRScene.h; sourceTree = "<group>"; };
+		F10F0B47187F4372009AABA7 /* DRRScene.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRScene.m; sourceTree = "<group>"; };
 		F11DFE8C18560DE8001A17AA /* Drawing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Drawing.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F11DFE8F18560DE8001A17AA /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		F11DFE9218560DE8001A17AA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -54,8 +59,8 @@
 		F11DFEB518560DE9001A17AA /* DrawingTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "DrawingTests-Info.plist"; sourceTree = "<group>"; };
 		F11DFEB718560DE9001A17AA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F11DFEB918560DE9001A17AA /* DrawingTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DrawingTests.m; sourceTree = "<group>"; };
-		F11DFEC318560E36001A17AA /* DRRMyViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRMyViewController.h; sourceTree = "<group>"; };
-		F11DFEC418560E36001A17AA /* DRRMyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRMyViewController.m; sourceTree = "<group>"; };
+		F11DFEC318560E36001A17AA /* DRRMainView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRMainView.h; sourceTree = "<group>"; };
+		F11DFEC418560E36001A17AA /* DRRMainVIew.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRMainVIew.m; sourceTree = "<group>"; };
 		F139D7ED1875DFDC005C4511 /* Drawing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Drawing.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -64,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F10F0AFF187F13DD009AABA7 /* SpriteKit.framework in Frameworks */,
 				F11DFE9018560DE8001A17AA /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -102,6 +108,7 @@
 		F11DFE8E18560DE8001A17AA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F10F0AFD187F134D009AABA7 /* SpriteKit.framework */,
 				F11DFE8F18560DE8001A17AA /* Cocoa.framework */,
 				F11DFEAE18560DE9001A17AA /* XCTest.framework */,
 				F11DFE9118560DE8001A17AA /* Other Frameworks */,
@@ -125,8 +132,10 @@
 				F139D7ED1875DFDC005C4511 /* Drawing.entitlements */,
 				F11DFEA118560DE8001A17AA /* DRRAppDelegate.h */,
 				F11DFEA218560DE8001A17AA /* DRRAppDelegate.m */,
-				F11DFEC318560E36001A17AA /* DRRMyViewController.h */,
-				F11DFEC418560E36001A17AA /* DRRMyViewController.m */,
+				F11DFEC318560E36001A17AA /* DRRMainView.h */,
+				F11DFEC418560E36001A17AA /* DRRMainVIew.m */,
+				F10F0B46187F4372009AABA7 /* DRRScene.h */,
+				F10F0B47187F4372009AABA7 /* DRRScene.m */,
 				F108A7AB185C9EE900AE183A /* DRRDock.h */,
 				F108A7AC185C9EE900AE183A /* DRRDock.m */,
 				F11DFEA718560DE8001A17AA /* Images.xcassets */,
@@ -274,8 +283,9 @@
 			files = (
 				F11DFE9C18560DE8001A17AA /* main.m in Sources */,
 				F108A7AD185C9EE900AE183A /* DRRDock.m in Sources */,
-				F11DFEC518560E36001A17AA /* DRRMyViewController.m in Sources */,
+				F11DFEC518560E36001A17AA /* DRRMainVIew.m in Sources */,
 				F11DFEA318560DE8001A17AA /* DRRAppDelegate.m in Sources */,
+				F10F0B48187F4372009AABA7 /* DRRScene.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

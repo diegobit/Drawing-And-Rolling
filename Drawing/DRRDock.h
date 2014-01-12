@@ -11,8 +11,6 @@
 //#define DEBUGDOCKDRAW
 //#define DEBUGDOCKMOUSECORR
 
-
-
 typedef enum drawingmodes {STROKE, FILL} drawingmode_t;
 
 
@@ -47,6 +45,20 @@ void makeDrawLineButton(NSRect frame, CGFloat roundness, NSMutableArray * paths,
 void makeBackButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
 void makeSaveButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
 void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
+void makePlayButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
+void makePauseButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
+void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
+
+
+
+@interface DRRDockBar : NSView
+//- (void)setFrameSize:(NSSize)newSize;
+- (BOOL)preservesContentDuringLiveResize;
+
+- (void)drawRect:(NSRect)dirtyRect;
+
+- (void)mouseDown:(NSEvent *)theEvent;
+@end
 
 
 
@@ -56,12 +68,11 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 
 
-@interface DRRDock : NSMatrix {
-    BOOL dockPrevResizeWasInLive;
-}
+@interface DRRDock : NSMatrix
 
-@property id prevSelectedCell;
-@property id <dockToView> dockdelegate;
+//@property BOOL dockPrevResizeWasInLive;
+@property (weak) id prevSelectedCell;
+@property (weak) id <dockToView> dockdelegate;
 
 - (id)init;
 - (id)initWithFrame:(NSRect)frameRect;
@@ -70,9 +81,17 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 - (id)initWithCoder:(NSCoder *)aDecoder;
 - (void)setDefaultItemProperties;
 
+//- (void)setFrameSize:(NSSize)newSize;
 //- (BOOL)inLiveResize;
 
-//- (void)drawRect:(NSRect)dirtyRect;
+- (BOOL)preservesContentDuringLiveResize;
+//- (void)setNeedsDisplay:(BOOL)flag;
+//- (void)setNeedsDisplayInRect:(NSRect)invalidRect;
+
+#ifdef DEBUGDOCKDRAW
+- (void)drawRect:(NSRect)dirtyRect;
+#endif
+//- (void)setState:(NSInteger)value atRow:(NSInteger)row column:(NSInteger)col
 
 - (void)mouseDown:(NSEvent *)theEvent;
 
