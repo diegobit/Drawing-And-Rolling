@@ -14,10 +14,20 @@
 
 @interface DRRSceneView : SKView
 
-@property NSMutableArray * lines;
+//@property NSMutableArray * lines;
 
 - (id)initWithFrame:(NSRect)frameRect;
+
+- (void)buildLines:(NSMutableArray *)lines distanceReceiverOriginAndSenderOrigin:(NSSize)d scale:(CGFloat)sfactor;
+
+- (void)setFrameSize:(NSSize)newSize;
 //- (BOOL)isOpaque;
+
+- (void)mouseDown:(NSEvent *)theEvent;
+- (void)mouseDragged:(NSEvent *)theEvent;
+- (void)mouseUp:(NSEvent *)theEvent;
+//- (void)rightMouseDown:(NSEvent *)theEvent;
+//- (void)rightMouseUp:(NSEvent *)theEvent;
 
 @end
 
@@ -25,10 +35,12 @@
 
 @interface DRRScene : SKScene
 
-@property NSMutableArray * lines;
+@property CGMutablePathRef pathLines;
 
-- (id)initWithSize:(CGSize)size;
-    
+//- (void)update:(NSTimeInterval)currentTime;
+- (id)initWithSize:(CGSize)size linesPath:(CGPathRef)path;
+//- (id)initWithSize:(CGSize)size linesPathFromNSBezierPath:(NSBezierPath *)path;
+
 @end
 
 

@@ -655,7 +655,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="800" height="450"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="ESX-2k-6oY" customClass="DRRMainView">
+                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="ESX-2k-6oY" customClass="DRRDrawingView">
                         <rect key="frame" x="0.0" y="0.0" width="800" height="450"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     </customView>

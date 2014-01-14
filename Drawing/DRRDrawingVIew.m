@@ -1,12 +1,12 @@
 //
-//  DRRMainView.m
+//  DRRDrawingView.m
 //  Drawing
 //
 //  Created by Diego Giorgini on 09/12/13.
 //  Copyright (c) 2013 Diego Giorgini. All rights reserved.
 //
 
-#import "DRRMainView.h"
+#import "DRRDrawingView.h"
 
 
 
@@ -38,6 +38,7 @@
     if (self) {
         self.radius = 1;
         self.center = NSMakePoint(0, 0);
+        self.circle = [[NSBezierPath alloc] init];
     }
     return self;
 }
@@ -47,6 +48,7 @@
     if (self) {
         self.radius = r;
         self.center = NSMakePoint(0, 0);
+        self.circle = [[NSBezierPath alloc] init];
     }
     return self;
 }
@@ -55,13 +57,19 @@
     self.center = p;
     self.rect = NSMakeRect(p.x - self.radius, p.y - self.radius,
                            self.radius * 2, self.radius * 2);
+    [self.circle removeAllPoints];
+    [self.circle appendBezierPathWithOvalInRect:self.rect];
+}
+
+- (BOOL)hitTest:(NSPoint)p {
+    return [self.circle containsPoint:p];
 }
 
 @end
 
 
 
-@implementation DRRMainView
+@implementation DRRDrawingView
 
 - (id)initWithFrame:(NSRect)frameRect {
     
@@ -93,13 +101,8 @@
     
     [super awakeFromNib];
     [self setWantsLayer:YES];
-    [self.layer shouldRasterize];
+//    self.layer.shouldRasterize = YES;
     self.ball = [[DRRBall alloc] initWithRadius:15];
-    [self setItemPropertiesToDefault];
-    
-    // nome base salvataggio file. Estensioni
-    self.filesavename = @"map";
-    self.fileTypes = [NSArray arrayWithObjects:@"sav", nil];
     
     // Dimensione bottoni della dock, spessore line del disegno interno. Rotondità tasti.
     self.cellsize = NSMakeSize(40, 40);
@@ -113,10 +116,19 @@
                                                                 self.cellsize.width * 19/18,
                                                                 self.frame.size.height)];
     
+    [self setItemPropertiesToDefault];
+    
+    self.linesContainerHasChanged = NO;
+    
+    // nome base salvataggio file. Estensioni
+    self.filesavename = @"map";
+    self.fileTypes = [NSArray arrayWithObjects:@"sav", nil];
+    
     //    self.frame = NSMakeRect(self.frame.origin.x + self.dockBar.frame.size.width, self.frame.origin.y,
     //                            self.frame.size.width - self.dockBar.frame.size.width, self.frame.size.height);
     
     [self.superview addSubview:self.dockBar];
+    self.dockBar.layer.shouldRasterize = YES;
     
 //    self.dockBackgroundColor = [NSColor colorWithCalibratedRed:0.89 green:0.89 blue:0.89 alpha:1];
     // Creo la dock e i bottoni
@@ -228,20 +240,21 @@
     NSLog(@"setItemProperties myView");
     #endif
     
-    self.sceneView = NULL;
-    
     self.viewPrevResizeWasInLive = NO;
+    self.prevInLiveMovement = NO;
+    self.inLiveMovement = NO;
     self.validLine = NO;
     self.thisIsANewLine = YES;
     self.dirtyRect = NSMakeRect(0, 0, 1, 1);
     self.customCursor = DRAW;
     self.maxZoomFactor = 4;
-    self.minZoomFactor = 0.25;
+    self.minZoomFactor = 0.2;
     
     // inizializzo l'array di linee disegnate, le proprietà e altri paths
     self.linesContainer = [[NSMutableArray alloc] init];
     self.linesHistory = [[NSMutableArray alloc] init];
     self.pathLines = [NSBezierPath bezierPath];
+    [self.pathLines setLineWidth:2];
     self.pathSinglePoint = [NSBezierPath bezierPath];
     self.pathBall = [NSBezierPath bezierPath];
     
@@ -253,6 +266,9 @@
     self.v2wScale = [NSAffineTransform transform];
     self.w2vTrans = [NSAffineTransform transform];
     self.w2vScale = [NSAffineTransform transform];
+    
+    self.w2vTransFactor = NSMakeSize(self.dockBar.frame.size.width, 0);
+    self.w2vScaleFactor = 1;
     
 }
 
@@ -310,6 +326,17 @@
             
             [self setItemPropertiesToDefault];
             
+//            DRRScene * scene = [DRRScene sceneWithSize:CGSizeMake(self.sceneView.frame.size.width, self.sceneView.frame.size.height)];
+//            scene.scaleMode = SKSceneScaleModeFill;
+//            [self.sceneView presentScene:scene];
+//            scene = NULL;
+            
+//            NSArray * a = [self.sceneView subviews];
+//            [a enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+//                [obj removeFromSuperviewWithoutNeedingDisplay];
+//                [obj releaseGState];
+//            }];
+//            
             NSArray * rawlines = [filecontent componentsSeparatedByString:@"\n"];
             
             [rawlines enumerateObjectsUsingBlock:^(NSString * strline, NSUInteger idxline, BOOL *stop) {
@@ -325,12 +352,15 @@
                 
                 [self.linesContainer addObject:line];
                 
+                
+                
                 // creo anche una nuova history di linee, non è proprio uguale a quella di prima...
                 DRRSegmentIdx * idxs = [[DRRSegmentIdx alloc] initWithIndex:idxline indexTwo:0 indexThree:[line count] - 1];
                 [self.linesHistory addObject:idxs]; // TODO mgliorare history
                 
             }];
             
+            self.linesContainerHasChanged = YES;
             [self setNeedsDisplay:YES];
             
         }
@@ -428,6 +458,7 @@
     if (p != NULL) {
         NSInteger last = [self.linesContainer count] - 1;
         [self.linesContainer[last] addObject:[NSValue valueWithPoint:*p]];
+        self.linesContainerHasChanged = YES;
     }
     else
         errno = EINVAL;
@@ -438,6 +469,7 @@
     
     if (p != NULL) {
         [self.linesContainer[idx] addObject:[NSValue valueWithPoint:*p]];
+        self.linesContainerHasChanged = YES;
     }
     else
         errno = EINVAL;
@@ -493,15 +525,23 @@
         }
         
         [self.linesHistory removeLastObject];
+        self.linesContainerHasChanged = YES;
         
         [self setNeedsDisplay:YES];
 //        [self setNeedsDisplayInRect:[self computeRectFromArray:dirtyPoints moveBorder:1]]; //TODO sarà più veloce calcolare il rettangolo o ridisegnare tutto?
     }
     
-    #ifdef DEBUGLINESHIST
-    else
+    else {
+        self.ball.isAlreadyPlaced = NO;
+        NSPoint ballcenterview = [self.w2vScale transformPoint:[self.w2vTrans transformPoint:self.ball.center]];
+        [self setNeedsDisplayInRect:NSMakeRect(ballcenterview.x - self.ball.radius,
+                                               ballcenterview.y - self.ball.radius,
+                                               self.ball.radius * 2,
+                                               self.ball.radius * 2)];
+        #ifdef DEBUGLINESHIST
         NSLog(@"removeLatestLine: Nessuna una limea da rimuovere");
-    #endif
+        #endif
+    }
     
 }
 
@@ -518,6 +558,9 @@
     
     [self.w2vTrans translateXBy:diff.width yBy:diff.height];
     [self.v2wTrans translateXBy:(-1 * diff.width) yBy:(-1 * diff.height)];
+    // Aggiusto anche questi valori per scalare la scena
+    self.w2vTransFactor = NSMakeSize(self.w2vTransFactor.width + diff.width,
+                                     self.w2vTransFactor.height + diff.height); // TODO: sarebbe meglio estrapolare dalle matrici invece di tenerre un altro valore
     
     if (flag)
         [self setNeedsDisplay:YES];
@@ -544,15 +587,12 @@
 
         [self.w2vScale scaleBy:sstep];
         [self.v2wScale scaleBy:(1 / sstep)];
+        self.w2vScaleFactor *= sstep; // TODO: sarebbe meglio estrapolare dalle matrici invece di tenerre un altro valore
 
         NSPoint pview_after = [self.w2vScale transformPoint:pworld];
         NSSize diff = NSMakeSize(pview.x - pview_after.x, pview.y - pview_after.y);
 
-        
-        
-        [self move:diff invalidate:NO];
-        
-        [self setNeedsDisplay:YES];
+        [self move:diff invalidate:YES];
         
         return YES;
         
@@ -565,7 +605,7 @@
 - (void)updateCursor:(id)sender {
     
     #ifdef DEBUGPROTOCOL
-    NSLog(@"DRRMainView: Protocol DockToView: updateCursor");
+    NSLog(@"DRRDrawingView: Protocol DockToView: updateCursor");
     #endif
     
     DRRButton * btn = [self.dock selectedCell];
@@ -648,6 +688,21 @@
     
 }
 
+- (BOOL)inLivePanOrScale {
+    
+    if (!self.inLiveMovement) {
+        if (self.prevInLiveMovement) {
+            self.prevInLiveMovement = NO;
+            [self setNeedsDisplay:YES];
+        }
+    }
+    else
+        self.prevInLiveMovement = YES;
+    
+    return self.inLiveMovement;
+    
+}
+
 - (void)setNeedsDisplay:(BOOL)flag {
 //    NSRect viewRect;
 //    if (self.dockBar)
@@ -707,39 +762,54 @@
         
         [[NSColor blackColor] set];
         
-        if ([self inLiveResize]) {
+        if ([self inLiveResize] || [self inLivePanOrScale]) {
             [[NSGraphicsContext currentContext] setShouldAntialias: NO];
             [self.pathLines setLineWidth: 1.2];
         }
         else
             [self.pathLines setLineWidth: 2];
         
-        // per ogni linea del contenitore creo un path con NSBezierPath
+        // Disegno le linee
         if ([self.linesContainer count] > 0) {
-            [self.linesContainer enumerateObjectsUsingBlock:^(id line, NSUInteger iline, BOOL *stop1) {
-                if ([line count] > 0) {
-                    // aggiungo ogni punto della linea al path
-                    [line enumerateObjectsUsingBlock:^(id point, NSUInteger ipoint, BOOL *stop2) {
-                        NSPoint p = [point pointValue];
-                        #ifdef DEBUGLINES
-                        [self.pathSinglePoint appendBezierPathWithOvalInRect:NSMakeRect(p.x - 2, p.y - 2, 4, 4)];
-                        #endif
-                        
-                        if (ipoint == 0)
-                            [self.pathLines moveToPoint:p];
-                        else
-                            [self.pathLines lineToPoint:[point pointValue]];
-                    }];
-                    
-                    [[NSColor blackColor] set];
+            
+            // per ogni linea del contenitore creo un path con NSBezierPath. Solo se nel frammepo LinesCOntainer è stato modificato
+            if (self.linesContainerHasChanged) {
+                [self.pathLines removeAllPoints];
+                
+                [self.linesContainer enumerateObjectsUsingBlock:^(id line, NSUInteger iline, BOOL *stop1) {
+                    if ([line count] > 0) {
+                        // aggiungo ogni punto della linea al path
+                        [line enumerateObjectsUsingBlock:^(id point, NSUInteger ipoint, BOOL *stop2) {
+                            NSPoint p = [point pointValue];
+                            #ifdef DEBUGLINES
+                            [self.pathSinglePoint appendBezierPathWithOvalInRect:NSMakeRect(p.x - 2, p.y - 2, 4, 4)];
+                            #endif
+                            
+                            if (ipoint == 0)
+                                [self.pathLines moveToPoint:p];
+                            else
+                                [self.pathLines lineToPoint:[point pointValue]];
+                        }];
+                    }
                     [self.pathLines stroke];
-                    [self.pathLines removeAllPoints];
                     
                     #ifdef DEBUGLINES
                     [[NSColor redColor] set]; [self.pathSinglePoint fill]; [self.pathSinglePoint removeAllPoints];
+                    [[NSColor blackColor] set];
                     #endif
-                }
-            }];
+                
+                }];
+                
+                self.linesContainerHasChanged = NO;
+            }
+            
+            // Disegno il path che mi sono costruito prima, non ho aggiunto o rimosso linee nel frattempo
+            else {
+                
+                [self.pathLines stroke];
+                
+            }
+            
         }
         
         // disegno la linea retta temporanea
@@ -769,7 +839,6 @@
             [self.pathBall fill];
             
             [self.pathBall removeAllPoints];
-            
         }
         
         
@@ -802,17 +871,17 @@
         
         
         
-        
-        [self.v2wTrans concat];
-        [self.v2wScale concat];
+//        
+//        [self.v2wTrans concat];
+//        [self.v2wScale concat];
         
         // DEBUG: scrivo il numero di elementi nell'array delle linee e in quello della cronologia
         #if defined(DEBUGLINES) || defined(DEBUGLINESHIST)
         NSMutableParagraphStyle *style = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
         [style setAlignment:NSLeftTextAlignment];
         NSDictionary *attr = [NSDictionary dictionaryWithObject:style forKey:NSParagraphStyleAttributeName];
-        NSString * lCont_str = [NSString stringWithFormat:@"%li", (long)[linesContainer count]];
-        NSString * lHist_str = [NSString stringWithFormat:@"%li", (long)[linesHistory count]];
+        NSString * lCont_str = [NSString stringWithFormat:@"%li", (long)[self.linesContainer count]];
+        NSString * lHist_str = [NSString stringWithFormat:@"%li", (long)[self.linesHistory count]];
         [lCont_str drawInRect:NSMakeRect(self.frame.size.width - 52, 0, 20, 15) withAttributes:attr];
         [lHist_str drawInRect:NSMakeRect(self.frame.size.width - 22, 0, 40, 15) withAttributes:attr];
         #endif
@@ -832,13 +901,18 @@
 
 //<##>
 - (void)startOrPauseScene {
+//    [self.sceneView.scene setAnchorPoint:<#(CGPoint)#>]
+//    [self.sceneView.scene setScale:self.w2vScaleFactor];
+//    [self.sceneView.scene setPosition:<#(CGPoint)#>]
 //    [self.w2vScale concat];
 //    [self.w2vTrans concat];
     if ([self.sceneView isHidden] && [self.sceneView isPaused]) {
+        NSLog(@"1");
         // Dopo aver disegnato, passo le linee alla vista che gestirà la scena in movimento
-        self.sceneView.lines = self.linesContainer;
-        // TODO: palla?
-        
+        NSSize dist = NSMakeSize(fabs(self.dockBar.frame.size.width - self.frame.size.width),
+                                 fabs(self.dockBar.frame.size.height - self.frame.size.height));
+        [self.sceneView buildLines:self.linesContainer distanceReceiverOriginAndSenderOrigin:dist scale:self.w2vScaleFactor];
+        NSLog(@"2");
         [self.sceneView setHidden:NO];
     }
     
@@ -846,7 +920,7 @@
         [self.sceneView setPaused:NO];
     else
         [self.sceneView setPaused:YES];
-    
+    NSLog(@"3");
 //    [self setNeedsDisplay:YES];
 }
 
@@ -955,6 +1029,9 @@
             [[NSCursor closedHandCursor] set];
             self.customCursor = PANACTIVE;
         }
+        
+        if ([self.ball hitTest:pworld])
+            self.ballPressed = YES;
         
         self.prevmouseXY = pwindow;
     }
@@ -1090,15 +1167,37 @@
         
         else if (btn == self.btnPan) {
             
-            NSSize diff = NSMakeSize(pwindow.x - self.prevmouseXY.x, pwindow.y - self.prevmouseXY.y);
-            [self move:diff invalidate:YES];
+            if ([self ballPressed]) {
+                NSPoint pwindowview = [self.v2wTrans transformPoint:[self.v2wScale transformPoint:pwindow]];
+                NSPoint prevmouseXYview = [self.v2wTrans transformPoint:[self.v2wScale transformPoint:self.prevmouseXY]];
+                NSSize diff = NSMakeSize(pwindowview.x - prevmouseXYview.x, pwindowview.y - prevmouseXYview.y);
+                
+                [self.ball setCenterPosition:NSMakePoint(self.ball.center.x + diff.width,
+                                                         self.ball.center.y + diff.height)];
+//                [self setNeedsDisplayInRect:NSMakeRect(pwindow.x - self.ball.radius, pwindow.y - self.ball.radius,
+//                                                       self.ball.radius * 2, self.ball.radius * 2)];
+                [self setNeedsDisplay:YES]; // TODO: migliorare solo invalidare rettangolo...
+            }
+            
+            else {
+                if (self.inLiveMovement)
+                    self.prevInLiveMovement = YES;
+                self.inLiveMovement = YES;
+                
+                NSSize diff = NSMakeSize(pwindow.x - self.prevmouseXY.x, pwindow.y - self.prevmouseXY.y);
+                [self move:diff invalidate:YES];
+            }
             
             self.prevmouseXY = pwindow;
-            
+                
         }
         
         else if (btn == self.btnZoom) {
 
+            if (self.inLiveMovement)
+                self.prevInLiveMovement = YES;
+            self.inLiveMovement = YES;
+            
             CGFloat diff = pwindow.y - self.prevmouseXY.y;
             CGFloat s = 1;
             
@@ -1239,11 +1338,18 @@
         }
         
         else if (btn == self.btnPan) {
+            if (self.ballPressed)
+                self.ballPressed = NO;
+            
+            self.inLiveMovement = NO;
+            [self setNeedsDisplay:YES];
             self.customCursor = PANWAIT;
             [[NSCursor openHandCursor] set];
         }
         
         else if (btn == self.btnZoom) {
+            self.inLiveMovement = NO;
+            [self setNeedsDisplay:YES];
             self.customCursor = ZOOM;
             [[NSCursor resizeUpDownCursor] set];
         }

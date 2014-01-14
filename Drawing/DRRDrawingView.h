@@ -1,5 +1,5 @@
 //
-//  DRRMainView.h
+//  DRRDrawingView.h
 //  Drawing
 //
 //  Created by Diego Giorgini on 09/12/13.
@@ -27,7 +27,7 @@
 
 
 
-typedef enum customcursor {PANWAIT, PANACTIVE, ZOOM, ZOOMIN, ZOOMOUT, DRAW} customcursor_t;
+typedef enum customcursor {PANWAIT, PANACTIVE, PANBALL, ZOOM, ZOOMIN, ZOOMOUT, DRAW} customcursor_t;
 
 
 
@@ -50,25 +50,29 @@ typedef enum customcursor {PANWAIT, PANACTIVE, ZOOM, ZOOMIN, ZOOMOUT, DRAW} cust
 @property CGFloat radius;
 @property BOOL isAlreadyPlaced;
 @property BOOL isAlreadyTempPlaced;
+@property NSBezierPath * circle;
 
 //- (NSPoint)getCenter;
 - (id)init;
 - (id)initWithRadius:(CGFloat)r;
-
+- (BOOL)hitTest:(NSPoint)p;
 - (void)setCenterPosition:(NSPoint)p;
 
 @end
 
 
 
-@interface DRRMainView : NSView <dockToView>
+@interface DRRDrawingView : NSView <dockToView>
     
 /// Indica se il tasto sinistro del mouse è premuto nel momento del controllo.
 @property BOOL leftpressed;
 /// Indica se il tasto destro del mouse è premuto nel momento del controllo.
 @property BOOL rightpressed;
-/// Indica se l'ultimo rididegno della vista era un ridimensionamento.
+@property BOOL ballPressed;
+/// Indica se l'ultimo ridisegno della vista era un ridimensionamento.
 @property BOOL viewPrevResizeWasInLive;
+@property BOOL prevInLiveMovement;
+@property BOOL inLiveMovement;
 /// coordinata precedente del mouse per mouseDragged.
 @property NSPoint prevmouseXY;
 /// Rettangolo dello schermo.
@@ -82,6 +86,8 @@ typedef enum customcursor {PANWAIT, PANACTIVE, ZOOM, ZOOMIN, ZOOMOUT, DRAW} cust
 @property NSAffineTransform * v2wScale;
 @property NSAffineTransform * w2vTrans;
 @property NSAffineTransform * w2vScale;
+@property NSSize w2vTransFactor;
+@property CGFloat w2vScaleFactor;
 
 @property CGFloat maxZoomFactor;
 @property CGFloat minZoomFactor;
@@ -114,6 +120,7 @@ typedef enum customcursor {PANWAIT, PANACTIVE, ZOOM, ZOOMIN, ZOOMOUT, DRAW} cust
 @property NSMutableArray * BezierPathsToDraw;
 @property NSMutableArray * linesHistory;
 @property DRRBall * ball;
+@property BOOL linesContainerHasChanged;
 
 /// Variabile booleana che indica se la linea che sto disegnando è nuova o verrà ancorata ad una vecchia
 @property BOOL thisIsANewLine;
@@ -175,6 +182,7 @@ typedef enum customcursor {PANWAIT, PANACTIVE, ZOOM, ZOOMIN, ZOOMOUT, DRAW} cust
 
 - (void)setFrameSize:(NSSize)newSize;
 - (BOOL)inLiveResize;
+- (BOOL)inLivePanOrScale;
 - (void)setNeedsDisplay:(BOOL)flag;
 - (void)setNeedsDisplayInRect:(NSRect)invalidRect;
 

@@ -8,8 +8,8 @@
 
 #import <Cocoa/Cocoa.h>
 #import <SpriteKit/SpriteKit.h>
-#import "DRRScene.h"
-#import "DRRMainView.h"
+//#import "DRRScene.h"
+//#import "DRRDrawingView.h"
 
 
 @interface DRRAppDelegate : NSObject <NSApplicationDelegate>

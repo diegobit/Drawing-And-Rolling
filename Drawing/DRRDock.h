@@ -8,6 +8,9 @@
 
 #import <Cocoa/Cocoa.h>
 
+#define llGray colorWithCalibratedRed:0.89 green:0.89 blue:0.89 alpha:1
+#define ddBlue colorWithCalibratedRed:0.05 green:0.05 blue:0.1 alpha:1
+
 //#define DEBUGDOCKDRAW
 //#define DEBUGDOCKMOUSECORR
 
