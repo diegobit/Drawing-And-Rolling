@@ -680,8 +680,19 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     NSLog(@"-drawRect dockBar");
     #endif
     
+    // Coloro lo sfondo
     [[NSColor llGray] set];
-    NSRectFill(dirtyRect);
+    NSRectFill(NSMakeRect(dirtyRect.origin.x,
+                          dirtyRect.origin.y,
+                          dirtyRect.size.width - 1,
+                          dirtyRect.size.height));
+    
+    // Coloro la linea del bordo a destra
+    [[NSColor lightGrayColor] set];
+    NSRectFill(NSMakeRect(dirtyRect.origin.x + dirtyRect.size.width - 1,
+                          dirtyRect.origin.y,
+                          1,
+                          dirtyRect.size.height));
 }
 
 
