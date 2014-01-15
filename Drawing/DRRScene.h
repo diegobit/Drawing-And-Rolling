@@ -18,7 +18,7 @@
 
 - (id)initWithFrame:(NSRect)frameRect;
 
-- (void)buildLines:(NSMutableArray *)lines distanceReceiverOriginAndSenderOrigin:(NSSize)d scale:(CGFloat)sfactor;
+- (void)buildSceneContent:(NSMutableArray *)lines ballPosition:(NSPoint *)ballpos ballRadius:(CGFloat)rad move:(NSSize)mfactor scale:(CGFloat)sfactor;
 
 - (void)setFrameSize:(NSSize)newSize;
 //- (BOOL)isOpaque;
@@ -38,7 +38,7 @@
 @property CGMutablePathRef pathLines;
 
 //- (void)update:(NSTimeInterval)currentTime;
-- (id)initWithSize:(CGSize)size linesPath:(CGPathRef)path;
+- (id)initWithSize:(CGSize)size linesPath:(NSMutableArray *)path ballPosition:(CGPoint)ballPos ballRadius:(CGFloat)rad;
 //- (id)initWithSize:(CGSize)size linesPathFromNSBezierPath:(NSBezierPath *)path;
 
 @end

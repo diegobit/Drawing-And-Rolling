@@ -111,11 +111,11 @@
     self.roundness = (self.cellsize.width + self.cellsize.height) / 8;
     
     // Creo la barra che conterrà la matrice (per disegnarne lo sfondo e il contorno)
-    self.dockBar = [[DRRDockBar alloc] initWithFrame:NSMakeRect(self.frame.origin.x,
-                                                                self.frame.origin.y,
-                                                                self.cellsize.width * 19/18,
-                                                                self.frame.size.height)];
-    
+//    dockBar = [[DRRDockBar alloc] initWithFrame:NSMakeRect(self.frame.origin.x,
+//                                                                self.frame.origin.y,
+//                                                                self.cellsize.width * 19/18,
+//                                                                self.frame.size.height)];
+//    
     [self setItemPropertiesToDefault];
     
     self.linesContainerHasChanged = NO;
@@ -127,8 +127,8 @@
     //    self.frame = NSMakeRect(self.frame.origin.x + self.dockBar.frame.size.width, self.frame.origin.y,
     //                            self.frame.size.width - self.dockBar.frame.size.width, self.frame.size.height);
     
-    [self.superview addSubview:self.dockBar];
-    self.dockBar.layer.shouldRasterize = YES;
+//    [self.superview addSubview:dockBar];
+    dockBar.layer.shouldRasterize = YES;
     
 //    self.dockBackgroundColor = [NSColor colorWithCalibratedRed:0.89 green:0.89 blue:0.89 alpha:1];
     // Creo la dock e i bottoni
@@ -217,17 +217,14 @@
     [self.dock setFrameOrigin:NSMakePoint(self.dock.frame.origin.x,
                                           self.frame.origin.y + (heightBetweenDockAndTop / 2))];
     
-    [self.dockBar addSubview:self.dock];
+    [dockBar addSubview:self.dock];
     [self.dock.dockdelegate updateCursor:self];
     
     [self.window setMinSize:NSMakeSize(self.dock.frame.size.height + self.dock.cellSize.height,
                                        self.dock.frame.size.height + self.dock.cellSize.height)];
     
     // Ora inizializzo e aggiungo la vista che gestirà la scena.
-    self.sceneView = [[DRRSceneView alloc] initWithFrame:NSMakeRect(self.frame.origin.x + self.dockBar.frame.size.width,
-                                                                    self.frame.origin.y,
-                                                                    self.frame.size.width - self.dockBar.frame.size.width,
-                                                                    self.frame.size.height)];
+    self.sceneView = [[DRRSceneView alloc] initWithFrame:self.bounds];
     [self.sceneView setHidden:YES];
     [self.sceneView setPaused:YES];
     [self addSubview:self.sceneView];
@@ -267,7 +264,7 @@
     self.w2vTrans = [NSAffineTransform transform];
     self.w2vScale = [NSAffineTransform transform];
     
-    self.w2vTransFactor = NSMakeSize(self.dockBar.frame.size.width, 0);
+    self.w2vTransFactor = NSMakeSize(0, 0);
     self.w2vScaleFactor = 1;
     
 }
@@ -549,7 +546,7 @@
 
 - (void)move:(NSSize)mstep invalidate:(BOOL)flag {
     
-    NSPoint pview = self.frame.origin;
+    NSPoint pview = self.bounds.origin;
     NSPoint pworld = [self.v2wTrans transformPoint:[self.v2wScale transformPoint:pview]];
     NSPoint pviewmoved = NSMakePoint(pview.x + mstep.width, pview.y + mstep.height);
     NSPoint pworldmoved = [self.v2wTrans transformPoint:[self.v2wScale transformPoint:pviewmoved]];
@@ -580,9 +577,9 @@
     
     if ( (!reachedUpperB && !reachedLowerB) || (reachedUpperB && (sstep < 1)) || (reachedLowerB && (sstep > 1)) ) {
 
-        // Siccome la funzione di traslazione della matrice tiene conto della scalatura passando due paia di coordinate in coordinate mondo, allora passo alla funzione lo spostamento del centro con la scalatura in coordinate vista.
-        NSPoint pview = NSMakePoint(self.frame.origin.x + self.frame.size.width / 2,
-                                    self.frame.origin.y + self.frame.size.height / 2);
+        // Siccome la funzione di traslazione della matrice tiene conto della scalatura passando due paia di coordinate in coordinate mondo, allora passo alla funzione lo spostamento dal centro con la scalatura in coordinate vista.
+        NSPoint pview = NSMakePoint(self.bounds.origin.x + self.bounds.size.width / 2,
+                                    self.bounds.origin.y + self.bounds.size.height / 2);
         NSPoint pworld = [self.v2wScale transformPoint:pview];
 
         [self.w2vScale scaleBy:sstep];
@@ -642,10 +639,10 @@
     #endif
     
     // Voglio utilizzare il centro della vista come punto di ancoraggio: calcolo la posizione del centro per entrambi i frame (corrente e futuro) e passo la differenza alla funzione di traslazione, penserà lei alla scalatura.
-    NSPoint pview_before = NSMakePoint(self.frame.origin.x + self.frame.size.width / 2,
-                                       self.frame.origin.y + self.frame.size.height / 2);
-    NSPoint pview_after = NSMakePoint(self.frame.origin.x + newSize.width / 2,
-                                      self.frame.origin.y + newSize.height / 2);
+    NSPoint pview_before = NSMakePoint(self.bounds.origin.x + self.bounds.size.width / 2,
+                                       self.bounds.origin.y + self.bounds.size.height / 2);
+    NSPoint pview_after = NSMakePoint(self.bounds.origin.x + newSize.width / 2,
+                                      self.bounds.origin.y + newSize.height / 2);
     
     NSSize diff = NSMakeSize(pview_after.x - pview_before.x, pview_after.y - pview_before.y);
     
@@ -657,14 +654,13 @@
 //        // TODO: scalare matrice
 //    }
     
-    [self.dockBar setFrameSize:NSMakeSize(self.dockBar.frame.size.width, self.frame.size.height)];
+    [dockBar setFrameSize:NSMakeSize(dockBar.frame.size.width, self.frame.size.height)];
     
     CGFloat heightBetweenDockAndTop = (self.frame.size.height - self.dock.frame.size.height);
     [self.dock setFrameOrigin:NSMakePoint(self.dock.frame.origin.x,
                                           self.frame.origin.y + (heightBetweenDockAndTop / 2))];
     
-    [self.sceneView setFrameSize:NSMakeSize(self.frame.size.width - self.dockBar.frame.size.width,
-                                             self.frame.size.height)];
+    [self.sceneView setFrameSize:self.bounds.size];
     
 }
 
@@ -882,8 +878,8 @@
         NSDictionary *attr = [NSDictionary dictionaryWithObject:style forKey:NSParagraphStyleAttributeName];
         NSString * lCont_str = [NSString stringWithFormat:@"%li", (long)[self.linesContainer count]];
         NSString * lHist_str = [NSString stringWithFormat:@"%li", (long)[self.linesHistory count]];
-        [lCont_str drawInRect:NSMakeRect(self.frame.size.width - 52, 0, 20, 15) withAttributes:attr];
-        [lHist_str drawInRect:NSMakeRect(self.frame.size.width - 22, 0, 40, 15) withAttributes:attr];
+        [lCont_str drawInRect:NSMakeRect(self.bounds.size.width - 52, 0, 20, 15) withAttributes:attr];
+        [lHist_str drawInRect:NSMakeRect(self.bounds.size.width - 22, 0, 40, 15) withAttributes:attr];
         #endif
         
     }
@@ -901,17 +897,18 @@
 
 //<##>
 - (void)startOrPauseScene {
-//    [self.sceneView.scene setAnchorPoint:<#(CGPoint)#>]
-//    [self.sceneView.scene setScale:self.w2vScaleFactor];
-//    [self.sceneView.scene setPosition:<#(CGPoint)#>]
-//    [self.w2vScale concat];
-//    [self.w2vTrans concat];
     if ([self.sceneView isHidden] && [self.sceneView isPaused]) {
         NSLog(@"1");
         // Dopo aver disegnato, passo le linee alla vista che gestirà la scena in movimento
-        NSSize dist = NSMakeSize(fabs(self.dockBar.frame.size.width - self.frame.size.width),
-                                 fabs(self.dockBar.frame.size.height - self.frame.size.height));
-        [self.sceneView buildLines:self.linesContainer distanceReceiverOriginAndSenderOrigin:dist scale:self.w2vScaleFactor];
+//        NSSize dist = NSMakeSize(fabs(dockBar.frame.size.width - self.frame.size.width),
+//                                 fabs(dockBar.frame.size.height - self.frame.size.height));
+        NSPoint ballCenter = self.ball.center;
+        
+        [self.sceneView buildSceneContent:self.linesContainer
+                             ballPosition:&ballCenter
+                               ballRadius:self.ball.radius
+                                     move:self.w2vTransFactor
+                                    scale:self.w2vScaleFactor];
         NSLog(@"2");
         [self.sceneView setHidden:NO];
     }
@@ -1010,7 +1007,7 @@
         // ...no! Aggiungo una nuova linea e il punto ad essa. Includo il caso in cui la funzione abbia restituito un errore per camuffarlo a runtime
         else {
             self.thisIsANewLine = YES;
-            self.prevmouseXY = pwindow;
+            self.prevmouseXY = pview;
             
             [self addEmptyLine];
             [self addPointToLatestLine:(&pworld)];
@@ -1033,7 +1030,7 @@
         if ([self.ball hitTest:pworld])
             self.ballPressed = YES;
         
-        self.prevmouseXY = pwindow;
+        self.prevmouseXY = pview;
     }
     
     else if (btn == self.btnZoom) {
@@ -1042,12 +1039,12 @@
             self.customCursor = ZOOM;
         }
         
-        self.prevmouseXY = pwindow;
+        self.prevmouseXY = pview;
     }
     
     #if defined(DEBUGLINES) || defined(DEBUGLINESHIST)
     if ([self.sceneView isHidden])
-        [self setNeedsDisplayInRect:NSMakeRect(self.frame.size.width - 55, 0, self.frame.size.width, 50)];
+        [self setNeedsDisplayInRect:NSMakeRect(self.bounds.size.width - 55, 0, self.bounds.size.width, 50)];
     #endif
     
 }
@@ -1081,6 +1078,7 @@
                         bX -= 10;
                     [self.ball setIsAlreadyPlaced:YES];
                     [self.ball setCenterPosition:NSMakePoint(bX, prevmouseXYworld.y + 30)];
+                    
                     NSPoint pballview = [self.w2vScale transformPoint:[self.w2vTrans transformPoint:self.ball.center]];
                     [self setNeedsDisplayInRect:NSMakeRect(pballview.x - self.ball.radius - 1, pballview.y - self.ball.radius - 1,
                                                            self.ball.radius * 2 + 2, self.ball.radius * 2 + 2)];
@@ -1096,10 +1094,10 @@
                 else
                     [self addPointToLatestLine:(&pworld)];
                 
-                self.dirtyRect = [self computeRect:self.prevmouseXY secondPoint:pwindow moveBorder:1];
+                self.dirtyRect = [self computeRect:self.prevmouseXY secondPoint:pview moveBorder:1];
                 [self setNeedsDisplayInRect:self.dirtyRect];
                 
-                self.prevmouseXY = pwindow;
+                self.prevmouseXY = pview;
             }
             
             else {
@@ -1168,9 +1166,9 @@
         else if (btn == self.btnPan) {
             
             if ([self ballPressed]) {
-                NSPoint pwindowview = [self.v2wTrans transformPoint:[self.v2wScale transformPoint:pwindow]];
-                NSPoint prevmouseXYview = [self.v2wTrans transformPoint:[self.v2wScale transformPoint:self.prevmouseXY]];
-                NSSize diff = NSMakeSize(pwindowview.x - prevmouseXYview.x, pwindowview.y - prevmouseXYview.y);
+                NSPoint pviewworld = [self.v2wTrans transformPoint:[self.v2wScale transformPoint:pview]];
+                NSPoint prevmouseXYworld = [self.v2wTrans transformPoint:[self.v2wScale transformPoint:self.prevmouseXY]];
+                NSSize diff = NSMakeSize(pviewworld.x - prevmouseXYworld.x, pviewworld.y - prevmouseXYworld.y);
                 
                 [self.ball setCenterPosition:NSMakePoint(self.ball.center.x + diff.width,
                                                          self.ball.center.y + diff.height)];
@@ -1184,11 +1182,11 @@
                     self.prevInLiveMovement = YES;
                 self.inLiveMovement = YES;
                 
-                NSSize diff = NSMakeSize(pwindow.x - self.prevmouseXY.x, pwindow.y - self.prevmouseXY.y);
+                NSSize diff = NSMakeSize(pview.x - self.prevmouseXY.x, pview.y - self.prevmouseXY.y);
                 [self move:diff invalidate:YES];
             }
             
-            self.prevmouseXY = pwindow;
+            self.prevmouseXY = pview;
                 
         }
         
@@ -1198,7 +1196,7 @@
                 self.prevInLiveMovement = YES;
             self.inLiveMovement = YES;
             
-            CGFloat diff = pwindow.y - self.prevmouseXY.y;
+            CGFloat diff = pview.y - self.prevmouseXY.y;
             CGFloat s = 1;
             
             if (abs(diff) > 1) {
@@ -1227,7 +1225,7 @@
                     self.customCursor = ZOOM;
                 }
                 
-                self.prevmouseXY = pwindow;
+                self.prevmouseXY = pview;
                 
             }
 
@@ -1235,7 +1233,7 @@
         
         #if defined(DEBUGLINES) || defined(DEBUGLINESHIST)
         if ([self.sceneView isHidden])
-            [self setNeedsDisplayInRect:NSMakeRect(self.frame.size.width - 55, 0, self.frame.size.width, 50)];
+            [self setNeedsDisplayInRect:NSMakeRect(self.bounds.size.width - 55, 0, self.bounds.size.width, 50)];
         #endif
         
     }
@@ -1325,7 +1323,7 @@
                     [self.linesHistory addObject:idxs];
                 }
                 
-                self.dirtyRect = [self computeRect:self.prevmouseXY secondPoint:pwindow moveBorder:1];
+                self.dirtyRect = [self computeRect:self.prevmouseXY secondPoint:pview moveBorder:1];
                 self.validLine = NO;
                 [self setNeedsDisplayInRect:self.dirtyRect];
             }
@@ -1356,7 +1354,7 @@
         
         #if defined(DEBUGLINES) || defined(DEBUGLINESHIST)
         if ([self.sceneView isHidden])
-            [self setNeedsDisplayInRect:NSMakeRect(self.frame.size.width - 55, 0, self.frame.size.width, 50)];
+            [self setNeedsDisplayInRect:NSMakeRect(self.bounds.size.width - 55, 0, self.bounds.size.width, 50)];
         #endif
         
     }

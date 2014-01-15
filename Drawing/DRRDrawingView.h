@@ -62,7 +62,9 @@ typedef enum customcursor {PANWAIT, PANACTIVE, PANBALL, ZOOM, ZOOMIN, ZOOMOUT, D
 
 
 
-@interface DRRDrawingView : NSView <dockToView>
+@interface DRRDrawingView : NSView <dockToView> {
+    IBOutlet DRRDockBar * dockBar;
+}
     
 /// Indica se il tasto sinistro del mouse è premuto nel momento del controllo.
 @property BOOL leftpressed;
@@ -94,7 +96,7 @@ typedef enum customcursor {PANWAIT, PANACTIVE, PANBALL, ZOOM, ZOOMIN, ZOOMOUT, D
 
 // Matrice che gestisce i bottoni dell'interfaccia. Grandezza controllo. Rotondità del bordo dei tasti.
 // Spessore linea del disegno interno dei controlli.
-@property DRRDockBar * dockBar;
+//@property IBOutlet DRRDockBar * dockBar;
 @property DRRDock * dock;
 @property NSSize cellsize;
 @property CGFloat roundness;

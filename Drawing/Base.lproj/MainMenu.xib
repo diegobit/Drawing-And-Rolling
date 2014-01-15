@@ -656,17 +656,28 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="ESX-2k-6oY" customClass="DRRDrawingView">
-                        <rect key="frame" x="0.0" y="0.0" width="800" height="450"/>
+                        <rect key="frame" x="43" y="0.0" width="757" height="450"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <connections>
+                            <outlet property="dockBar" destination="CaD-fk-kFr" id="eHf-2B-sTZ"/>
+                        </connections>
+                    </customView>
+                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="CaD-fk-kFr" customClass="DRRDockBar">
+                        <rect key="frame" x="0.0" y="0.0" width="43" height="450"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <constraints>
+                            <constraint firstAttribute="width" constant="43" id="o9C-U5-CJt"/>
+                        </constraints>
                     </customView>
                 </subviews>
                 <constraints>
                     <constraint firstAttribute="trailing" secondItem="ESX-2k-6oY" secondAttribute="trailing" priority="500" id="4tb-a7-f9p"/>
-                    <constraint firstItem="ESX-2k-6oY" firstAttribute="leading" secondItem="372" secondAttribute="leading" priority="500" id="9c0-vC-tLP"/>
+                    <constraint firstAttribute="bottom" secondItem="CaD-fk-kFr" secondAttribute="bottom" id="9KE-bb-bFK"/>
                     <constraint firstItem="ESX-2k-6oY" firstAttribute="top" secondItem="372" secondAttribute="top" priority="500" id="Njb-he-F4v"/>
-                    <constraint firstAttribute="centerY" secondItem="ESX-2k-6oY" secondAttribute="centerY" id="ZcB-h9-Vg0"/>
+                    <constraint firstItem="ESX-2k-6oY" firstAttribute="leading" secondItem="CaD-fk-kFr" secondAttribute="trailing" id="Tg4-rX-7ZW"/>
+                    <constraint firstItem="CaD-fk-kFr" firstAttribute="top" secondItem="372" secondAttribute="top" id="VnT-OU-toL"/>
                     <constraint firstAttribute="bottom" secondItem="ESX-2k-6oY" secondAttribute="bottom" priority="500" id="aTv-Cy-LZY"/>
-                    <constraint firstAttribute="centerX" secondItem="ESX-2k-6oY" secondAttribute="centerX" id="pHz-ff-zBf"/>
+                    <constraint firstItem="CaD-fk-kFr" firstAttribute="leading" secondItem="372" secondAttribute="leading" id="heT-ik-wqN"/>
                 </constraints>
             </view>
         </window>
