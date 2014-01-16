@@ -14,8 +14,7 @@
 //#define DEBUGDOCKDRAW
 //#define DEBUGDOCKMOUSECORR
 
-typedef enum drawingmodes {STROKE, FILL} drawingmode_t;
-
+typedef enum drawingmodes {STROKENORMAL, STROKEALT, STROKEBOTH, FILLNORMAL, FILLALT, FILLBOTH} drawingmode_t;
 
 
 @interface DRRPathObj : NSObject
@@ -33,7 +32,7 @@ typedef enum drawingmodes {STROKE, FILL} drawingmode_t;
 @property NSColor * color;
 @property drawingmode_t drawingMode;
 
-+ (DRRDrawingProperties *)initWithColor:(NSColor *)color drawingMode:(drawingmode_t)mode;
++ (DRRDrawingProperties *)initWithColor:(NSColor *)color drawingMode:(drawingmode_t)mode;// altMode:(BOOL)flag;
 
 - (id)init;
 
@@ -56,12 +55,12 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 @interface DRRDockBar : NSView
 
-@property (weak) id dock;
+//@property (weak) id dock;
 
 //- (void)setFrameSize:(NSSize)newSize;
 - (BOOL)preservesContentDuringLiveResize;
 
-- (void)setFrameSize:(NSSize)newSize;
+//- (void)setFrameSize:(NSSize)newSize;
 
 - (void)drawRect:(NSRect)dirtyRect;
 
@@ -79,9 +78,11 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 @interface DRRDock : NSMatrix
 
 //@property BOOL dockPrevResizeWasInLive;
-@property (weak) id prevSelectedCell;
-@property NSInteger prevSelectedCellRow;
-@property NSInteger prevSelectedCellCol;
+@property (weak) id prevSelectCell;
+@property (weak) id prevSelectCell_RMouse;
+@property (weak) id prevSelectCell_playPause;
+//@property NSInteger prevSelectedCellRow;
+//@property NSInteger prevSelectedCellCol;
 @property (weak) id <dockToView> dockdelegate;
 
 - (id)init;
@@ -113,7 +114,7 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 @property NSMutableArray * btnpaths;
 @property NSMutableArray * btnmodes;
-@property BOOL disabled;
+@property BOOL altMode;
 
 + (Class)cellClass;
 
@@ -129,7 +130,7 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 @property NSMutableArray * btnpaths;
 @property NSMutableArray * btnmodes;
-@property BOOL disabled;
+@property BOOL altMode;
 
 + (Class)cellClass;
 

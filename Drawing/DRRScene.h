@@ -9,29 +9,7 @@
 #import <SpriteKit/SpriteKit.h>
 #import "DRRDock.h"
 
-//#define DEBUGSCENE
-
-
-@interface DRRSceneView : SKView
-
-//@property NSMutableArray * lines;
-@property NSSize pan;
-@property CGFloat scale;
-
-- (id)initWithFrame:(NSRect)frameRect;
-
-- (void)buildSceneContent:(NSMutableArray *)lines ballPosition:(NSPoint *)ballpos ballRadius:(CGFloat)rad move:(NSSize)mfactor scale:(CGFloat)sfactor;
-
-- (void)setFrameSize:(NSSize)newSize;
-//- (BOOL)isOpaque;
-
-- (void)mouseDown:(NSEvent *)theEvent;
-- (void)mouseDragged:(NSEvent *)theEvent;
-- (void)mouseUp:(NSEvent *)theEvent;
-//- (void)rightMouseDown:(NSEvent *)theEvent;
-//- (void)rightMouseUp:(NSEvent *)theEvent;
-
-@end
+#define DEBUGSCENE
 
 
 
@@ -42,6 +20,38 @@
 //- (void)update:(NSTimeInterval)currentTime;
 - (id)initWithSize:(CGSize)size linesPath:(NSMutableArray *)path ballPosition:(CGPoint)ballPos ballRadius:(CGFloat)rad;
 //- (id)initWithSize:(CGSize)size linesPathFromNSBezierPath:(NSBezierPath *)path;
+
+@end
+
+
+
+@interface DRRSceneView : SKView
+
+//@property NSMutableArray * lines;
+@property NSSize pan;
+@property NSSize panRelative;
+@property CGFloat scale;
+@property CGFloat scaleRelative;
+
+- (id)initWithFrame:(NSRect)frameRect;
+- (void)setItemPropertiesToDefault;
+
+- (void)buildSceneContent:(NSMutableArray *)lines ballPosition:(NSPoint *)ballpos ballRadius:(CGFloat)rad;// move:(NSSize)mfactor scale:(CGFloat)sfactor;
+
+- (void)setFrameSize:(NSSize)newSize isActive:(BOOL)flag;
+//- (void)setSceneFrameSizeAndMoveIt:(DRRScene *)scene newSize:(CGSize)newSize;
+- (void)scaleUpdate:(CGFloat)step;
+- (void)scaleScene:(DRRScene *)scene useRelative:(BOOL)flag;
+//- (void)scaleScene:(DRRScene *)scene newSize:(CGSize)newSize useRelative:(BOOL)flag;
+- (void)moveUpdate:(NSSize)move;
+- (void)moveScene:(DRRScene *)scene useRelative:(BOOL)flag;
+//- (BOOL)isOpaque;
+
+- (void)mouseDown:(NSEvent *)theEvent;
+- (void)mouseDragged:(NSEvent *)theEvent;
+- (void)mouseUp:(NSEvent *)theEvent;
+//- (void)rightMouseDown:(NSEvent *)theEvent;
+//- (void)rightMouseUp:(NSEvent *)theEvent;
 
 @end
 

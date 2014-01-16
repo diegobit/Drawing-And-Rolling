@@ -158,7 +158,9 @@
     self.btnDrawFree = [[DRRButton alloc] initWithPaths:drawFreePaths typeOfDrawing:drawFreeModes];
     [self.dock putCell:self.btnDrawFree atRow:2 column:0];
     [self.dock setState:NSOnState atRow:2 column:0];
-    self.dock.prevSelectedCell = [self.dock cellAtRow:2 column:0];
+    self.dock.prevSelectCell = [self.dock selectedCell];
+    self.dock.prevSelectCell_RMouse = [self.dock selectedCell];
+    self.dock.prevSelectCell_playPause = [self.dock selectedCell];
     
     NSMutableArray * drawLinePaths = [[NSMutableArray alloc] init];
     NSMutableArray * drawLineModes = [[NSMutableArray alloc] init];
@@ -201,6 +203,13 @@
     [self.btnPlay setAction:play_pause];
     [self.btnPlay setTarget:self];
     [self.dock putCell:self.btnPlay atRow:7 column:0];
+    
+    NSMutableArray * pausePaths = [[NSMutableArray alloc] init];
+    NSMutableArray * pauseModes = [[NSMutableArray alloc] init];
+    makePauseButton(NSMakeRect(self.dock.frame.origin.x, self.dock.frame.origin.y + 7 + (7 * self.dock.cellSize.height), self.dock.cellSize.width, self.dock.cellSize.height), self.roundness, pausePaths, pauseModes);
+    self.btnPause = [[DRRActionButton alloc] initWithPaths:pausePaths typeOfDrawing:pauseModes];
+    [self.btnPause setAction:play_pause];
+    [self.btnPause setTarget:self];
     
     NSMutableArray * stopPaths = [[NSMutableArray alloc] init];
     NSMutableArray * stopModes = [[NSMutableArray alloc] init];
@@ -264,7 +273,7 @@
     self.w2vTrans = [NSAffineTransform transform];
     self.w2vScale = [NSAffineTransform transform];
     
-    self.w2vTransFactor = NSMakeSize(0, 0);
+//    self.w2vTransFactor = NSMakeSize(0, 0);
 //    self.w2vScaleFactor = 1;
     
 }
@@ -316,11 +325,12 @@
     
     if ([panel runModal] == NSFileHandlingPanelOKButton) {
         NSStringEncoding * enc = NULL;
-        NSError *__autoreleasing * err = NULL;
-        NSString * filecontent = [NSString stringWithContentsOfURL:[panel URLs][0] usedEncoding:enc error:err];
+//        NSError *__autoreleasing * err = NULL;
+        NSString * filecontent = [NSString stringWithContentsOfURL:[panel URLs][0] usedEncoding:enc error:NULL];
         
         if (filecontent != nil) {
             
+            [self.sceneView setItemPropertiesToDefault];
             [self setItemPropertiesToDefault];
             
 //            DRRScene * scene = [DRRScene sceneWithSize:CGSizeMake(self.sceneView.frame.size.width, self.sceneView.frame.size.height)];
@@ -556,8 +566,11 @@
     [self.w2vTrans translateXBy:diff.width yBy:diff.height];
     [self.v2wTrans translateXBy:(-1 * diff.width) yBy:(-1 * diff.height)];
     // Aggiusto anche questi valori per scalare la scena
-    self.sceneView.pan = NSMakeSize(self.w2vTransFactor.width + diff.width,
-                                    self.w2vTransFactor.height + diff.height); // TODO: sarebbe meglio estrapolare dalle matrici invece di tenerre un altro valore
+    [self.sceneView moveUpdate:diff];
+//    self.sceneView.pan = NSMakeSize(self.sceneView.pan.width + diff.width,
+//                                    self.sceneView.pan.height + diff.height); // TODO: sarebbe meglio estrapolare dalle matrici invece di tenerre un altro valore
+    if (!self.sceneView.isHidden)
+        [self.sceneView moveScene:(DRRScene *)self.sceneView.scene useRelative:YES];
     
     if (flag)
         [self setNeedsDisplay:YES];
@@ -584,7 +597,16 @@
 
         [self.w2vScale scaleBy:sstep];
         [self.v2wScale scaleBy:(1 / sstep)];
-        self.sceneView.scale *= sstep; // TODO: sarebbe meglio estrapolare dalle matrici invece di tenere un altro valore
+//        self.sceneView.scale *= sstep; // TODO: sarebbe meglio estrapolare dalle matrici invece di tenere un altro valore
+        [self.sceneView scaleUpdate:sstep];
+        if (!self.sceneView.isHidden)
+            [self.sceneView scaleScene:(DRRScene *)self.sceneView.scene
+                           useRelative:YES];
+        
+//            [self.sceneView scaleScene:(DRRScene *)self.sceneView.scene
+////                               newSize:CGSizeMake(self.sceneView.bounds.size.width / self.sceneView.scale,
+////                                                  self.sceneView.bounds.size.height / self.sceneView.scale)
+//                           useRelative:NO];
 
         NSPoint pview_after = [self.w2vScale transformPoint:pworld];
         NSSize diff = NSMakeSize(pview.x - pview_after.x, pview.y - pview_after.y);
@@ -660,7 +682,9 @@
     [self.dock setFrameOrigin:NSMakePoint(self.dock.frame.origin.x,
                                           self.frame.origin.y + (heightBetweenDockAndTop / 2))];
     
-    [self.sceneView setFrameSize:self.bounds.size];
+//    [self.sceneView moveUpdate:diff];
+    [self.sceneView setFrameSize:self.bounds.size isActive:!self.sceneView.isHidden];
+    
     
 }
 
@@ -912,31 +936,39 @@
         
         [self.sceneView buildSceneContent:self.linesContainer
                              ballPosition:ballCenter
-                               ballRadius:self.ball.radius
-                                     move:self.w2vTransFactor
-                                    scale:self.w2vScaleFactor];
+                               ballRadius:self.ball.radius];
+                                     /*move:self.w2vTransFactor
+                                    scale:self.w2vScaleFactor*/
         
         // Disabilito esteticamente i bottoni che non voglio utilizzare durante la scena //TODO: disabilitare davvero
         NSArray * cells = [self.dock cells];
         [cells enumerateObjectsUsingBlock:^(NSCell * cell, NSUInteger idx, BOOL *stop) {
-            if (cell == self.btnDrawFree || cell == self.btnDrawLine || cell == self.btnBack)
-                ((DRRButton *) cell).disabled = YES;
+            if (cell == self.btnDrawFree || cell == self.btnDrawLine || cell == self.btnBack || cell == self.btnPlay)
+                ((DRRButton *) cell).altMode = YES;
         }];
         
+//        [self.dock putCell:self.btnPause atRow:7 column:0];
+    //        [self.dock highlightCell:YES atRow:7 column:0];
+        
+        self.dock.prevSelectCell_playPause = self.dock.prevSelectCell;
         NSInteger row = 0; NSInteger col = 0;
-        [self.dock getRow:&row column:&col ofCell:self.dock.prevSelectedCell];
-        self.dock.prevSelectedCellRow = row;
-        self.dock.prevSelectedCellCol = col;
+        [self.dock getRow:&row column:&col ofCell:self.dock.prevSelectCell];
         [self.dock setState:NSOnState atRow:0 column:0];
         
         NSLog(@"start 2");
         [self.sceneView setHidden:NO];
         [self.sceneView setPaused:NO];
     }
-    else if (![self.sceneView isPaused])
+    else if (![self.sceneView isPaused]) {
         [self.sceneView setPaused:YES];
-    else
+        [[self.dock cellAtRow:7 column:0] setAltMode:NO];
+//        [self.dock putCell:self.btnPlay atRow:7 column:0];
+    }
+    else {
         [self.sceneView setPaused:NO];
+        [[self.dock cellAtRow:7 column:0] setAltMode:YES];
+//        [self.dock putCell:self.btnPause atRow:7 column:0];
+    }
 
     NSLog(@"start 3");
 //    [self setNeedsDisplay:YES];
@@ -953,10 +985,20 @@
         // Riabilito esteticamente i bottoni che non volevo utilizzare durante la scena //TODO: disabilitare davvero
         NSArray * cells = [self.dock cells];
         [cells enumerateObjectsUsingBlock:^(NSCell * cell, NSUInteger idx, BOOL *stop) {
-            if (cell == self.btnDrawFree || cell == self.btnDrawLine || cell == self.btnBack)
-                ((DRRButton *) cell).disabled = NO;
+            if (cell == self.btnDrawFree || cell == self.btnDrawLine || cell == self.btnBack || cell == self.btnPlay)
+                ((DRRButton *) cell).altMode = NO;
+//            if (cell == self.btnPause) {
+//                NSInteger row = 0; NSInteger col = 0;
+//                [self.dock getRow:&row column:&col ofCell:cell];
+//                [self.dock putCell:self.btnPlay atRow:row column:col];
+//            }
         }];
-        [self.dock setState:NSOnState atRow:self.dock.prevSelectedCellRow column:0];
+        
+//        [self.dock putCell:self.btnPlay atRow:7 column:0];
+//        [self.dock setState:NSOffState atRow:7 column:0];
+        NSInteger row = 0; NSInteger col = 0;
+        [self.dock getRow:&row column:&col ofCell:self.dock.prevSelectCell_playPause];
+        [self.dock setState:NSOnState atRow:row column:col];
         
         [self setNeedsDisplay:YES];
     }
@@ -1423,7 +1465,19 @@
     #endif
     
     if (self.rightpressed) {
-        [self removeLatestLine];
+//        [self removeLatestLine];
+//        NSInteger row = 0; NSInteger col = 0;
+//        [self.dock getRow:row column:col ofCell:self.btnPan];
+        if (self.dock.selectedCell != self.btnPan) {
+            self.dock.prevSelectCell_RMouse = self.dock.selectedCell;
+            [self.dock selectCell:self.btnPan];
+        }
+        else {
+            DRRButton * temp = self.dock.selectedCell;
+            [self.dock selectCell:self.dock.prevSelectCell_RMouse];
+            self.dock.prevSelectCell_RMouse = temp;
+        }
+        
         self.rightpressed = NO;
     }
 }
