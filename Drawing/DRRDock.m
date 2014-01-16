@@ -657,6 +657,8 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 //    
 //}
 
+//- (void) awakeF
+
 - (BOOL)preservesContentDuringLiveResize {
     return YES;
 }
@@ -673,6 +675,18 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 //- (void)setNeedsDisplayInRect:(NSRect)invalidRect {
 //    
 //}
+
+
+
+//- (void)setFrameSize:(NSSize)newSize {
+//    [super setFrameSize:newSize];
+//    
+//    CGFloat heightBetweenDockAndTop = (self.frame.size.height - self.dock.frame.size.height);
+//    [self.dock setFrameOrigin:NSMakePoint(self.dock.frame.origin.x,
+//                                          self.frame.origin.y + (heightBetweenDockAndTop / 2))];
+//}
+
+
 
 - (void)drawRect:(NSRect)dirtyRect {
     
@@ -748,6 +762,8 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 - (void)setDefaultItemProperties {
 //    dockPrevResizeWasInLive = NO;
     self.prevSelectedCell = [self selectedCell];
+    self.prevSelectedCellRow = 0;
+    self.prevSelectedCellCol = 0;
     [self setWantsLayer:YES];
 }
 
@@ -853,13 +869,8 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     if (self) {
         self.btnpaths = paths;
         self.btnmodes = modes;
+        self.disabled = NO;
     }
-    return self;
-}
-
-- (id)initWithCoder:(NSCoder *)aDecoder {
-    self = [super initWithCoder:aDecoder];
-//    if (self) { }
     return self;
 }
 
@@ -900,15 +911,15 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
         
         else if (idx > 0) {
             // Voglio riempire di bianco solo il grigio llGray, non eventuali altri colori del bottone (esempio: il riempimento nero della lente dello zoom)
-            CGFloat red, green, blue, alpha, redLLG, greenLLG, blueLLG, alphaLLG; //, redDDB, greenDDB, blueDDB, alphaDDB;
+            CGFloat red, green, blue, alpha, redLLG, greenLLG, blueLLG, alphaLLG, redDDB, greenDDB, blueDDB, alphaDDB;
             [color getRed:&red green:&green blue:&blue alpha:&alpha];
             [[NSColor llGray] getRed:&redLLG green:&greenLLG blue:&blueLLG alpha:&alphaLLG]; // TODO: far diventare trasparente l'interno dei bottoni così si vede lo sfondo della dockBar
-//            [[NSColor ddBlue] getRed:&redDDB green:&greenDDB blue:&blueDDB alpha:&alphaDDB];
+            [[NSColor ddBlue] getRed:&redDDB green:&greenDDB blue:&blueDDB alpha:&alphaDDB];
             
-//            if (red == redDDB && green == greenDDB && blue == blueDDB && alpha == alphaDDB) {
+            if (self.disabled && red == redDDB && green == greenDDB && blue == blueDDB && alpha == alphaDDB) {
 //                if (![self isHighlighted] && ![self state] == NSOnState)
-//                    color = [NSColor lightGrayColor];
-//            }
+                color = [NSColor lightGrayColor];
+            }
             
             if (red == redLLG && green == greenLLG && blue == blueLLG && alpha == alphaLLG) {
                 if ([self isHighlighted])
@@ -946,6 +957,7 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     if (self) {
         self.btnpaths = paths;
         self.btnmodes = modes;
+        self.disabled = NO;
     }
     return self;
 }
@@ -984,6 +996,25 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
                 if ([self state] == NSOnState)
                     color = [NSColor greenColor];
             }
+        }
+        
+        else if (idx > 0) {
+            // Voglio riempire di bianco solo il grigio llGray, non eventuali altri colori del bottone (esempio: il riempimento nero della lente dello zoom)
+            CGFloat red, green, blue, alpha, redLLG, greenLLG, blueLLG, alphaLLG, redDDB, greenDDB, blueDDB, alphaDDB;
+            [color getRed:&red green:&green blue:&blue alpha:&alpha];
+            [[NSColor llGray] getRed:&redLLG green:&greenLLG blue:&blueLLG alpha:&alphaLLG]; // TODO: far diventare trasparente l'interno dei bottoni così si vede lo sfondo della dockBar
+            [[NSColor ddBlue] getRed:&redDDB green:&greenDDB blue:&blueDDB alpha:&alphaDDB];
+            
+            if (self.disabled && red == redDDB && green == greenDDB && blue == blueDDB && alpha == alphaDDB) {
+                //                if (![self isHighlighted] && ![self state] == NSOnState)
+                color = [NSColor lightGrayColor];
+            }
+            
+            if (red == redLLG && green == greenLLG && blue == blueLLG && alpha == alphaLLG) {
+                if ([self isHighlighted] || [self state] == NSOnState)
+                    color = [NSColor whiteColor];
+            }
+            
         }
         
         else if (idx > 1) {

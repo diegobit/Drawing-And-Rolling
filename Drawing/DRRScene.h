@@ -9,12 +9,14 @@
 #import <SpriteKit/SpriteKit.h>
 #import "DRRDock.h"
 
-#define DEBUGSCENE
+//#define DEBUGSCENE
 
 
 @interface DRRSceneView : SKView
 
 //@property NSMutableArray * lines;
+@property NSSize pan;
+@property CGFloat scale;
 
 - (id)initWithFrame:(NSRect)frameRect;
 

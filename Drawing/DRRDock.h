@@ -55,8 +55,13 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 
 @interface DRRDockBar : NSView
+
+@property (weak) id dock;
+
 //- (void)setFrameSize:(NSSize)newSize;
 - (BOOL)preservesContentDuringLiveResize;
+
+- (void)setFrameSize:(NSSize)newSize;
 
 - (void)drawRect:(NSRect)dirtyRect;
 
@@ -75,6 +80,8 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 //@property BOOL dockPrevResizeWasInLive;
 @property (weak) id prevSelectedCell;
+@property NSInteger prevSelectedCellRow;
+@property NSInteger prevSelectedCellCol;
 @property (weak) id <dockToView> dockdelegate;
 
 - (id)init;
@@ -106,6 +113,7 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 @property NSMutableArray * btnpaths;
 @property NSMutableArray * btnmodes;
+@property BOOL disabled;
 
 + (Class)cellClass;
 
@@ -121,6 +129,7 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 @property NSMutableArray * btnpaths;
 @property NSMutableArray * btnmodes;
+@property BOOL disabled;
 
 + (Class)cellClass;
 

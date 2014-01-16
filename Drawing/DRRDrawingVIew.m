@@ -245,7 +245,7 @@
     self.dirtyRect = NSMakeRect(0, 0, 1, 1);
     self.customCursor = DRAW;
     self.maxZoomFactor = 4;
-    self.minZoomFactor = 0.2;
+    self.minZoomFactor = 0.33;
     
     // inizializzo l'array di linee disegnate, le proprietà e altri paths
     self.linesContainer = [[NSMutableArray alloc] init];
@@ -265,7 +265,7 @@
     self.w2vScale = [NSAffineTransform transform];
     
     self.w2vTransFactor = NSMakeSize(0, 0);
-    self.w2vScaleFactor = 1;
+//    self.w2vScaleFactor = 1;
     
 }
 
@@ -556,8 +556,8 @@
     [self.w2vTrans translateXBy:diff.width yBy:diff.height];
     [self.v2wTrans translateXBy:(-1 * diff.width) yBy:(-1 * diff.height)];
     // Aggiusto anche questi valori per scalare la scena
-    self.w2vTransFactor = NSMakeSize(self.w2vTransFactor.width + diff.width,
-                                     self.w2vTransFactor.height + diff.height); // TODO: sarebbe meglio estrapolare dalle matrici invece di tenerre un altro valore
+    self.sceneView.pan = NSMakeSize(self.w2vTransFactor.width + diff.width,
+                                    self.w2vTransFactor.height + diff.height); // TODO: sarebbe meglio estrapolare dalle matrici invece di tenerre un altro valore
     
     if (flag)
         [self setNeedsDisplay:YES];
@@ -584,7 +584,7 @@
 
         [self.w2vScale scaleBy:sstep];
         [self.v2wScale scaleBy:(1 / sstep)];
-        self.w2vScaleFactor *= sstep; // TODO: sarebbe meglio estrapolare dalle matrici invece di tenerre un altro valore
+        self.sceneView.scale *= sstep; // TODO: sarebbe meglio estrapolare dalle matrici invece di tenere un altro valore
 
         NSPoint pview_after = [self.w2vScale transformPoint:pworld];
         NSSize diff = NSMakeSize(pview.x - pview_after.x, pview.y - pview_after.y);
@@ -895,38 +895,72 @@
 }
 
 
-//<##>
 - (void)startOrPauseScene {
     if ([self.sceneView isHidden] && [self.sceneView isPaused]) {
-        NSLog(@"1");
+        
+        NSLog(@"start 1");
+        
         // Dopo aver disegnato, passo le linee alla vista che gestirà la scena in movimento
 //        NSSize dist = NSMakeSize(fabs(dockBar.frame.size.width - self.frame.size.width),
 //                                 fabs(dockBar.frame.size.height - self.frame.size.height));
-        NSPoint ballCenter = self.ball.center;
+        NSPoint * ballCenter = NULL;
+        
+        if (self.ball.isAlreadyPlaced) {
+            NSPoint bc = self.ball.center;
+            ballCenter = &bc;
+        }
         
         [self.sceneView buildSceneContent:self.linesContainer
-                             ballPosition:&ballCenter
+                             ballPosition:ballCenter
                                ballRadius:self.ball.radius
                                      move:self.w2vTransFactor
                                     scale:self.w2vScaleFactor];
-        NSLog(@"2");
+        
+        // Disabilito esteticamente i bottoni che non voglio utilizzare durante la scena //TODO: disabilitare davvero
+        NSArray * cells = [self.dock cells];
+        [cells enumerateObjectsUsingBlock:^(NSCell * cell, NSUInteger idx, BOOL *stop) {
+            if (cell == self.btnDrawFree || cell == self.btnDrawLine || cell == self.btnBack)
+                ((DRRButton *) cell).disabled = YES;
+        }];
+        
+        NSInteger row = 0; NSInteger col = 0;
+        [self.dock getRow:&row column:&col ofCell:self.dock.prevSelectedCell];
+        self.dock.prevSelectedCellRow = row;
+        self.dock.prevSelectedCellCol = col;
+        [self.dock setState:NSOnState atRow:0 column:0];
+        
+        NSLog(@"start 2");
         [self.sceneView setHidden:NO];
-    }
-    
-    if ([self.sceneView isPaused])
         [self.sceneView setPaused:NO];
-    else
+    }
+    else if (![self.sceneView isPaused])
         [self.sceneView setPaused:YES];
-    NSLog(@"3");
+    else
+        [self.sceneView setPaused:NO];
+
+    NSLog(@"start 3");
 //    [self setNeedsDisplay:YES];
 }
 
 - (void)stopScene {
 
-    [self.sceneView setPaused:YES];
-    [self.sceneView setHidden:YES];
-    
-    [self setNeedsDisplay:YES];
+    if (!self.sceneView.isHidden) {
+        [self.sceneView setPaused:YES];
+        [self.sceneView setHidden:YES];
+        //    [self.sceneView.scene removeAllActions];
+        //    [self.sceneView.scene removeAllChildren];
+        
+        // Riabilito esteticamente i bottoni che non volevo utilizzare durante la scena //TODO: disabilitare davvero
+        NSArray * cells = [self.dock cells];
+        [cells enumerateObjectsUsingBlock:^(NSCell * cell, NSUInteger idx, BOOL *stop) {
+            if (cell == self.btnDrawFree || cell == self.btnDrawLine || cell == self.btnBack)
+                ((DRRButton *) cell).disabled = NO;
+        }];
+        [self.dock setState:NSOnState atRow:self.dock.prevSelectedCellRow column:0];
+        
+        [self setNeedsDisplay:YES];
+    }
+
 }
 
 
@@ -1069,7 +1103,7 @@
             NSPoint prevmouseXYworld = [self.v2wTrans transformPoint:[self.v2wScale transformPoint:self.prevmouseXY]];
             CGFloat d = [self distanceBetweenPoint:prevmouseXYworld andPoint:pworld];
             
-            if (d > 7) {
+            if (d > 15) {
                 if (!self.ball.isAlreadyPlaced) {
                     CGFloat bX = prevmouseXYworld.x;
                     if (pworld.x - prevmouseXYworld.x > 0)
@@ -1112,7 +1146,7 @@
             
             NSPoint prevmouseXYworld = [self.v2wTrans transformPoint:[self.v2wScale transformPoint:self.prevmouseXY]];
             CGFloat d = [self distanceBetweenPoint:prevmouseXYworld andPoint:pworld];
-            if (d > 7) {
+            if (d > 15) {
                 self.prevTempPoint = self.tempPoint;
                 self.tempPoint = pworld;
                 self.validLine = YES;
@@ -1150,8 +1184,17 @@
                     }
                 }  // if se non è posizionata la palla in modo definitivo: imposto una posizione temporanea
             } // if distanza valida per disegnare una linea temporanea
-            else
+            else {
+                if (self.validLine && self.ball.isAlreadyTempPlaced) {
+                    NSPoint pballview = [self.w2vScale transformPoint:[self.w2vTrans transformPoint:self.ball.center]];
+                    [self setNeedsDisplayInRect:NSMakeRect(self.prevmouseXY.x - self.ball.radius * 2,
+                                                           pballview.y - self.ball.radius,
+                                                           self.ball.radius * 4,
+                                                           self.ball.radius * 2)];
+                }
+                
                 self.validLine = NO;
+            }
 
             NSPoint prevTempPointview = [self.w2vScale transformPoint:[self.w2vTrans transformPoint:self.prevTempPoint]];
             NSPoint tempPointview = [self.w2vScale transformPoint:[self.w2vTrans transformPoint:self.tempPoint]];
