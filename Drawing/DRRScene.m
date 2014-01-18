@@ -15,21 +15,20 @@
 - (id)initWithSize:(CGSize)size {
     if (self = [super initWithSize:size]) {
         self.backgroundColor = [SKColor colorWithRed:1 green:1 blue:1 alpha:1];
-        NSLog(@"start 1 build x initwhitsize semplice");
     }
     return self;
 }
 
 - (id)initWithSize:(CGSize)size linesPath:(NSMutableArray *)lpaths ballPosition:(CGPoint)ballPos ballRadius:(CGFloat)rad {
     if (self = [super initWithSize:size]) {
-        NSLog(@"start 1 build x initwhitsize vero 1");
+
         self.backgroundColor = [SKColor colorWithRed:1 green:1 blue:1 alpha:1];
         
         if (lpaths != NULL) {
             
             NSMutableArray * shapeNodes = [[NSMutableArray alloc] init];
             [lpaths enumerateObjectsUsingBlock:^(NSValue * pathVal, NSUInteger idx, BOOL *stop) {
-                NSLog(@"start 1 build x initwhitsize vero 2 loop");
+                
                 [shapeNodes addObject:[[SKShapeNode alloc] init]];
                 ((SKShapeNode *) shapeNodes[idx]).path = [pathVal pointerValue];
                 ((SKShapeNode *) shapeNodes[idx]).lineWidth = 0.1;
@@ -37,9 +36,8 @@
                 ((SKShapeNode *) shapeNodes[idx]).fillColor = [SKColor clearColor]; // FIXME: sarebbe meglio non riempisse proprio
                 [((SKShapeNode *) shapeNodes[idx]) setPhysicsBody:[SKPhysicsBody bodyWithEdgeChainFromPath:((SKShapeNode *) shapeNodes[idx]).path]];
                 
-                NSLog(@"start 1 build x initwhitsize vero 3 prima figlio");
+                
                 [self addChild:((SKShapeNode *) shapeNodes[idx])];
-                NSLog(@"start 1 build x initwhitsize vero 4 dopo figlio");
             }];
             
         }
@@ -56,18 +54,20 @@
         CGPathMoveToPoint(bpath, NULL, 0, -rad/2);
         CGPathAddLineToPoint(bpath, NULL, 0, rad/2);
         
-        NSLog(@"start 1 build x initwhitsize vero 5");
+        
         ball.path = bpath;
-        ball.lineWidth = 1.0;
+        CGPathRelease(bpath);
+        ball.lineWidth = 0.5;
+        ball.fillColor = [SKColor llGray];
         ball.strokeColor = [SKColor blackColor];
-//        ball.fillColor = [SKColor llGray];
-        NSLog(@"start 1 build x initwhitsize vero 6");
+        
         [self addChild:ball];
         [ball setPosition:ballPos];
         [ball setPhysicsBody:[SKPhysicsBody bodyWithCircleOfRadius:rad]];
+        [ball.physicsBody setFriction:0.4];
         
     }
-    NSLog(@"start 1 build x initwhitsize vero 7");
+
     return self;
 }
 
@@ -92,7 +92,7 @@
 
 
 - (void)mouseDown:(NSEvent *)theEvent {
-    NSLog(@"scene");
+    
     [self.view mouseDown:theEvent];
 }
 - (void)mouseDragged:(NSEvent *)theEvent {
@@ -116,13 +116,17 @@
 @implementation DRRSceneView
 
 - (id)initWithFrame:(NSRect)frameRect {
-    NSLog(@"4");
+    
     self = [super initWithFrame:frameRect];
     if (self) {
         
         [self setItemPropertiesToDefault];
         
         [self setWantsLayer:YES];
+        
+        DRRScene * tempScene = [[DRRScene alloc] initWithSize:self.bounds.size];
+        [self presentScene:tempScene];
+//        [self setPaused:YES];
 
 //        DRRScene * nextScene = [DRRScene sceneWithSize:CGSizeMake(frameRect.size.width, frameRect.size.height)];
 //        nextScene.scaleMode = SKSceneScaleModeFill;
@@ -146,24 +150,24 @@
 
 - (void)setItemPropertiesToDefault {
     self.scale = 1;
-    self.scaleRelative = 1;
-    self.pan = NSMakeSize(0, 0);
-    self.panRelative = NSMakeSize(0, 0);
-    self.paused = YES;
+    self.pan = NSMakePoint(0, 0);
+    [self.scene setPaused:YES];
     [self setHidden:YES];
 }
 
 
 
-- (void)buildSceneContent:(NSMutableArray *)lines ballPosition:(NSPoint *)ballpos ballRadius:(CGFloat)rad { // move:(NSSize)mfactor scale:(CGFloat)sfactor {
-    NSLog(@"start 1 build 1");
-    DRRScene * nextScene = NULL;
+- (void)buildSceneContent:(NSMutableArray *)lines ballPosition:(NSPoint)ballpos ballRadius:(CGFloat)rad { // move:(NSSize)mfactor scale:(CGFloat)sfactor {
+
+//    DRRScene * tempScene;
+    DRRScene * nextScene;
+//    [self presentScene:tempScene];
     
     if ([lines count] > 0) {
 
         // Creo i path delle linee per la scena
         NSMutableArray * linesPaths = [[NSMutableArray alloc] init];
-        NSLog(@"start 1 build 2 (si linee) ");
+        
         [lines enumerateObjectsUsingBlock:^(NSMutableArray * line, NSUInteger idx, BOOL *stop) {
             CGMutablePathRef linesMutPath = CGPathCreateMutable();
             
@@ -180,16 +184,13 @@
             CGPathRelease(linesMutPath);
         }];
         
-        NSLog(@"start 1 build 3 (si linee 2)");
-        
         // Creo la scena con le linee e il bordo per la simulazione fisica. Gli passo la posizione della palla, così se la crea. SCALO e MUOVO già la scena
-        nextScene.scaleMode = SKSceneScaleModeAspectFill;
         nextScene = [[DRRScene alloc] initWithSize:CGSizeMake(self.bounds.size.width,
                                                               self.bounds.size.height)
                                          linesPath:linesPaths
-                                      ballPosition:CGPointMake(ballpos->x, ballpos->y)
+                                      ballPosition:CGPointMake(ballpos.x, ballpos.y)
                                         ballRadius:rad];
-        
+        nextScene.scaleMode = SKSceneScaleModeAspectFill;
 //        [self setSceneFrameSizeAndMoveIt:nextScene newSize:CGSizeMake(self.bounds.size.width / self.scale,
 //                                                                      self.bounds.size.height / self.scale)];
 //        CGVector diff = CGVectorMake(self.pan.width, self.pan.height);
@@ -200,20 +201,20 @@
     
     // Non ci sono linee nell'array, creo una scena vuota con la palla (se c'è)
     else {
-        NSLog(@"start 1 build 4 (no linee)");
-        nextScene.scaleMode = SKSceneScaleModeAspectFill;
-        if (ballpos != NULL) {
+
+        if (ballpos.x != 0 && ballpos.y != 0) {
             nextScene = [[DRRScene alloc] initWithSize:CGSizeMake(self.bounds.size.width,
                                                                   self.bounds.size.height)
                                              linesPath:NULL
-                                          ballPosition:*ballpos
+                                          ballPosition:ballpos
                                             ballRadius:rad];
         }
         else {
             nextScene = [[DRRScene alloc] initWithSize:CGSizeMake(self.bounds.size.width,
                                                                   self.bounds.size.height)];
         }
-        NSLog(@"start 1 build 5 (dopo init scena)");
+        nextScene.scaleMode = SKSceneScaleModeAspectFill;
+        
 //        CGVector diff = CGVectorMake(self.pan.width, self.pan.height);
 //        [nextScene runAction:[SKAction moveBy:diff duration:0]];
 //        self.pan = NSMakeSize(0, 0);
@@ -222,10 +223,10 @@
 //    [self scaleScene:nextScene newSize:CGSizeMake(self.bounds.size.width / self.scale,
 //                                                  self.bounds.size.height / self.scale)];
 //    [nextScene runAction:[SKAction scaleBy:self.scale duration:0]];
-    [self scaleScene:nextScene useRelative:NO];
-    [self moveScene:nextScene useRelative:NO];
+    [self scaleScene:nextScene];
+    [self moveScene:nextScene];
     
-    NSLog(@"start 1 build 6");
+    
     // Creo la fisica globale
     nextScene.physicsWorld.gravity = CGVectorMake(0.0,-9.8);
 //    nextScene.physicsWorld.contactDelegate = self;
@@ -236,13 +237,9 @@
 //    // Cero e posiziono la palla e imposto la sua fisica
 //    SKShapeNode * ball =
 
-    
-    
-    NSLog(@"start 1 build 7 (prima di present)");
     [self presentScene:nextScene];
-    NSLog(@"start 1 build 8 (dopo present)");
+//    [self.scene setSpeed:1];
 //    nextScene = NULL; // FIXME
-    NSLog(@"start 1 build 9 (fine build)");
 }
 
 
@@ -255,10 +252,8 @@
     [self.scene setSize:self.bounds.size];
 //    [self scaleScene:(DRRScene *)self.scene newSize:CGSizeMake(self.bounds.size.width, self.bounds.size.height)];
     if (flag) {
-        [self scaleScene:(DRRScene *)self.scene
-//                 newSize:CGSizeMake(self.bounds.size.width, self.bounds.size.height)
-             useRelative:YES];
-        [self moveScene:(DRRScene *)self.scene useRelative:YES];
+        [self scaleScene:(DRRScene *)self.scene];
+        [self moveScene:(DRRScene *)self.scene];
     }
 //    else
 //        [self moveScene:(DRRScene *)self.scene useRelative:NO];
@@ -267,45 +262,23 @@
 
 - (void)scaleUpdate:(CGFloat)step {
     self.scale *= step;
-    self.scaleRelative *= step;
 }
 
-- (void)scaleScene:(DRRScene *)scene/* newSize:(CGSize)newSize */ useRelative:(BOOL)flag {
+- (void)scaleScene:(DRRScene *)scene {
 
-//    CGSize newTransformedSize = CGSizeMake(newSize.width / self.scale, newSize.height / self.scale);
-//    [scene setSize:newTransformedSize];
-//    [scene setSize:newSize];
-    if (flag) {
-        [scene runAction:[SKAction scaleBy:self.scaleRelative duration:0]];
-        self.scaleRelative = 1;
-    }
-    else {
-        [scene runAction:[SKAction scaleBy:self.scale duration:0]];
-        self.scale = 1;
-    }
-    
+    [scene runAction:[SKAction scaleTo:self.scale duration:0]];
     
 }
 
 - (void)moveUpdate:(NSSize)move {
-    self.pan = NSMakeSize(self.pan.width + move.width,
-                          self.pan.height + move.height); // TODO: sarebbe meglio estrapolare dalle matrici invece di tenerre un altro valore
-    self.panRelative = NSMakeSize(self.panRelative.width + move.width,
-                                  self.panRelative.height + move.height);
+    self.pan = NSMakePoint(self.pan.x + move.width,
+                           self.pan.y + move.height);
 }
 
-- (void)moveScene:(DRRScene *)scene useRelative:(BOOL)flag {
+- (void)moveScene:(DRRScene *)scene {
 
-    if (flag) {
-        CGVector diff = CGVectorMake(self.panRelative.width, self.panRelative.height);
-        [scene runAction:[SKAction moveBy:diff duration:0]];
-        self.panRelative = NSMakeSize(0, 0);
-    }
-    else {
-        CGVector diff = CGVectorMake(self.pan.width, self.pan.height);
-        [scene runAction:[SKAction moveBy:diff duration:0]];
-        self.panRelative = NSMakeSize(0, 0);
-    }
+    NSPoint diff = NSMakePoint(self.pan.x * self.scale, self.pan.y * self.scale);
+    [scene runAction:[SKAction moveTo:diff duration:0]];
     
 }
 
@@ -319,7 +292,7 @@
 
 
 - (void)mouseDown:(NSEvent *)theEvent {
-    NSLog(@"skview");
+    
     
 //    NSPoint pwindow = [theEvent locationInWindow];
 //    NSPoint pview = [self convertPoint:pwindow fromView:nil];

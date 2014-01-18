@@ -15,7 +15,7 @@
 //#define DEBUGDOCKMOUSECORR
 
 typedef enum drawingmodes {STROKENORMAL, STROKEALT, STROKEBOTH, FILLNORMAL, FILLALT, FILLBOTH} drawingmode_t;
-
+typedef enum buttons {btnPAN, btnZOOM, btnDRAWFREE, btnDRAWLINE, btnBACK, btnSAVE, btnLOAD, btnPLAY, btnSTOP} buttons_t;
 
 @interface DRRPathObj : NSObject
 
@@ -48,7 +48,6 @@ void makeBackButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 void makeSaveButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
 void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
 void makePlayButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
-void makePauseButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
 void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
 
 
@@ -115,8 +114,11 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 @property NSMutableArray * btnpaths;
 @property NSMutableArray * btnmodes;
 @property BOOL altMode;
+@property NSInteger celltag;
 
 + (Class)cellClass;
+
+//- (void)setTag:(NSInteger)anInt;
 
 - (id)initWithPaths:(NSMutableArray*)paths typeOfDrawing:(NSMutableArray*)modes;
 

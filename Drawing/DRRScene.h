@@ -9,8 +9,9 @@
 #import <SpriteKit/SpriteKit.h>
 #import "DRRDock.h"
 
-#define DEBUGSCENE
+//#define DEBUGSCENE
 
+#define lGreen colorWithCalibratedRed:0.35 green:0.88 blue:0.11 alpha:1 // 88 224 12
 
 
 @interface DRRScene : SKScene
@@ -28,23 +29,20 @@
 @interface DRRSceneView : SKView
 
 //@property NSMutableArray * lines;
-@property NSSize pan;
-@property NSSize panRelative;
+@property NSPoint pan;
 @property CGFloat scale;
-@property CGFloat scaleRelative;
 
 - (id)initWithFrame:(NSRect)frameRect;
 - (void)setItemPropertiesToDefault;
 
-- (void)buildSceneContent:(NSMutableArray *)lines ballPosition:(NSPoint *)ballpos ballRadius:(CGFloat)rad;// move:(NSSize)mfactor scale:(CGFloat)sfactor;
+- (void)buildSceneContent:(NSMutableArray *)lines ballPosition:(NSPoint)ballpos ballRadius:(CGFloat)rad;// move:(NSSize)mfactor scale:(CGFloat)sfactor;
 
 - (void)setFrameSize:(NSSize)newSize isActive:(BOOL)flag;
 //- (void)setSceneFrameSizeAndMoveIt:(DRRScene *)scene newSize:(CGSize)newSize;
 - (void)scaleUpdate:(CGFloat)step;
-- (void)scaleScene:(DRRScene *)scene useRelative:(BOOL)flag;
-//- (void)scaleScene:(DRRScene *)scene newSize:(CGSize)newSize useRelative:(BOOL)flag;
+- (void)scaleScene:(DRRScene *)scene;
 - (void)moveUpdate:(NSSize)move;
-- (void)moveScene:(DRRScene *)scene useRelative:(BOOL)flag;
+- (void)moveScene:(DRRScene *)scene;
 //- (BOOL)isOpaque;
 
 - (void)mouseDown:(NSEvent *)theEvent;
