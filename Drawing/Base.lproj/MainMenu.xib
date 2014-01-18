@@ -63,7 +63,7 @@
                     </menu>
                 </menuItem>
                 <menuItem title="File" id="83">
-                    <menu key="submenu" title="File" id="81">
+                    <menu key="submenu" title="File" id="81" customClass="DRRMenuController">
                         <items>
                             <menuItem title="New" keyEquivalent="n" id="82">
                                 <connections>
@@ -72,7 +72,7 @@
                             </menuItem>
                             <menuItem title="Open…" keyEquivalent="o" id="72">
                                 <connections>
-                                    <action selector="openDocument:" target="-1" id="374"/>
+                                    <action selector="open:" target="81" id="edT-oU-2Lx"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Open Recent" id="124">
@@ -96,7 +96,7 @@
                             </menuItem>
                             <menuItem title="Save…" keyEquivalent="s" id="75">
                                 <connections>
-                                    <action selector="saveDocument:" target="-1" id="362"/>
+                                    <action selector="saveAs:" target="81" id="V8M-9Y-QcX"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Revert to Saved" id="112">
@@ -120,6 +120,9 @@
                                 </connections>
                             </menuItem>
                         </items>
+                        <connections>
+                            <outlet property="drawingView" destination="ESX-2k-6oY" id="6Y8-YY-vUM"/>
+                        </connections>
                     </menu>
                 </menuItem>
                 <menuItem title="Edit" id="217">

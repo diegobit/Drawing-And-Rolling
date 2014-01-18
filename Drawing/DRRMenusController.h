@@ -7,10 +7,13 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "DRRDrawingView.h"
 
-@interface DRRMenuController : NSMenu
+@interface DRRMenuController : NSMenu {
+    IBOutlet DRRDrawingView * drawingView;
+}
 
-- (IBAction)doSaveAs:(id)pId;
-- (IBAction)doOpen:(id)pId;
+- (IBAction)saveAs:(id)pId;
+- (IBAction)open:(id)pId;
 
 @end
