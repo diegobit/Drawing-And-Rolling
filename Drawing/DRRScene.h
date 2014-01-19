@@ -9,18 +9,35 @@
 #import <SpriteKit/SpriteKit.h>
 #import "DRRDock.h"
 
-//#define DEBUGSCENE
+#define DEBUGSCENE
 
 #define lGreen colorWithCalibratedRed:0.35 green:0.88 blue:0.11 alpha:1 // 88 224 12
+typedef enum dir {LEFT, UP, DOWN, RIGHT, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT} dir_t;
 
 
 @interface DRRScene : SKScene
 
 @property CGMutablePathRef pathLines;
+@property SKNode * world;
+@property SKShapeNode * ball;
+@property CGPoint prevBallPos;
+@property CGPoint ballPosView;
+@property CGSize distEdge;
+@property CGFloat fixedTimeBetweenFrames;
 
-//- (void)update:(NSTimeInterval)currentTime;
 - (id)initWithSize:(CGSize)size linesPath:(NSMutableArray *)path ballPosition:(CGPoint)ballPos ballRadius:(CGFloat)rad;
-//- (id)initWithSize:(CGSize)size linesPathFromNSBezierPath:(NSBezierPath *)path;
+
+- (BOOL)movingToAnEdge:(dir_t *)dir objPosition:(CGPoint)pos objVelocity:(CGVector *)vel;
+
+- (void)update:(NSTimeInterval)currentTime;
+- (void)didEvaluateActions;
+- (void)didSimulatePhysics;
+
+- (void)mouseDown:(NSEvent *)theEvent;
+- (void)mouseDragged:(NSEvent *)theEvent;
+- (void)mouseUp:(NSEvent *)theEvent;
+//- (void)rightMouseDown:(NSEvent *)theEvent;
+//- (void)rightMouseUp:(NSEvent *)theEvent;
 
 @end
 

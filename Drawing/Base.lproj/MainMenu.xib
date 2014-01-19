@@ -671,6 +671,11 @@
                         <constraints>
                             <constraint firstAttribute="width" constant="43" id="o9C-U5-CJt"/>
                         </constraints>
+                        <shadow key="shadow" blurRadius="7">
+                            <size key="offset" width="-5" height="0.0"/>
+                            <color key="color" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        </shadow>
+                        <animations/>
                     </customView>
                 </subviews>
                 <constraints>

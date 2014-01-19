@@ -101,7 +101,6 @@
     
     [super awakeFromNib];
     [self setWantsLayer:YES];
-//    self.layer.shouldRasterize = YES;
     self.ball = [[DRRBall alloc] initWithRadius:15];
     
     // Dimensione bottoni della dock, spessore line del disegno interno. Rotondità tasti.
@@ -250,7 +249,7 @@
     self.thisIsANewLine = YES;
     self.dirtyRect = NSMakeRect(0, 0, 1, 1);
     self.customCursor = DRAW;
-    self.maxZoomFactor = 4;
+    self.maxZoomFactor = 1;
     self.minZoomFactor = 0.25;
     
     // inizializzo l'array di linee disegnate, le proprietà e altri paths
@@ -870,6 +869,9 @@
     
     if ([self.sceneView isHidden]) {
         
+        if ([self.sceneView isPaused])
+            [self.sceneView setPaused:NO];
+
         // Dopo aver disegnato, passo le linee alla vista che gestirà la scena in movimento
         
         NSPoint ballCenter = NSMakePoint(0, 0);
@@ -1048,7 +1050,7 @@
             NSPoint prevmouseXYworld = [self.v2wTrans transformPoint:[self.v2wScale transformPoint:self.prevmouseXY]];
             CGFloat d = [self distanceBetweenPoint:prevmouseXYworld andPoint:pworld];
             
-            if (d > 15) {
+            if (d > 20) {
                 if (!self.ball.isAlreadyPlaced) {
                     CGFloat bX = prevmouseXYworld.x;
                     if (pworld.x - prevmouseXYworld.x > 0)
@@ -1091,7 +1093,7 @@
             
             NSPoint prevmouseXYworld = [self.v2wTrans transformPoint:[self.v2wScale transformPoint:self.prevmouseXY]];
             CGFloat d = [self distanceBetweenPoint:prevmouseXYworld andPoint:pworld];
-            if (d > 15) {
+            if (d > 20) {
                 self.prevTempPoint = self.tempPoint;
                 self.tempPoint = pworld;
                 self.validLine = YES;

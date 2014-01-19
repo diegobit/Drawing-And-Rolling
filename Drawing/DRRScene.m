@@ -15,34 +15,43 @@
 - (id)initWithSize:(CGSize)size {
     if (self = [super initWithSize:size]) {
         self.backgroundColor = [SKColor colorWithRed:1 green:1 blue:1 alpha:1];
+        self.prevBallPos = CGPointMake(0, 0);
+        self.distEdge = CGSizeMake(self.frame.size.width * 2/5, self.size.height * 2/5);
+        self.fixedTimeBetweenFrames = 1/60;
     }
     return self;
 }
 
 - (id)initWithSize:(CGSize)size linesPath:(NSMutableArray *)lpaths ballPosition:(CGPoint)ballPos ballRadius:(CGFloat)rad {
+   
     if (self = [super initWithSize:size]) {
 
         self.backgroundColor = [SKColor colorWithRed:1 green:1 blue:1 alpha:1];
+        self.prevBallPos = CGPointMake(0, 0);
+        self.distEdge = CGSizeMake(self.frame.size.width / 3, self.size.height / 3);
+        self.fixedTimeBetweenFrames = 1/60;
         
         if (lpaths != NULL) {
             
-            NSMutableArray * shapeNodes = [[NSMutableArray alloc] init];
+            NSMutableArray * linesNodes = [[NSMutableArray alloc] init];
+            self.world = [[SKNode alloc] init];
+            [self addChild:self.world];
             [lpaths enumerateObjectsUsingBlock:^(NSValue * pathVal, NSUInteger idx, BOOL *stop) {
                 
-                [shapeNodes addObject:[[SKShapeNode alloc] init]];
-                ((SKShapeNode *) shapeNodes[idx]).path = [pathVal pointerValue];
-                ((SKShapeNode *) shapeNodes[idx]).lineWidth = 0.1;
-                ((SKShapeNode *) shapeNodes[idx]).strokeColor = [SKColor blackColor];
-                ((SKShapeNode *) shapeNodes[idx]).fillColor = [SKColor clearColor]; // FIXME: sarebbe meglio non riempisse proprio
-                [((SKShapeNode *) shapeNodes[idx]) setPhysicsBody:[SKPhysicsBody bodyWithEdgeChainFromPath:((SKShapeNode *) shapeNodes[idx]).path]];
+                [linesNodes addObject:[[SKShapeNode alloc] init]];
+                ((SKShapeNode *) linesNodes[idx]).path = [pathVal pointerValue];
+                ((SKShapeNode *) linesNodes[idx]).lineWidth = 0.1;
+                ((SKShapeNode *) linesNodes[idx]).strokeColor = [SKColor blackColor];
+                ((SKShapeNode *) linesNodes[idx]).fillColor = [SKColor clearColor]; // FIXME: sarebbe meglio non riempisse proprio
+                [((SKShapeNode *) linesNodes[idx]) setPhysicsBody:[SKPhysicsBody bodyWithEdgeChainFromPath:((SKShapeNode *) linesNodes[idx]).path]];
                 
                 
-                [self addChild:((SKShapeNode *) shapeNodes[idx])];
+                [self.world addChild:((SKShapeNode *) linesNodes[idx])];
             }];
             
         }
         
-        SKShapeNode * ball = [[SKShapeNode alloc] init];
+        self.ball = [[SKShapeNode alloc] init];
         CGMutablePathRef bpath = CGPathCreateMutable();
         CGPathAddEllipseInRect(bpath, NULL, CGRectMake(-rad, -rad, rad*2, rad*2));
         CGPathMoveToPoint(bpath, NULL, -rad/2, 0);
@@ -51,20 +60,132 @@
         CGPathAddLineToPoint(bpath, NULL, 0, rad/2);
         
         
-        ball.path = bpath;
+        self.ball.path = bpath;
         CGPathRelease(bpath);
-        ball.lineWidth = 0.5;
-        ball.fillColor = [SKColor llGray];
-        ball.strokeColor = [SKColor blackColor];
+        self.ball.lineWidth = 0.5;
+        self.ball.fillColor = [SKColor llGray];
+        self.ball.strokeColor = [SKColor blackColor];
         
-        [self addChild:ball];
-        [ball setPosition:ballPos];
-        [ball setPhysicsBody:[SKPhysicsBody bodyWithCircleOfRadius:rad]];
-        [ball.physicsBody setFriction:0.4];
+        [self addChild:self.ball];
+        [self.ball setPosition:ballPos];
+        self.prevBallPos = self.ball.position;
+        [self.ball setPhysicsBody:[SKPhysicsBody bodyWithCircleOfRadius:rad]];
+        [self.ball.physicsBody setFriction:0.4];
         
     }
 
     return self;
+}
+
+
+
+- (BOOL)movingToAnEdge:(dir_t *)dir objPosition:(CGPoint)pos objVelocity:(CGVector *)vel {
+    CGFloat dX = self.distEdge.width; CGFloat dY = self.distEdge.height;
+    BOOL ret = NO;
+    
+    // vel potrebbe essere NULL, per ora mi interessa solo vedere se pos è vicino al bordo e sapere quale
+    if (dir != NULL) {
+        
+        ret = YES;
+        
+        if (pos.x < dX && pos.y < dY)
+            *dir = DOWNLEFT;
+        else if (pos.x < dX && self.frame.size.height - pos.y < dY)
+            *dir = UPLEFT;
+        else if (self.frame.size.width - pos.x < dX && pos.y < dY)
+            *dir = DOWNRIGHT;
+        else if (self.frame.size.width - pos.x < dX && self.frame.size.height - pos.y < dY)
+            *dir = UPRIGHT;
+        else if (pos.x < dX)
+            *dir = LEFT;
+        else if (pos.y < dY)
+            *dir = DOWN;
+        else if (self.frame.size.width - pos.x < dX)
+            *dir = RIGHT;
+        else if (self.frame.size.height - pos.y < dY)
+            *dir = UP;
+        else
+            ret = NO;
+        
+        // vel != NULL, voglio sapere SOLO se mi sto muovendo verso quel bordo, altrimenti ritorno NO
+        if (ret && vel != NULL) {
+            if (!(((*dir == DOWNLEFT || *dir == LEFT || *dir == UPLEFT) && vel->dx < 0) ||
+                  ((*dir == UPLEFT || *dir == UP || *dir == UPRIGHT) && vel->dy > 0) ||
+                  ((*dir == UPRIGHT || *dir == RIGHT || *dir == DOWNRIGHT) && vel->dx > 0) ||
+                  ((*dir == DOWNRIGHT || *dir == DOWN || *dir == DOWNLEFT) && vel->dy < 0)
+                 )
+               )
+                ret = NO;
+        }
+        
+        return ret;
+    }
+    
+    // dir e vel sono null, mi interessa solo vedere se pos è vicino al bordo
+    else if ((pos.x < dX) ||
+             (self.frame.size.width - pos.x < dX) ||
+             (pos.y < dY) ||
+             (self.frame.size.height - pos.y < dY)
+            )
+        ret = YES;
+    
+    return ret;
+}
+
+
+
+- (void)update:(NSTimeInterval)currentTime {
+    
+    [super update:currentTime];
+    
+    //    CGVector ballshift = CGVectorMake(self.prevBallPos.x - self.ball.position.x,
+    //                                      self.prevBallPos.y - self.ball.position.y);
+    //    if (ballshift.dx != 0 || ballshift.dy != 0) {
+    //        self.prevBallPos = self.ball.position;
+    //        [self runAction:[SKAction moveBy:ballshift duration:0.5]];
+    //    }
+}
+
+- (void)didEvaluateActions {
+    
+    [super didEvaluateActions];
+    
+    DRRSceneView * sceneView = (DRRSceneView *) self.view;
+    self.prevBallPos = CGPointMake((self.ball.position.x + sceneView.pan.x) * sceneView.scale,
+                                   (self.ball.position.y + sceneView.pan.y) * sceneView.scale);
+
+}
+
+- (void)didSimulatePhysics {
+    
+    if (self.ball.position.x != 0 || self.ball.position.y != 0) {
+        dir_t dir = LEFT;
+        CGVector vel = self.ball.physicsBody.velocity;
+        DRRSceneView * sceneView = (DRRSceneView *) self.view;
+        self.ballPosView = CGPointMake((self.ball.position.x + sceneView.pan.x) * sceneView.scale,
+                                       (self.ball.position.y + sceneView.pan.y) * sceneView.scale);
+        
+        [super didSimulatePhysics];
+
+        if ([self movingToAnEdge:&dir objPosition:self.ballPosView objVelocity:&vel]) {
+//            NSLog(@"SI!!");
+            //        self.ball.physicsBody.velocity;
+            //        CGVector ballshift = CGVectorMake(self.prevBallPos.x - self.ball.position.x,
+            //                                          self.prevBallPos.y - self.ball.position.y);
+//            CGVector ballshift = CGVectorMake(vel.dx / - 60,
+//                                              vel.dy / - 60);
+//            if (ballshift.dx != 0 || ballshift.dy != 0) {
+                //            self.prevBallPos = self.ball.position;
+            [self runAction:[SKAction moveBy:CGVectorMake(self.prevBallPos.x - self.ballPosView.x,
+                                                          self.prevBallPos.y - self.ballPosView.y)
+                                    duration:0.3]];
+            
+//            self.prevBallPos = self.ballPosView;
+                //            self.position = CGPointMake(self.position.x + ballshift.dx, self.position.y + ballshift.dy);
+//            }
+        }
+    }
+    
 }
 
 

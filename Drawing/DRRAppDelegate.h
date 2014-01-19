@@ -15,6 +15,7 @@
 @interface DRRAppDelegate : NSObject <NSApplicationDelegate> {
     IBOutlet DRRDrawingView * drawingView;
 }
+@property BOOL doNotReactivate;
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag;

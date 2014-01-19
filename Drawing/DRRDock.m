@@ -679,15 +679,15 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     [[NSColor llGray] set];
     NSRectFill(NSMakeRect(dirtyRect.origin.x,
                           dirtyRect.origin.y,
-                          dirtyRect.size.width - 1,
+                          dirtyRect.size.width,
                           dirtyRect.size.height));
     
-    // Coloro la linea del bordo a destra
-    [[NSColor lightGrayColor] set];
-    NSRectFill(NSMakeRect(dirtyRect.origin.x + dirtyRect.size.width - 1,
-                          dirtyRect.origin.y,
-                          1,
-                          dirtyRect.size.height));
+//    // Coloro la linea del bordo a destra
+//    [[NSColor lightGrayColor] set];
+//    NSRectFill(NSMakeRect(dirtyRect.origin.x + dirtyRect.size.width - 1,
+//                          dirtyRect.origin.y,
+//                          1,
+//                          dirtyRect.size.height));
 }
 
 

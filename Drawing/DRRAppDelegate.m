@@ -24,14 +24,19 @@
 }
 
 - (void)applicationDidResignActive:(NSNotification *)notification {
-    NSLog(@"----DIDRESIGN");
+    if ([drawingView.sceneView.scene isPaused])
+        self.doNotReactivate = YES;
     [drawingView.sceneView setPaused:YES];
 }
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification {
-    NSLog(@"----DIDBECOMEACTIVE");
     [drawingView.sceneView setPaused:NO];
+    if (self.doNotReactivate) {
+        [drawingView.sceneView.scene setPaused:YES];
+        self.doNotReactivate = NO;
+    }
 }
 
 
 @end
+
