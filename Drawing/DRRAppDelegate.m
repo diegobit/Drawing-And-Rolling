@@ -15,8 +15,6 @@
     [self.window setBackgroundColor:[NSColor whiteColor]];
 }
 
-
-
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)theApplication hasVisibleWindows:(BOOL)flag {
     if (flag)
         [self.window orderFront:self];
@@ -24,5 +22,16 @@
         [self.window makeKeyAndOrderFront:self];
     return YES;
 }
+
+- (void)applicationDidResignActive:(NSNotification *)notification {
+    NSLog(@"----DIDRESIGN");
+    [drawingView.sceneView setPaused:YES];
+}
+
+- (void)applicationDidBecomeActive:(NSNotification *)notification {
+    NSLog(@"----DIDBECOMEACTIVE");
+    [drawingView.sceneView setPaused:NO];
+}
+
 
 @end

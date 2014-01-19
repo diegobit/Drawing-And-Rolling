@@ -15,7 +15,7 @@
 //#define DEBUGDOCKMOUSECORR
 
 typedef enum drawingmodes {STROKENORMAL, STROKEALT, STROKEBOTH, FILLNORMAL, FILLALT, FILLBOTH} drawingmode_t;
-typedef enum buttons {btnPAN, btnZOOM, btnDRAWFREE, btnDRAWLINE, btnBACK, btnSAVE, btnLOAD, btnPLAY, btnSTOP} buttons_t;
+//typedef enum buttons {btnPAN, btnZOOM, btnDRAWFREE, btnDRAWLINE, btnBACK, btnSAVE, btnLOAD, btnPLAY, btnSTOP} buttons_t;
 
 @interface DRRPathObj : NSObject
 
@@ -54,9 +54,6 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 @interface DRRDockBar : NSView
 
-//@property (weak) id dock;
-
-//- (void)setFrameSize:(NSSize)newSize;
 - (BOOL)preservesContentDuringLiveResize;
 
 //- (void)setFrameSize:(NSSize)newSize;
@@ -64,6 +61,7 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 - (void)drawRect:(NSRect)dirtyRect;
 
 - (void)mouseDown:(NSEvent *)theEvent;
+
 @end
 
 
@@ -76,12 +74,9 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 @interface DRRDock : NSMatrix
 
-//@property BOOL dockPrevResizeWasInLive;
 @property (weak) id prevSelectCell;
 @property (weak) id prevSelectCell_RMouse;
 @property (weak) id prevSelectCell_playPause;
-//@property NSInteger prevSelectedCellRow;
-//@property NSInteger prevSelectedCellCol;
 @property (weak) id <dockToView> dockdelegate;
 
 - (id)init;
@@ -101,7 +96,6 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 #ifdef DEBUGDOCKDRAW
 - (void)drawRect:(NSRect)dirtyRect;
 #endif
-//- (void)setState:(NSInteger)value atRow:(NSInteger)row column:(NSInteger)col
 
 - (void)mouseDown:(NSEvent *)theEvent;
 
@@ -114,11 +108,9 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 @property NSMutableArray * btnpaths;
 @property NSMutableArray * btnmodes;
 @property BOOL altMode;
-@property NSInteger celltag;
+//@property NSInteger celltag;
 
 + (Class)cellClass;
-
-//- (void)setTag:(NSInteger)anInt;
 
 - (id)initWithPaths:(NSMutableArray*)paths typeOfDrawing:(NSMutableArray*)modes;
 

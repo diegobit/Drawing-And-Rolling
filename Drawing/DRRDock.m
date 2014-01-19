@@ -855,14 +855,6 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     return self;
 }
 
-//- (NSInteger)tag {
-//    return self.tag;
-//}
-//
-//- (void)setTag:(NSInteger)anInt {
-//    self.tag = anInt;
-//}
-
 
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
@@ -870,18 +862,6 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     #ifdef DEBUGDOCKDRAW
     NSLog(@"-drawInterior DRRButton");
     #endif
-    
-//    NSColor * llightGray = [NSColor llGray];
-    
-    //    NSColor * prevColor; ///// TODO salvare colore precedente
-//    if ([self isHighlighted]) {
-//        DRRDrawingProperties * border = (DRRDrawingProperties *) self.btnmodes[0];
-//        border.color = [NSColor grayColor];
-//    }
-//    else {
-//        DRRDrawingProperties * border = (DRRDrawingProperties *) self.btnmodes[0];
-//        border.color = [NSColor llGray];
-//    }
     
     // per ogni path del bottone...
     [self.btnpaths enumerateObjectsUsingBlock:^(DRRPathObj * pathobj, NSUInteger idx, BOOL *stop) {
@@ -925,7 +905,6 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
             [[NSColor ddBlue] getRed:&redDDB green:&greenDDB blue:&blueDDB alpha:&alphaDDB];
             
             if (wouldDrawNormal && self.altMode && red == redDDB && green == greenDDB && blue == blueDDB && alpha == alphaDDB) {
-//                if (![self isHighlighted] && ![self state] == NSOnState)
                 color = [NSColor lightGrayColor];
             }
             

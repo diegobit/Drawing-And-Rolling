@@ -686,6 +686,7 @@
         </window>
         <customObject id="494" customClass="DRRAppDelegate">
             <connections>
+                <outlet property="drawingView" destination="ESX-2k-6oY" id="rzD-WH-qik"/>
                 <outlet property="window" destination="371" id="532"/>
             </connections>
         </customObject>

@@ -62,7 +62,7 @@ typedef enum customcursor {PANWAIT, PANACTIVE, PANBALL, ZOOM, ZOOMIN, ZOOMOUT, D
 
 
 
-@interface DRRDrawingView : NSView <dockToView> {
+@interface DRRDrawingView : NSView <dockToView/*, NSWindowDelegate*/> {
     IBOutlet DRRDockBar * dockBar;
 }
     
@@ -96,7 +96,6 @@ typedef enum customcursor {PANWAIT, PANACTIVE, PANBALL, ZOOM, ZOOMIN, ZOOMOUT, D
 
 // Matrice che gestisce i bottoni dell'interfaccia. Grandezza controllo. Rotondità del bordo dei tasti.
 // Spessore linea del disegno interno dei controlli.
-//@property IBOutlet DRRDockBar * dockBar;
 @property DRRDock * dock;
 @property NSSize cellsize;
 @property CGFloat roundness;

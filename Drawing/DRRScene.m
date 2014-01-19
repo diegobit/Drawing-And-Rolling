@@ -43,12 +43,8 @@
         }
         
         SKShapeNode * ball = [[SKShapeNode alloc] init];
-//        CGPathRef bpath = CGPathCreateWithEllipseInRect(CGRectMake(- rad, - rad, rad * 2, rad * 2), NULL);
         CGMutablePathRef bpath = CGPathCreateMutable();
         CGPathAddEllipseInRect(bpath, NULL, CGRectMake(-rad, -rad, rad*2, rad*2));
-//        CGMutablePathRef scalespath = CGPathCreateMutable();
-//        CGPathMoveToPoint(bpath, NULL, -rad * 7/10, -rad);
-//        CGPathAddLineToPoint(bpath, NULL, 0, -rad);
         CGPathMoveToPoint(bpath, NULL, -rad/2, 0);
         CGPathAddLineToPoint(bpath, NULL, rad/2, 0);
         CGPathMoveToPoint(bpath, NULL, 0, -rad/2);
@@ -71,28 +67,9 @@
     return self;
 }
 
-//- (id)initWithSize:(CGSize)size linesPathFromNSBezierPath:(NSBezierPath *)path {
-//    CGMutablePathRef newPath = CGPathCreateMutable();
-//        // TODO conversione path
-//
-//
-//    self = [self initWithSize:size linesPath:newPath];
-//    return self;
-//}
-
-
-
-
-
-//- (void)drawRect:(NSRect)dirtyRect {
-//    [[NSColor clearColor] setFill];
-//    NSRectFillUsingOperation(dirtyRect, NSCompositeSourceOver);
-//}
-
 
 
 - (void)mouseDown:(NSEvent *)theEvent {
-    
     [self.view mouseDown:theEvent];
 }
 - (void)mouseDragged:(NSEvent *)theEvent {
@@ -126,16 +103,6 @@
         
         DRRScene * tempScene = [[DRRScene alloc] initWithSize:self.bounds.size];
         [self presentScene:tempScene];
-//        [self setPaused:YES];
-
-//        DRRScene * nextScene = [DRRScene sceneWithSize:CGSizeMake(frameRect.size.width, frameRect.size.height)];
-//        nextScene.scaleMode = SKSceneScaleModeFill;
-//        [self presentScene:nextScene];
-//        nextScene = NULL; // FIXME
-        
-//        self.scene run
-        
-//        [self setPaused:YES];
         
         #ifdef DEBUGSCENE
         self.showsFPS = YES;
@@ -157,11 +124,9 @@
 
 
 
-- (void)buildSceneContent:(NSMutableArray *)lines ballPosition:(NSPoint)ballpos ballRadius:(CGFloat)rad { // move:(NSSize)mfactor scale:(CGFloat)sfactor {
+- (void)buildSceneContent:(NSMutableArray *)lines ballPosition:(NSPoint)ballpos ballRadius:(CGFloat)rad {
 
-//    DRRScene * tempScene;
     DRRScene * nextScene;
-//    [self presentScene:tempScene];
     
     if ([lines count] > 0) {
 
@@ -191,12 +156,7 @@
                                       ballPosition:CGPointMake(ballpos.x, ballpos.y)
                                         ballRadius:rad];
         nextScene.scaleMode = SKSceneScaleModeAspectFill;
-//        [self setSceneFrameSizeAndMoveIt:nextScene newSize:CGSizeMake(self.bounds.size.width / self.scale,
-//                                                                      self.bounds.size.height / self.scale)];
-//        CGVector diff = CGVectorMake(self.pan.width, self.pan.height);
-//        [nextScene runAction:[SKAction moveBy:diff duration:0]];
-        
-//        [nextScene setPhysicsBody:[SKPhysicsBody bodyWithEdgeChainFromPath:linesPath]];
+
     }
     
     // Non ci sono linee nell'array, creo una scena vuota con la palla (se c'è)
@@ -215,48 +175,31 @@
         }
         nextScene.scaleMode = SKSceneScaleModeAspectFill;
         
-//        CGVector diff = CGVectorMake(self.pan.width, self.pan.height);
-//        [nextScene runAction:[SKAction moveBy:diff duration:0]];
-//        self.pan = NSMakeSize(0, 0);
     }
     
-//    [self scaleScene:nextScene newSize:CGSizeMake(self.bounds.size.width / self.scale,
-//                                                  self.bounds.size.height / self.scale)];
-//    [nextScene runAction:[SKAction scaleBy:self.scale duration:0]];
     [self scaleScene:nextScene];
     [self moveScene:nextScene];
     
     
     // Creo la fisica globale
     nextScene.physicsWorld.gravity = CGVectorMake(0.0,-9.8);
-//    nextScene.physicsWorld.contactDelegate = self;
-    
-    
-    
-    
-//    // Cero e posiziono la palla e imposto la sua fisica
-//    SKShapeNode * ball =
 
     [self presentScene:nextScene];
-//    [self.scene setSpeed:1];
 //    nextScene = NULL; // FIXME
+    
 }
 
 
 
 - (void)setFrameSize:(NSSize)newSize isActive:(BOOL)flag {
     
-//    NSPoint pview_before = NSMakePoint(CGFloat x, CGFloat y)
     [super setFrameSize:newSize];
     
     [self.scene setSize:self.bounds.size];
-//    [self scaleScene:(DRRScene *)self.scene newSize:CGSizeMake(self.bounds.size.width, self.bounds.size.height)];
     if (flag) {
         [self scaleScene:(DRRScene *)self.scene];
         [self moveScene:(DRRScene *)self.scene];
     }
-//    else
-//        [self moveScene:(DRRScene *)self.scene useRelative:NO];
     
 }
 
@@ -283,43 +226,8 @@
 }
 
 
-//- (void)drawRect:(NSRect)dirtyRect {
-//    NSLog(@"sceneview draw");
-//    [[NSColor clearColor] setFill];
-//    NSRectFillUsingOperation(dirtyRect, NSCompositeSourceOver);
-//}
-
-
 
 - (void)mouseDown:(NSEvent *)theEvent {
-    
-    
-//    NSPoint pwindow = [theEvent locationInWindow];
-//    NSPoint pview = [self convertPoint:pwindow fromView:nil];
-//    NSPoint pworld = [self.v2wTrans transformPoint:[self.v2wScale transformPoint:pview]];
-//    
-//    if (btn == self.btnPan) {
-//        if (self.customCursor != PANACTIVE) {
-//            [[NSCursor closedHandCursor] set];
-//            self.customCursor = PANACTIVE;
-//        }
-//        
-//        if ([self.ball hitTest:pworld])
-//            self.ballPressed = YES;
-//        
-//        self.prevmouseXY = pview;
-//    }
-//    
-//    else if (btn == self.btnZoom) {
-//        if (self.customCursor != ZOOM) {
-//            [[NSCursor resizeUpDownCursor] set];
-//            self.customCursor = ZOOM;
-//        }
-//        
-//        self.prevmouseXY = pview;
-//    }
-
-    
     [self.superview mouseDown:theEvent];
 }
 - (void)mouseDragged:(NSEvent *)theEvent {
