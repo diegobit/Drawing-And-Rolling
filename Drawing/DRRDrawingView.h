@@ -82,6 +82,7 @@ typedef enum customcursor {PANWAIT, PANACTIVE, PANBALL, ZOOM, ZOOMIN, ZOOMOUT, D
 /// Frame della scena: vista completa meno i bottoni
 @property NSRect sceneRect;
 @property DRRSceneView * sceneView;
+@property CGVector initMove;
 @property customcursor_t customCursor;
 
 @property NSAffineTransform * v2wTrans;

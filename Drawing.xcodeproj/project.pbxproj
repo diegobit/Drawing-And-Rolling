@@ -16,13 +16,13 @@
 		F11DFEA018560DE8001A17AA /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = F11DFE9E18560DE8001A17AA /* Credits.rtf */; };
 		F11DFEA318560DE8001A17AA /* DRRAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFEA218560DE8001A17AA /* DRRAppDelegate.m */; };
 		F11DFEA618560DE8001A17AA /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = F11DFEA418560DE8001A17AA /* MainMenu.xib */; };
-		F11DFEA818560DE8001A17AA /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F11DFEA718560DE8001A17AA /* Images.xcassets */; };
 		F11DFEAF18560DE9001A17AA /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F11DFEAE18560DE9001A17AA /* XCTest.framework */; };
 		F11DFEB018560DE9001A17AA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F11DFE8F18560DE8001A17AA /* Cocoa.framework */; };
 		F11DFEB818560DE9001A17AA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F11DFEB618560DE9001A17AA /* InfoPlist.strings */; };
 		F11DFEBA18560DE9001A17AA /* DrawingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFEB918560DE9001A17AA /* DrawingTests.m */; };
 		F11DFEC518560E36001A17AA /* DRRDrawingVIew.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFEC418560E36001A17AA /* DRRDrawingVIew.m */; };
-		F1A93DD2188B26D3007A5BAD /* DRRMenusController.m in Sources */ = {isa = PBXBuildFile; fileRef = F1A93DD1188B26D3007A5BAD /* DRRMenusController.m */; };
+		F1877A8E188C7FD5001760B6 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F1877A8D188C7FD5001760B6 /* Images.xcassets */; };
+		F1A93DD2188B26D3007A5BAD /* DRRMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = F1A93DD1188B26D3007A5BAD /* DRRMenuController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,7 +54,6 @@
 		F11DFEA118560DE8001A17AA /* DRRAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DRRAppDelegate.h; sourceTree = "<group>"; };
 		F11DFEA218560DE8001A17AA /* DRRAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DRRAppDelegate.m; sourceTree = "<group>"; };
 		F11DFEA518560DE8001A17AA /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
-		F11DFEA718560DE8001A17AA /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		F11DFEAD18560DE9001A17AA /* DrawingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DrawingTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F11DFEAE18560DE9001A17AA /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		F11DFEB518560DE9001A17AA /* DrawingTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "DrawingTests-Info.plist"; sourceTree = "<group>"; };
@@ -63,8 +62,9 @@
 		F11DFEC318560E36001A17AA /* DRRDrawingView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRDrawingView.h; sourceTree = "<group>"; };
 		F11DFEC418560E36001A17AA /* DRRDrawingVIew.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRDrawingVIew.m; sourceTree = "<group>"; };
 		F139D7ED1875DFDC005C4511 /* Drawing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Drawing.entitlements; sourceTree = "<group>"; };
-		F1A93DD0188B26D3007A5BAD /* DRRMenusController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRMenusController.h; sourceTree = "<group>"; };
-		F1A93DD1188B26D3007A5BAD /* DRRMenusController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRMenusController.m; sourceTree = "<group>"; };
+		F1877A8D188C7FD5001760B6 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		F1A93DD0188B26D3007A5BAD /* DRRMenuController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRMenuController.h; sourceTree = "<group>"; };
+		F1A93DD1188B26D3007A5BAD /* DRRMenuController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRMenuController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -141,10 +141,10 @@
 				F10F0B47187F4372009AABA7 /* DRRScene.m */,
 				F108A7AB185C9EE900AE183A /* DRRDock.h */,
 				F108A7AC185C9EE900AE183A /* DRRDock.m */,
-				F1A93DD0188B26D3007A5BAD /* DRRMenusController.h */,
-				F1A93DD1188B26D3007A5BAD /* DRRMenusController.m */,
-				F11DFEA718560DE8001A17AA /* Images.xcassets */,
+				F1A93DD0188B26D3007A5BAD /* DRRMenuController.h */,
+				F1A93DD1188B26D3007A5BAD /* DRRMenuController.m */,
 				F11DFEA418560DE8001A17AA /* MainMenu.xib */,
+				F1877A8D188C7FD5001760B6 /* Images.xcassets */,
 				F11DFE9618560DE8001A17AA /* Supporting Files */,
 			);
 			path = Drawing;
@@ -265,7 +265,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11DFE9A18560DE8001A17AA /* InfoPlist.strings in Resources */,
-				F11DFEA818560DE8001A17AA /* Images.xcassets in Resources */,
+				F1877A8E188C7FD5001760B6 /* Images.xcassets in Resources */,
 				F11DFEA018560DE8001A17AA /* Credits.rtf in Resources */,
 				F11DFEA618560DE8001A17AA /* MainMenu.xib in Resources */,
 			);
@@ -289,7 +289,7 @@
 				F11DFE9C18560DE8001A17AA /* main.m in Sources */,
 				F108A7AD185C9EE900AE183A /* DRRDock.m in Sources */,
 				F11DFEC518560E36001A17AA /* DRRDrawingVIew.m in Sources */,
-				F1A93DD2188B26D3007A5BAD /* DRRMenusController.m in Sources */,
+				F1A93DD2188B26D3007A5BAD /* DRRMenuController.m in Sources */,
 				F11DFEA318560DE8001A17AA /* DRRAppDelegate.m in Sources */,
 				F10F0B48187F4372009AABA7 /* DRRScene.m in Sources */,
 			);

@@ -112,7 +112,7 @@ void makeDrawLineButton(NSRect frame, CGFloat roundness, NSMutableArray * paths,
     NSBezierPath * line = [[NSBezierPath alloc] init];
     
     // Path per il bordo
-    [border appendBezierPathWithRoundedRect:frame xRadius:roundness yRadius:roundness];
+    [border appendBezierPathWithRoundedRect:frame xRadius:(roundness + 2) yRadius:(roundness + 2)];
     CGFloat bthickness = fmin(frame.size.width, frame.size.height) * 0.08;
     [innerborder appendBezierPathWithRoundedRect:NSMakeRect(frame.origin.x + bthickness, frame.origin.y + bthickness, frame.size.width - (2 * bthickness), frame.size.height - (2 * bthickness)) xRadius:roundness yRadius:roundness];
     

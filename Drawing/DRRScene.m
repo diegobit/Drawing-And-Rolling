@@ -8,6 +8,252 @@
 
 #import "DRRScene.h"
 
+static const uint32_t ballCategory      =  0x1 << 0;
+static const uint32_t lineCategory      =  0x1 << 1;
+static const uint32_t emptyCategory      =  0x1 << 1;
+
+
+
+@implementation DRRObjectNode
+
++ (DRRObjectNode *)initWithNode:(SKShapeNode *)node andWithoutPhysics:(SKShapeNode *)nodeWithNoPhys {
+    DRRObjectNode * obj = [[DRRObjectNode alloc] init];
+    if (obj) {
+        obj.nodeWithPhysics = node;
+        obj.nodeWithNoPhysics = nodeWithNoPhys;
+    }
+    return obj;
+}
+
+- (id)init {
+    self = [super init];
+    return self;
+}
+
+@end
+
+
+
+@implementation DRRPresenceNode
+
++ (DRRPresenceNode *)initWithState:(BOOL)flag coordinates:(NSMutableArray *)coord{
+    DRRPresenceNode * obj = [[DRRPresenceNode alloc] init];
+    if (obj) {
+        obj.active = flag;
+        obj.coordinates = coord;
+    }
+    return obj;
+}
+
+
+
+- (id)init {
+    self = [super init];
+    return self;
+}
+     
+@end
+
+
+
+@implementation DRRLinesContainer
+
+- (id)init {
+    if (self = [super init]) {
+        self.blockSize = 200;
+        self.linesRightUp = [[NSMutableArray alloc] init];
+        self.linesRightDown = [[NSMutableArray alloc] init];
+        self.linesLeftUp = [[NSMutableArray alloc] init];
+        self.linesLeftDown = [[NSMutableArray alloc] init];
+        self.presenceArray = [[NSMutableArray alloc] init];
+        self.nextFreeKey = 0;
+    }
+    return self;
+}
+
+
+
+- (void)addNode:(SKShapeNode *)node andWithPhysics:(SKShapeNode *)nodeWithPhysics {
+//    NSString * key = [NSString stringWithFormat:@"%ld", [self.presenceArray count]];
+    NSString * key = [NSString stringWithFormat:@"%ld", self.nextFreeKey];
+    self.nextFreeKey++;
+    node.name = key;
+    
+    // Calcolo il rettangolo che contiene il path del nodo e da quello i blocchi che lo contengono
+    CGRect rect = CGPathGetBoundingBox(node.path);
+    NSMutableArray * blocksCoord = [self blocksCoordFromRect:rect];
+    // aggiungo al presenceArray un elemento (chiave: indice array) con stato corrente e con tutte le coordinate a cui lo posso trovare
+    [self.presenceArray addObject:[DRRPresenceNode initWithState:NO coordinates:blocksCoord]];
+    
+    // scorro i blocchi relativi al nodo corrente, aggiungo il nodo al blocco.
+    [blocksCoord enumerateObjectsUsingBlock:^(NSValue * pointV, NSUInteger idx, BOOL *stop) {
+        NSPoint point = [pointV pointValue];
+        NSMapTable * block = [self blockOfCoordinate:point];
+        DRRObjectNode * objNode = [[DRRObjectNode alloc] init];
+        objNode.nodeWithPhysics = nodeWithPhysics;
+        objNode.nodeWithNoPhysics = node;
+        
+        [block setObject:objNode forKey:key];
+    }];
+}
+
+- (SKShapeNode *)nodeByKey:(NSInteger)key wantsPhysics:(BOOL)flag {
+    DRRPresenceNode * pNode = self.presenceArray[key];
+    NSPoint point = [pNode.coordinates[0] pointValue];
+    NSMapTable * block = [self blockOfCoordinate:point];
+    DRRObjectNode * node = [block objectForKey:[NSString stringWithFormat:@"%ld", key]];
+    
+    if (flag)
+        return node.nodeWithPhysics;
+    else
+        return node.nodeWithNoPhysics;
+}
+
+- (NSMutableArray *)nodesByKeys:(NSMutableSet *)keys wantsPhysics:(BOOL)flag {
+    NSMutableArray * nodes = [[NSMutableArray alloc] init];
+    
+    [keys enumerateObjectsUsingBlock:^(NSString * keyString, BOOL *stop) {
+        NSInteger key = [keyString integerValue];
+        DRRPresenceNode * pNode = self.presenceArray[key];
+        NSPoint point = [pNode.coordinates[0] pointValue];
+        NSMapTable * block = [self blockOfCoordinate:point];
+        DRRObjectNode * node = [block objectForKey:keyString];
+        
+        if (flag)
+            [nodes addObject:node.nodeWithPhysics];
+        else
+            [nodes addObject:node.nodeWithNoPhysics];
+    }];
+    
+    return nodes;
+}
+
+- (NSMutableSet *)keysInBlocksThatContainsRect:(CGRect)rect {
+    NSMutableSet * keys = [[NSMutableSet alloc] init];
+    
+    // Aggiungo tutte le chiavi di tutti i blocchi che appaiono nel rettagolo dato. No duplicati
+    NSMutableArray * blocksCoord = [self blocksCoordFromRect:rect];
+    [blocksCoord enumerateObjectsUsingBlock:^(NSValue * pointV, NSUInteger idx, BOOL *stop) {
+        NSMapTable * block = [self blockOfCoordinate:[pointV pointValue]];
+        NSArray * nextKeys = [block.keyEnumerator allObjects];
+        [keys addObjectsFromArray:nextKeys];
+    }];
+    
+    return keys;
+}
+
+- (NSMutableArray *)blocksCoordFromRect:(CGRect)rect {
+    NSMutableArray * blocks = [[NSMutableArray alloc] init];
+    NSInteger i, j;
+    
+    NSPoint blockLowLeft = NSMakePoint(floor(rect.origin.x / self.blockSize), floor(rect.origin.y / self.blockSize));
+    NSInteger rightEdge = floor((rect.origin.x + rect.size.width) / self.blockSize);
+    NSInteger upperEdge = floor((rect.origin.y + rect.size.height) / self.blockSize);
+    
+    for (i = blockLowLeft.x; i <= rightEdge; i++) {
+        for (j = blockLowLeft.y; j <= upperEdge; j++) {
+            [blocks addObject:[NSValue valueWithPoint:NSMakePoint(i, j)]];
+        }
+    }
+    return blocks;
+}
+
+
+- (NSMutableArray *)blocksFromCoordinates:(NSMutableArray *)coordArray {
+    NSMutableArray * blocks = [[NSMutableArray alloc] init];
+    
+    [coordArray enumerateObjectsUsingBlock:^(NSValue * pointV, NSUInteger idx, BOOL *stop) {
+        NSMapTable * block = [self blockOfCoordinate:[pointV pointValue]];
+        [blocks addObject:block];
+    }];
+    
+    return blocks;
+}
+
+- (NSMapTable *)blockOfCoordinate:(NSPoint)point {
+    NSInteger pX, pY;
+    NSInteger diff;
+    // alloco array nei quadranti 1 o 4
+    if (point.x >= 0) {
+        pX = point.x;
+        if (point.y >= 0) {
+            pY = point.y;
+            for (diff = point.x - [self.linesRightUp count]; diff >= 0; diff--) {
+                [self.linesRightUp addObject:[[NSMutableArray alloc] init]];
+            }
+            for (diff = point.y - [self.linesRightUp[pX] count]; diff >= 0; diff--) {
+                [self.linesRightUp[pX] addObject:[[NSMapTable alloc] initWithKeyOptions:NSMapTableStrongMemory
+                                                                           valueOptions:NSMapTableStrongMemory
+                                                                               capacity:1]];
+            }
+        }
+        else {
+            pY = fabs(point.y + 1);
+            for (diff = point.x - [self.linesRightDown count]; diff >= 0; diff--) {
+                [self.linesRightDown addObject:[[NSMutableArray alloc] init]];
+            }
+            for (diff = fabs(point.y - 1) - [self.linesRightDown[pX] count]; diff >= 0; diff--) {
+                [self.linesRightDown[pX] addObject:[[NSMapTable alloc] initWithKeyOptions:NSMapTableStrongMemory
+                                                                             valueOptions:NSMapTableStrongMemory
+                                                                                 capacity:1]];
+            }
+        }
+    }
+    
+    // alloco array nei quadranti 2 o 3
+    else {
+        pX = fabs(point.x + 1);
+        if (point.y >= 0) {
+            pY = point.y;
+            for (diff = fabs(point.x - 1) - [self.linesLeftUp count]; diff >= 0; diff--) {
+                [self.linesLeftUp addObject:[[NSMutableArray alloc] init]];
+            }
+            for (diff = point.y - [self.linesLeftUp[pX] count]; diff >= 0; diff--) {
+                [self.linesLeftUp[pX] addObject:[[NSMapTable alloc] initWithKeyOptions:NSMapTableStrongMemory
+                                                                          valueOptions:NSMapTableStrongMemory
+                                                                              capacity:1]];
+            }
+        }
+        else {
+            pY = fabs(point.y + 1);
+            for (diff = fabs(point.x - 1) - [self.linesLeftDown count]; diff >= 0; diff--) {
+                [self.linesLeftDown addObject:[[NSMutableArray alloc] init]];
+            }
+            for (diff = fabs(point.y - 1) - [self.linesLeftDown[pX] count]; diff >= 0; diff--) {
+                [self.linesLeftDown[pX] addObject:[[NSMapTable alloc] initWithKeyOptions:NSMapTableStrongMemory
+                                                                            valueOptions:NSMapTableStrongMemory
+                                                                                capacity:1]];
+            }
+        }
+    }
+    if (point.x >= 0 && point.y >= 0)
+        return self.linesRightUp[pX][pY];
+    else if (point.x >= 0)
+        return self.linesRightDown[pX][pY];
+    else if (point.y >= 0)  // point.x < 0
+        return self.linesLeftUp[pX][pY];
+    else                    // point.x < 0 && point.y < 0
+        return self.linesLeftDown[pX][pY];
+    
+}
+
+
+
+- (BOOL)isNodeActive:(NSInteger)key {
+    DRRPresenceNode * pNode = self.presenceArray[key];
+    return pNode.active;
+}
+
+- (void)setNodesState:(BOOL)flag fromKeySet:(NSMutableSet *)set {
+    [set enumerateObjectsUsingBlock:^(NSString * keyString, BOOL *stop) {
+        [self.presenceArray[[keyString integerValue]] setActive:flag];
+    }];
+}
+
+
+
+@end
+
 
 
 @implementation DRRScene
@@ -16,40 +262,31 @@
     if (self = [super initWithSize:size]) {
         self.backgroundColor = [SKColor colorWithRed:1 green:1 blue:1 alpha:1];
         self.prevBallPos = CGPointMake(0, 0);
-        self.distEdge = CGSizeMake(self.frame.size.width * 2/5, self.size.height * 2/5);
-        self.fixedTimeBetweenFrames = 1/60;
+        self.distEdge = CGSizeMake(self.frame.size.width / 2, self.size.height / 2);
+        self.linesContainer = [[DRRLinesContainer alloc] init];
+//        self.prevScreenRect_world = CGRectMake(0, 0, 1, 1);
+        self.screenRect_world = CGRectMake(0, 0, 1, 1);
+        self.screenRect_world_phys = CGRectMake(0, 0, 1, 1);
+        self.nextNodes = [[NSMutableArray alloc] init];
+        self.nextNodesPhys = [[NSMutableArray alloc] init];
+        self.blockSizeUnit = self.linesContainer.blockSize * 0.99;
+//        self.updateWorldTreeCounter = 5;
+        self.PhysicsUpdateRequiredTime = 0.083;
+        self.prevPhysicsUpdateTime = 0;
+//        self.firstdraw = YES;
+//        self.fixedTimeBetweenFrames = 1/60;
     }
     return self;
 }
 
 - (id)initWithSize:(CGSize)size linesPath:(NSMutableArray *)lpaths ballPosition:(CGPoint)ballPos ballRadius:(CGFloat)rad {
    
-    if (self = [super initWithSize:size]) {
+    if (self = [self initWithSize:size]) {
 
-        self.backgroundColor = [SKColor colorWithRed:1 green:1 blue:1 alpha:1];
-        self.prevBallPos = CGPointMake(0, 0);
-        self.distEdge = CGSizeMake(self.frame.size.width / 3, self.size.height / 3);
-        self.fixedTimeBetweenFrames = 1/60;
-        
-        if (lpaths != NULL) {
-            
-            NSMutableArray * linesNodes = [[NSMutableArray alloc] init];
-            self.world = [[SKNode alloc] init];
-            [self addChild:self.world];
-            [lpaths enumerateObjectsUsingBlock:^(NSValue * pathVal, NSUInteger idx, BOOL *stop) {
-                
-                [linesNodes addObject:[[SKShapeNode alloc] init]];
-                ((SKShapeNode *) linesNodes[idx]).path = [pathVal pointerValue];
-                ((SKShapeNode *) linesNodes[idx]).lineWidth = 0.1;
-                ((SKShapeNode *) linesNodes[idx]).strokeColor = [SKColor blackColor];
-                ((SKShapeNode *) linesNodes[idx]).fillColor = [SKColor clearColor]; // FIXME: sarebbe meglio non riempisse proprio
-                [((SKShapeNode *) linesNodes[idx]) setPhysicsBody:[SKPhysicsBody bodyWithEdgeChainFromPath:((SKShapeNode *) linesNodes[idx]).path]];
-                
-                
-                [self.world addChild:((SKShapeNode *) linesNodes[idx])];
-            }];
-            
-        }
+//        self.backgroundColor = [SKColor colorWithRed:1 green:1 blue:1 alpha:1];
+//        self.prevBallPos = CGPointMake(0, 0);
+//        self.distEdge = CGSizeMake(self.frame.size.width / 2, self.size.height / 2);
+//        self.fixedTimeBetweenFrames = 1/60;
         
         self.ball = [[SKShapeNode alloc] init];
         CGMutablePathRef bpath = CGPathCreateMutable();
@@ -70,7 +307,67 @@
         [self.ball setPosition:ballPos];
         self.prevBallPos = self.ball.position;
         [self.ball setPhysicsBody:[SKPhysicsBody bodyWithCircleOfRadius:rad]];
+        self.ball.physicsBody.categoryBitMask = ballCategory;
+        self.ball.physicsBody.collisionBitMask = /*emptyCategory;*/ lineCategory;
         [self.ball.physicsBody setFriction:0.4];
+        
+        if (lpaths != NULL) {
+            
+//            NSMutableArray * linesNodes = [[NSMutableArray alloc] init];
+            self.world = [[SKNode alloc] init];
+            self.worldWithPhysics = [[SKNode alloc] init];
+            [self addChild:self.world];
+            [self addChild:self.worldWithPhysics];
+            
+            [lpaths enumerateObjectsUsingBlock:^(NSValue * pathVal, NSUInteger idx, BOOL *stop) {
+//                [linesNodes addObject:[[SKShapeNode alloc] init]];
+                SKShapeNode * currNodePhys = [[SKShapeNode alloc] init];
+                SKShapeNode * currNode = [[SKShapeNode alloc] init];
+                
+                currNode.path = [pathVal pointerValue];
+                currNodePhys.path = [pathVal pointerValue];
+                CGPathRelease([pathVal pointerValue]);
+                currNode.lineWidth = 0.1;
+                currNode.strokeColor = [SKColor blackColor];
+                currNodePhys.strokeColor = [SKColor clearColor];
+                currNode.fillColor = [SKColor clearColor];
+                currNodePhys.fillColor = [SKColor /*colorWithCalibratedRed:1 green:1 blue:1 alpha:0.3*/clearColor];
+                
+                [currNodePhys setPhysicsBody:[SKPhysicsBody bodyWithEdgeChainFromPath:currNodePhys.path]];
+//                currNode.physicsBody.restitution = 0.3;
+                currNodePhys.physicsBody.dynamic = NO;
+                currNodePhys.physicsBody.resting = YES;
+                currNodePhys.physicsBody.categoryBitMask = lineCategory;
+                currNodePhys.physicsBody.collisionBitMask = /*emptyCategory;*/ ballCategory;
+                
+                // Aggiungo il nodo al contenitore di linee per aggiungere all'albero della scena solo quelle che servono
+                [self.linesContainer addNode:currNode andWithPhysics:currNodePhys];
+                
+//                [self.world addChild:currNode];
+            }];
+            
+            self.screenRect_world_phys = CGRectMake(self.ball.position.x - self.blockSizeUnit,
+                                                    self.ball.position.y - self.blockSizeUnit,
+                                                    self.blockSizeUnit * 2,
+                                                    self.blockSizeUnit * 2);
+            NSMutableSet * nextKeysPhys = [self.linesContainer keysInBlocksThatContainsRect:self.screenRect_world_phys];
+            [nextKeysPhys enumerateObjectsUsingBlock:^(NSString * key, BOOL *stop) {
+                SKShapeNode * node = [self.linesContainer nodeByKey:[key integerValue] wantsPhysics:YES];
+                [self.worldWithPhysics addChild:node];
+                [node.physicsBody setResting:YES];
+            }];
+            
+            self.screenRect_world = CGRectMake(self.ball.position.x - self.blockSizeUnit * 3,
+                                               self.ball.position.y - self.blockSizeUnit * 1.5,
+                                               self.blockSizeUnit * 6,
+                                               self.blockSizeUnit * 3);
+            NSMutableSet * nextKeys = [self.linesContainer keysInBlocksThatContainsRect:self.screenRect_world];
+            [nextKeys enumerateObjectsUsingBlock:^(NSString * key, BOOL *stop) {
+                [self.world addChild:[self.linesContainer nodeByKey:[key integerValue] wantsPhysics:NO]];
+            }];
+            
+            self.firstdraw = YES;
+        }
         
     }
 
@@ -135,55 +432,111 @@
 
 
 - (void)update:(NSTimeInterval)currentTime {
+//    [super update:currentTime];
     
-    [super update:currentTime];
+    // Ogni 10 frame aggiorno il sottoalbero del mondo che contiene le linee
+//    if (self.updateWorldTreeCounter == 5) {
+//        self.updateWorldTreeCounter = 0;
+    if (currentTime - self.prevPhysicsUpdateTime > self.PhysicsUpdateRequiredTime) {
+//        NSLog(@"%f - %f", currentTime, self.prevPhysicsUpdateTime);
+        self.prevPhysicsUpdateTime = currentTime;
+        
+        if (!self.firstdraw) {
+            
+            [self.worldWithPhysics removeAllChildren];
+            [self.nextNodesPhys enumerateObjectsUsingBlock:^(SKShapeNode * node, NSUInteger idx, BOOL *stop) {
+                [self.worldWithPhysics addChild:node];
+                [node.physicsBody setResting:YES];
+            }];
+            
+            [self.world removeAllChildren]; // TODO fare meglio
+            [self.nextNodes enumerateObjectsUsingBlock:^(SKShapeNode * node, NSUInteger idx, BOOL *stop) {
+                [self.world addChild:node];
+            }];
+            
+        }
+        else {
+            self.firstdraw = NO;
+//            self.sceneView = (DRRSceneView *) self.view;
+        }
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+            
+            NSInteger ballDirRight = -1;
+            NSInteger ballDirUp = -1;
+            if (self.ball.physicsBody.velocity.dx > 0)
+                ballDirRight = 1;
+            if (self.ball.physicsBody.velocity.dy > 0)
+                ballDirUp = 1;
+            
+            CGPoint newOrigin;
+            if (ballDirUp == 1)
+                newOrigin = CGPointMake(self.ball.position.x - ballDirRight,
+                                        self.ball.position.y - ballDirUp);
+            else
+                newOrigin = CGPointMake(self.ball.position.x - ballDirRight,
+                                        self.ball.position.y - ballDirUp - self.blockSizeUnit);
+            
+            self.screenRect_world_phys = CGRectMake(newOrigin.x,
+                                                    newOrigin.y,
+                                                    self.blockSizeUnit,
+                                                    self.blockSizeUnit);
+            NSMutableSet * nextKeysPhys = [self.linesContainer keysInBlocksThatContainsRect:self.screenRect_world_phys];
+            [self.nextNodesPhys removeAllObjects];
+            [nextKeysPhys enumerateObjectsUsingBlock:^(NSString * key, BOOL *stop) {
+                SKShapeNode * node = [self.linesContainer nodeByKey:[key integerValue] wantsPhysics:YES];
+                [self.nextNodesPhys addObject:node];
+            }];
+            
+            if (self.sceneView == nil)
+                self.sceneView = (DRRSceneView *) self.view; // TODO: trovare un punto migliore
+            self.screenRect_world = CGRectMake(self.ball.position.x - self.blockSizeUnit * 3 / self.sceneView.scale,
+                                               self.ball.position.y - self.blockSizeUnit * 1.5 / self.sceneView.scale,
+                                               self.blockSizeUnit * 6 / self.sceneView.scale,
+                                               self.blockSizeUnit * 3 / self.sceneView.scale);
+
+            NSMutableSet * nextKeys = [self.linesContainer keysInBlocksThatContainsRect:self.screenRect_world];
+            [self.nextNodes removeAllObjects];
+            [nextKeys enumerateObjectsUsingBlock:^(NSString * key, BOOL *stop) {
+                SKShapeNode * node = [self.linesContainer nodeByKey:[key integerValue] wantsPhysics:NO];
+                [self.nextNodes addObject:node];
+            }];
+            
+        });
+            
+//        }
+        
+    }
     
-    //    CGVector ballshift = CGVectorMake(self.prevBallPos.x - self.ball.position.x,
-    //                                      self.prevBallPos.y - self.ball.position.y);
-    //    if (ballshift.dx != 0 || ballshift.dy != 0) {
-    //        self.prevBallPos = self.ball.position;
-    //        [self runAction:[SKAction moveBy:ballshift duration:0.5]];
-    //    }
+//    else
+//        self.updateWorldTreeCounter++;
+    
 }
 
 - (void)didEvaluateActions {
     
-    [super didEvaluateActions];
+//    [super didEvaluateActions];
     
-    DRRSceneView * sceneView = (DRRSceneView *) self.view;
-    self.prevBallPos = CGPointMake((self.ball.position.x + sceneView.pan.x) * sceneView.scale,
-                                   (self.ball.position.y + sceneView.pan.y) * sceneView.scale);
-
+    self.prevPrevBallPos = self.prevBallPos;
+    self.prevBallPos = self.ball.position;
+    
 }
 
 - (void)didSimulatePhysics {
     
+//    [super didSimulatePhysics];
+    
     if (self.ball.position.x != 0 || self.ball.position.y != 0) {
-        dir_t dir = LEFT;
-        CGVector vel = self.ball.physicsBody.velocity;
-        DRRSceneView * sceneView = (DRRSceneView *) self.view;
-        self.ballPosView = CGPointMake((self.ball.position.x + sceneView.pan.x) * sceneView.scale,
-                                       (self.ball.position.y + sceneView.pan.y) * sceneView.scale);
+//        DRRSceneView * sceneView = (DRRSceneView *) self.view;
+        CGFloat myScale = ((DRRSceneView *) self.view).scale * 1.01;
         
-        [super didSimulatePhysics];
-
-        if ([self movingToAnEdge:&dir objPosition:self.ballPosView objVelocity:&vel]) {
-//            NSLog(@"SI!!");
-            //        self.ball.physicsBody.velocity;
-            //        CGVector ballshift = CGVectorMake(self.prevBallPos.x - self.ball.position.x,
-            //                                          self.prevBallPos.y - self.ball.position.y);
-//            CGVector ballshift = CGVectorMake(vel.dx / - 60,
-//                                              vel.dy / - 60);
-//            if (ballshift.dx != 0 || ballshift.dy != 0) {
-                //            self.prevBallPos = self.ball.position;
-            [self runAction:[SKAction moveBy:CGVectorMake(self.prevBallPos.x - self.ballPosView.x,
-                                                          self.prevBallPos.y - self.ballPosView.y)
-                                    duration:0.3]];
-            
-//            self.prevBallPos = self.ballPosView;
-                //            self.position = CGPointMake(self.position.x + ballshift.dx, self.position.y + ballshift.dy);
-//            }
-        }
+        CGVector move = CGVectorMake((self.prevBallPos.x - self.ball.position.x),
+                                     (self.prevBallPos.y - self.ball.position.y));
+        
+        [self runAction:[SKAction moveBy:CGVectorMake(move.dx * myScale,
+                                                      move.dy * myScale)
+                                duration:0.3]];
+        [(DRRSceneView *)self.view moveUpdate:NSMakeSize(move.dx, move.dy) useRuntime:YES];
     }
     
 }
@@ -239,6 +592,8 @@
 - (void)setItemPropertiesToDefault {
     self.scale = 1;
     self.pan = NSMakePoint(0, 0);
+    self.panRuntime = NSMakePoint(0, 0);
+//    self.initMove = CGVectorMake(0, 0);
     [self.scene setPaused:YES];
     [self setHidden:YES];
 }
@@ -267,6 +622,7 @@
             }];
             
             [linesPaths addObject:[NSValue valueWithPointer:CGPathCreateCopy(linesMutPath)]];
+            
             CGPathRelease(linesMutPath);
         }];
         
@@ -305,6 +661,7 @@
     // Creo la fisica globale
     nextScene.physicsWorld.gravity = CGVectorMake(0.0,-9.8);
 
+//    nextScene.physicsWorld.speed = 1;
     [self presentScene:nextScene];
 //    nextScene = NULL; // FIXME
     
@@ -318,8 +675,12 @@
     
     [self.scene setSize:self.bounds.size];
     if (flag) {
-        [self scaleScene:(DRRScene *)self.scene];
-        [self moveScene:(DRRScene *)self.scene];
+        
+//        NSPoint diff = NSMakePoint(self.panRuntime.x * self.scale, self.panRuntime.y * self.scale);
+//        [self.scene runAction:[SKAction moveTo:CGPointMake(diff.x + self.initMove.dx, diff.y + self.initMove.dy) duration:0]];
+        
+//        [self scaleScene:(DRRScene *)self.scene];
+//        [self moveScene:(DRRScene *)self.scene];
     }
     
 }
@@ -334,14 +695,29 @@
     
 }
 
-- (void)moveUpdate:(NSSize)move {
-    self.pan = NSMakePoint(self.pan.x + move.width,
-                           self.pan.y + move.height);
+- (void)moveUpdate:(NSSize)move useRuntime:(BOOL)flag {
+    
+    
+    
+    if (flag)
+        self.panRuntime = NSMakePoint(self.panRuntime.x + move.width,
+                                      self.panRuntime.y + move.height);
+    else {
+        self.pan = NSMakePoint(self.pan.x + move.width,
+                               self.pan.y + move.height);
+        self.panRuntime = self.pan;
+    }
+    
 }
 
-- (void)moveScene:(DRRScene *)scene {
-
-    NSPoint diff = NSMakePoint(self.pan.x * self.scale, self.pan.y * self.scale);
+- (void)moveScene:(DRRScene *)scene /*useRuntime:(BOOL)flag*/ {
+//    NSPoint diff;
+    
+//    if (flag)
+//        diff = NSMakePoint(self.panRuntime.x * self.scale, self.panRuntime.y * self.scale);
+//    else
+    NSPoint diff = NSMakePoint(self.panRuntime.x * self.scale, self.panRuntime.y * self.scale);
+    
     [scene runAction:[SKAction moveTo:diff duration:0]];
     
 }
