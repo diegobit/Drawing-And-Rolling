@@ -47,6 +47,7 @@ void makeDrawLineButton(NSRect frame, CGFloat roundness, NSMutableArray * paths,
 void makeBackButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
 void makeSaveButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
 void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
+void makeTrashButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
 void makePlayButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
 void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes);
 

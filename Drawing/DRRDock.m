@@ -496,6 +496,145 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 
 
+void makeTrashButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes) {
+    
+    frame = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.width - 1, frame.size.height - 1);
+    
+    NSBezierPath * border = [[NSBezierPath alloc] init];
+    NSBezierPath * innerborder = [[NSBezierPath alloc] init];
+    NSBezierPath * container = [[NSBezierPath alloc] init];
+    NSBezierPath * lineLeft = [[NSBezierPath alloc] init];
+    NSBezierPath * lineCenter = [[NSBezierPath alloc] init];
+    NSBezierPath * lineRight = [[NSBezierPath alloc] init];
+    NSBezierPath * cover = [[NSBezierPath alloc] init];
+    
+    // Path per il bordo
+    [border appendBezierPathWithRoundedRect:frame xRadius:(roundness + 2) yRadius:(roundness + 2)];
+    CGFloat bthickness = fmin(frame.size.width, frame.size.height) * 0.08;
+    [innerborder appendBezierPathWithRoundedRect:NSMakeRect(frame.origin.x + bthickness, frame.origin.y + bthickness, frame.size.width - (2 * bthickness), frame.size.height - (2 * bthickness)) xRadius:roundness yRadius:roundness];
+    
+    // Coordinate per il disegno interno.
+    NSPoint contExt_topLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.28,
+                                          frame.origin.y + frame.size.height * 0.36);
+    NSPoint contExt_bottomLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.34,
+                                             frame.origin.y + frame.size.height * 0.80);
+    NSPoint contExt_bottomRight = NSMakePoint(frame.origin.x + frame.size.width * 0.67,
+                                              frame.origin.y + frame.size.height * 0.80);
+    NSPoint contExt_topRight = NSMakePoint(frame.origin.x + frame.size.width * 0.73,
+                                           frame.origin.y + frame.size.height * 0.36);
+    
+    NSPoint contInt_topLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.32,
+                                          frame.origin.y + frame.size.height * 0.36);
+    NSPoint contInt_bottomLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.38,
+                                             frame.origin.y + frame.size.height * 0.77);
+    NSPoint contInt_bottomRight = NSMakePoint(frame.origin.x + frame.size.width * 0.63,
+                                              frame.origin.y + frame.size.height * 0.77);
+    NSPoint contInt_topRight = NSMakePoint(frame.origin.x + frame.size.width * 0.69,
+                                           frame.origin.y + frame.size.height * 0.36);
+    
+    NSPoint LineLeft_topLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.37,
+                                           frame.origin.y + frame.size.height * 0.39);
+    NSPoint LineLeft_bottomLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.41,
+                                              frame.origin.y + frame.size.height * 0.71);
+    NSPoint LineLeft_bottomRight = NSMakePoint(frame.origin.x + frame.size.width * 0.45,
+                                               frame.origin.y + frame.size.height * 0.71);
+    NSPoint LineLeft_topRight = NSMakePoint(frame.origin.x + frame.size.width * 0.41,
+                                            frame.origin.y + frame.size.height * 0.39);
+    
+    NSPoint LineCenter_topLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.49,
+                                             frame.origin.y + frame.size.height * 0.39);
+    NSPoint LineCenter_bottomLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.49,
+                                                frame.origin.y + frame.size.height * 0.71);
+    NSPoint LineCenter_bottomRight = NSMakePoint(frame.origin.x + frame.size.width * 0.53,
+                                                 frame.origin.y + frame.size.height * 0.71);
+    NSPoint LineCenter_topRight = NSMakePoint(frame.origin.x + frame.size.width * 0.53,
+                                              frame.origin.y + frame.size.height * 0.39);
+    
+    NSPoint LineRight_topLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.61,
+                                            frame.origin.y + frame.size.height * 0.39);
+    NSPoint LineRight_bottomLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.56,
+                                               frame.origin.y + frame.size.height * 0.71);
+    NSPoint LineRight_bottomRight = NSMakePoint(frame.origin.x + frame.size.width * 0.60,
+                                                frame.origin.y + frame.size.height * 0.71);
+    NSPoint LineRight_topRight = NSMakePoint(frame.origin.x + frame.size.width * 0.65,
+                                             frame.origin.y + frame.size.height * 0.39);
+    
+    NSPoint cover_topLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.27,
+                                        frame.origin.y + frame.size.height * 0.19);
+    NSPoint cover_bottomLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.26,
+                                           frame.origin.y + frame.size.height * 0.23);
+    NSPoint cover_bottomRight = NSMakePoint(frame.origin.x + frame.size.width * 0.73,
+                                            frame.origin.y + frame.size.height * 0.32);
+    NSPoint cover_topRight = NSMakePoint(frame.origin.x + frame.size.width * 0.74,
+                                         frame.origin.y + frame.size.height * 0.28);
+    NSPoint cover_centerRight = NSMakePoint(frame.origin.x + frame.size.width * 0.56,
+                                            frame.origin.y + frame.size.height * 0.25);
+    NSPoint cover_centerTop = NSMakePoint(frame.origin.x + frame.size.width * 0.51,
+                                          frame.origin.y + frame.size.height * 0.17);
+    NSPoint cover_centerLeft = NSMakePoint(frame.origin.x + frame.size.width * 0.44,
+                                           frame.origin.y + frame.size.height * 0.22);
+    
+    
+    // Path
+    [container moveToPoint:contExt_bottomLeft];
+    [container lineToPoint:contExt_topLeft];
+    [container lineToPoint:contInt_topLeft];
+    [container lineToPoint:contInt_bottomLeft];
+    [container lineToPoint:contInt_bottomRight];
+    [container lineToPoint:contInt_topRight];
+    [container lineToPoint:contExt_topRight];
+    [container lineToPoint:contExt_bottomRight];
+    
+    [lineLeft moveToPoint:LineLeft_topLeft];
+    [lineLeft lineToPoint:LineLeft_bottomLeft];
+    [lineLeft lineToPoint:LineLeft_bottomRight];
+    [lineLeft lineToPoint:LineLeft_topRight];
+    
+    [lineCenter moveToPoint:LineCenter_topLeft];
+    [lineCenter lineToPoint:LineCenter_bottomLeft];
+    [lineCenter lineToPoint:LineCenter_bottomRight];
+    [lineCenter lineToPoint:LineCenter_topRight];
+    
+    [lineRight moveToPoint:LineRight_topLeft];
+    [lineRight lineToPoint:LineRight_bottomLeft];
+    [lineRight lineToPoint:LineRight_bottomRight];
+    [lineRight lineToPoint:LineRight_topRight];
+    
+    [cover moveToPoint:cover_topLeft];
+    [cover lineToPoint:cover_bottomLeft];
+    [cover lineToPoint:cover_bottomRight];
+    [cover lineToPoint:cover_topRight];
+    [cover lineToPoint:cover_centerRight];
+    [cover appendBezierPathWithArcFromPoint:cover_centerRight toPoint:cover_centerTop radius:2];
+    [cover appendBezierPathWithArcFromPoint:cover_centerTop toPoint:cover_centerLeft radius:2];
+    [cover lineToPoint:cover_centerLeft];
+    
+    // Aggiungo i paths all'array paths e imposto le preferenze di disegno in modes
+    [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor llGray] drawingMode:FILLBOTH]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:innerborder]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor ddBlue] drawingMode:FILLNORMAL]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:container]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor llGray] drawingMode:FILLBOTH]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:lineLeft]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor llGray] drawingMode:FILLBOTH]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:lineCenter]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor llGray] drawingMode:FILLBOTH]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:lineRight]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor llGray] drawingMode:FILLBOTH]];
+    
+    [paths addObject:[[DRRPathObj alloc] initWithPath:cover]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor llGray] drawingMode:FILLBOTH]];
+    
+}
+
+
+
 void makePlayButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSMutableArray * modes) {
     
     frame = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.width - 1, frame.size.height - 1);

@@ -11,6 +11,7 @@
 #include <dispatch/dispatch.h>
 
 //#define DEBUGSCENE
+//#define DEBUGPHYSICS
 
 #define lGreen colorWithCalibratedRed:0.35 green:0.88 blue:0.11 alpha:1 // 88 224 12
 typedef enum dir {LEFT, UP, DOWN, RIGHT, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT} dir_t;
@@ -61,6 +62,8 @@ typedef enum dir {LEFT, UP, DOWN, RIGHT, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT} d
 
 - (id)init;
 
+- (void)freeContainer;
+
 //- (void)addKeyToBlock:(NSPoint);
 - (void)addNode:(SKShapeNode *)node andWithPhysics:(SKShapeNode *)nodeWithPhysics;
 - (SKShapeNode *)nodeByKey:(NSInteger)key wantsPhysics:(BOOL)flag;
@@ -86,7 +89,7 @@ typedef enum dir {LEFT, UP, DOWN, RIGHT, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT} d
 
 @interface DRRScene : SKScene
 
-@property DRRSceneView * sceneView;
+@property (weak) DRRSceneView * sceneView;
 @property CGMutablePathRef pathLines;
 @property SKNode * world;
 @property SKNode * worldWithPhysics;
@@ -107,6 +110,9 @@ typedef enum dir {LEFT, UP, DOWN, RIGHT, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT} d
 @property CGFloat PhysicsUpdateRequiredTime;
 @property CGFloat blockSizeUnit;
 @property BOOL firstdraw;
+#ifdef DEBUGPHYSICS
+@property SKNode * debugNode;
+#endif
 
 - (id)initWithSize:(CGSize)size linesPath:(NSMutableArray *)path ballPosition:(CGPoint)ballPos ballRadius:(CGFloat)rad;
 
@@ -129,6 +135,7 @@ typedef enum dir {LEFT, UP, DOWN, RIGHT, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT} d
 @interface DRRSceneView : SKView
 
 //@property NSMutableArray * lines;
+@property NSInteger maxLenLine;
 @property NSPoint pan;
 @property NSPoint panRuntime;
 //@property CGVector initMove;
@@ -136,6 +143,7 @@ typedef enum dir {LEFT, UP, DOWN, RIGHT, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT} d
 
 - (id)initWithFrame:(NSRect)frameRect;
 - (void)setItemPropertiesToDefault;
+- (void)clearScene;
 
 - (void)buildSceneContent:(NSMutableArray *)lines ballPosition:(NSPoint)ballpos ballRadius:(CGFloat)rad;// move:(NSSize)mfactor scale:(CGFloat)sfactor;
 

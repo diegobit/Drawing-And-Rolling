@@ -101,6 +101,7 @@
     
     [super awakeFromNib];
     [self setWantsLayer:YES];
+//    [self setAcceptsTouchEvents:YES];
     self.ball = [[DRRBall alloc] initWithRadius:15];
     
     // Dimensione bottoni della dock, spessore line del disegno interno. Rotondità tasti.
@@ -124,12 +125,28 @@
     self.fileTypes = [NSArray arrayWithObjects:@"sav", nil];
     
 //    dockBar.layer.shouldRasterize = YES;
+//    CGMutablePathRef shad = CGPathCreateMutable();
+//    CGPathMoveToPoint(shad,
+//                      NULL,
+//                      dockBar.bounds.origin.x + dockBar.bounds.size.width,
+//                      dockBar.bounds.origin.y);
+//    CGPathAddLineToPoint(shad,
+//                         NULL,
+//                         dockBar.bounds.origin.x + dockBar.bounds.size.width,
+//                         dockBar.bounds.origin.y + dockBar.bounds.size.height);
+    
+//    [shad moveToPoint:NSMakePoint(,
+//                                  )];
+//    [shad lineToPoint:NSMakePoint(,
+//                                  )];
+//    [dockBar setWantsLayer:YES];
+//    [dockBar.layer setShadowPath:shad];
     
     // Creo la dock e i bottoni
     self.dock = [[DRRDock alloc] initWithFrame:NSMakeRect(1, 0, 1, 1)
                                           mode:NSRadioModeMatrix
                                      cellClass:[DRRButton class]
-                                  numberOfRows:9
+                                  numberOfRows:10
                                numberOfColumns:1];
     [self.dock setDockdelegate:self];
     [self.dock setCellSize:self.cellsize];
@@ -196,25 +213,34 @@
     [self.btnLoad setTarget:self];
     [self.dock putCell:self.btnLoad atRow:6 column:0];
     
+    NSMutableArray * trashPaths = [[NSMutableArray alloc] init];
+    NSMutableArray * trashModes = [[NSMutableArray alloc] init];
+    makeTrashButton(NSMakeRect(self.dock.frame.origin.x, self.dock.frame.origin.y + 7 + (7 * self.dock.cellSize.height), self.dock.cellSize.width, self.dock.cellSize.height), self.roundness, trashPaths, trashModes);
+    self.btnTrash = [[DRRActionButton alloc] initWithPaths:trashPaths typeOfDrawing:trashModes];
+    SEL trash = @selector(resetMap);
+    [self.btnTrash setAction:trash];
+    [self.btnTrash setTarget:self];
+    [self.dock putCell:self.btnTrash atRow:7 column:0];
+    
     NSMutableArray * playPaths = [[NSMutableArray alloc] init];
     NSMutableArray * playModes = [[NSMutableArray alloc] init];
-    makePlayButton(NSMakeRect(self.dock.frame.origin.x, self.dock.frame.origin.y + 7 + (7 * self.dock.cellSize.height), self.dock.cellSize.width, self.dock.cellSize.height), self.roundness, playPaths, playModes);
+    makePlayButton(NSMakeRect(self.dock.frame.origin.x, self.dock.frame.origin.y + 8 + (8 * self.dock.cellSize.height), self.dock.cellSize.width, self.dock.cellSize.height), self.roundness, playPaths, playModes);
     self.btnPlay = [[DRRActionButton alloc] initWithPaths:playPaths typeOfDrawing:playModes];
 //    self.btnPlay.tag = (NSInteger) btnPLAY;
     SEL play_pause = @selector(startOrPauseScene);
     [self.btnPlay setAction:play_pause];
     [self.btnPlay setTarget:self];
-    [self.dock putCell:self.btnPlay atRow:7 column:0];
+    [self.dock putCell:self.btnPlay atRow:8 column:0];
     
     NSMutableArray * stopPaths = [[NSMutableArray alloc] init];
     NSMutableArray * stopModes = [[NSMutableArray alloc] init];
-    makeStopButton(NSMakeRect(self.dock.frame.origin.x, self.dock.frame.origin.y + 8 + (8 * self.dock.cellSize.height), self.dock.cellSize.width, self.dock.cellSize.height), self.roundness, stopPaths, stopModes);
+    makeStopButton(NSMakeRect(self.dock.frame.origin.x, self.dock.frame.origin.y + 9 + (9 * self.dock.cellSize.height), self.dock.cellSize.width, self.dock.cellSize.height), self.roundness, stopPaths, stopModes);
     self.btnStop = [[DRRActionButton alloc] initWithPaths:stopPaths typeOfDrawing:stopModes];
 //    self.btnStop.tag = (NSInteger) btnSTOP;
     SEL stop = @selector(stopScene);
     [self.btnStop setAction:stop];
     [self.btnStop setTarget:self];
-    [self.dock putCell:self.btnStop atRow:8 column:0];
+    [self.dock putCell:self.btnStop atRow:9 column:0];
     
     [self.dock sizeToCells];
     
@@ -233,7 +259,6 @@
     [self.sceneView.scene setPaused:YES];
     [self.sceneView setHidden:YES];
     [self addSubview:self.sceneView];
-    
 }
 
 - (void)setItemPropertiesToDefault {
@@ -347,6 +372,7 @@
         if (filecontent != nil) {
             
             [self stopScene];
+            [self.sceneView clearScene];
             [self.sceneView setItemPropertiesToDefault];
             [self setItemPropertiesToDefault];
             
@@ -403,6 +429,32 @@
         }
         
     } // fine panel richiesta file
+    
+}
+
+- (void)resetMap {
+
+    if ([self.sceneView isHidden]) {
+        NSAlert * alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"Eliminare ogni modifica?"];
+        [alert setInformativeText:@"Non potrai tornare indietro."];
+        [alert addButtonWithTitle:@"Elimina"];
+        [alert addButtonWithTitle:@"Annulla"];
+        [alert setAlertStyle:NSWarningAlertStyle];
+        
+        if ([alert runModal] == NSAlertFirstButtonReturn) {
+            
+            [self stopScene];
+            [self.sceneView setItemPropertiesToDefault];
+            [self setItemPropertiesToDefault];
+            
+//            self.sceneView = [[DRRSceneView alloc] initWithFrame:self.bounds];
+//            [self.sceneView.scene setPaused:YES];
+//            [self.sceneView setHidden:YES];
+            
+            [self setNeedsDisplay:YES];
+        }
+    }
     
 }
 
@@ -873,6 +925,8 @@
 
 - (void)startOrPauseScene {
     
+    NSInteger row = 0; NSInteger col = 0;
+    
     if ([self.sceneView isHidden]) {
         
         if ([self.sceneView isPaused])
@@ -906,7 +960,7 @@
                 self.initMove = CGVectorMake(centerView.x - ballCenterView.x, centerView.y - ballCenterView.y);
 //                self.sceneView.initMove = self.initMove;
                 [self.sceneView.scene runAction:[SKAction moveBy:self.initMove duration:0.5]];
-                [self.sceneView moveUpdate:NSMakeSize(self.initMove.dx, self.initMove.dy) useRuntime:NO]; // TEST: è una prova!
+                [self.sceneView moveUpdate:NSMakeSize(self.initMove.dx, self.initMove.dy) useRuntime:YES]; // TEST: è una prova!
 //            }
             
         }
@@ -922,11 +976,10 @@
                 if (cell == self.btnDrawFree)
                     [self.dock drawCellInside:cell]; // TODO: male, non dovrei farlo a mano, le altre funzionao da sole
             }
-            else if (cell == self.btnBack || cell == self.btnPlay)
+            else if (cell == self.btnBack || cell == self.btnPlay || cell == self.btnTrash)
                 ((DRRActionButton *) cell).altMode = YES;
         }];
         self.dock.prevSelectCell_playPause = self.dock.prevSelectCell;
-        NSInteger row = 0; NSInteger col = 0;
         [self.dock getRow:&row column:&col ofCell:self.btnPan];
         [self.dock setState:NSOnState atRow:row column:col];
         
@@ -934,12 +987,14 @@
     
     else if (![self.sceneView.scene isPaused]) {
         [self.sceneView.scene setPaused:YES];
-        [[self.dock cellAtRow:7 column:0] setAltMode:NO];
+        [self.dock getRow:&row column:&col ofCell:self.btnPlay];
+        [[self.dock cellAtRow:row column:col] setAltMode:NO];
     }
     
     else if ([self.sceneView.scene isPaused]){
         [self.sceneView.scene setPaused:NO];
-        [[self.dock cellAtRow:7 column:0] setAltMode:YES];
+        [self.dock getRow:&row column:&col ofCell:self.btnPlay];
+        [[self.dock cellAtRow:row column:col] setAltMode:YES];
     }
 
 //    [self updateCursor:self];
@@ -949,11 +1004,13 @@
 
     if (!self.sceneView.isHidden) {
 
-        DRRScene * tempScene = [[DRRScene alloc] initWithSize:self.sceneView.bounds.size];
-        [self.sceneView presentScene:tempScene];
+//        DRRScene * tempScene = [[DRRScene alloc] initWithSize:self.sceneView.bounds.size];
+        [self.sceneView presentScene:nil];
         [self.sceneView.scene setPaused:YES];
         [self.sceneView setHidden:YES];
-        [self.sceneView moveUpdate:NSMakeSize(- self.initMove.dx, - self.initMove.dy) useRuntime:NO];
+        [self.sceneView setItemPropertiesToDefault];
+        
+//        [self.sceneView moveUpdate:NSMakeSize(- self.initMove.dx, - self.initMove.dy) useRuntime:NO];
         
         // Riabilito esteticamente i bottoni che non volevo utilizzare durante la scena //TODO: disabilitare davvero
         NSArray * cells = [self.dock cells];
@@ -963,7 +1020,7 @@
                 if (cell == self.btnDrawFree)
                     [self.dock drawCellInside:cell]; // TODO: male, non dovrei farlo a mano, le altre funzionao da sole
             }
-            else if (cell == self.btnBack || cell == self.btnPlay)
+            else if (cell == self.btnBack || cell == self.btnPlay || cell == self.btnTrash)
                 ((DRRActionButton *) cell).altMode = NO;
         }];
         
@@ -1424,6 +1481,25 @@
         [self updateCursor:self];
         self.rightpressed = NO;
     }
+}
+
+- (void)scrollWheel:(NSEvent *)theEvent {
+    NSLog(@"user scrolled %f horizontally and %f vertically", [theEvent deltaX], [theEvent deltaY]);
+//    CGFloat scroll = [theEvent deltaY];
+    CGFloat myDeltaX = [theEvent deltaX];
+    if (fabs(myDeltaX) > 15)
+        myDeltaX = 0;
+    [self move:NSMakeSize(myDeltaX, - [theEvent deltaY]) invalidate:YES];
+//    [self scale:([theEvent deltaY] / 1) maxZoom:self.maxZoomFactor minZoom:self.minZoomFactor];
+}
+
+- (void)magnifyWithEvent:(NSEvent *)event {
+    NSLog(@"mag!");
+    [self scale:([event magnification] + 1) maxZoom:self.maxZoomFactor minZoom:self.minZoomFactor];
+}
+- (void)touchesBeganWithEvent:(NSEvent *)event {
+//    CGFloat a = [event ]
+    NSLog(@"touch generico");
 }
 
 

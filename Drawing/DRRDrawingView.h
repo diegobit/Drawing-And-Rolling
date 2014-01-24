@@ -63,7 +63,7 @@ typedef enum customcursor {PANWAIT, PANACTIVE, PANBALL, ZOOM, ZOOMIN, ZOOMOUT, D
 
 
 @interface DRRDrawingView : NSView <dockToView/*, NSWindowDelegate*/> {
-    IBOutlet DRRDockBar * dockBar;
+    IBOutlet __weak DRRDockBar * dockBar;
 }
     
 /// Indica se il tasto sinistro del mouse è premuto nel momento del controllo.
@@ -110,6 +110,7 @@ typedef enum customcursor {PANWAIT, PANACTIVE, PANBALL, ZOOM, ZOOMIN, ZOOMOUT, D
 @property DRRActionButton * btnBack;
 @property DRRActionButton * btnSave;
 @property DRRActionButton * btnLoad;
+@property DRRActionButton * btnTrash;
 @property DRRActionButton * btnPlay;
 @property DRRActionButton * btnPause;
 @property DRRActionButton * btnStop;
@@ -149,6 +150,7 @@ typedef enum customcursor {PANWAIT, PANACTIVE, PANBALL, ZOOM, ZOOMIN, ZOOMOUT, D
 
 - (void)saveToFile;
 - (void)loadFromFile;
+- (void)resetMap;
 
 /*! Trova i punti adiacenti al punto passato come parametro. Cerca tra le linee già disegnate (LinesContainer). Controlla solo i vertici delle linee.
  \param pt il punto da cercare.

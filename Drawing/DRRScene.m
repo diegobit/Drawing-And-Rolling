@@ -60,7 +60,7 @@ static const uint32_t emptyCategory      =  0x1 << 1;
 
 - (id)init {
     if (self = [super init]) {
-        self.blockSize = 200;
+        self.blockSize = 150;
         self.linesRightUp = [[NSMutableArray alloc] init];
         self.linesRightDown = [[NSMutableArray alloc] init];
         self.linesLeftUp = [[NSMutableArray alloc] init];
@@ -69,6 +69,15 @@ static const uint32_t emptyCategory      =  0x1 << 1;
         self.nextFreeKey = 0;
     }
     return self;
+}
+
+
+
+- (void)freeContainer {
+    [self.linesRightUp removeAllObjects];
+    [self.linesLeftUp removeAllObjects];
+    [self.linesLeftDown removeAllObjects];
+    [self.linesRightDown removeAllObjects];
 }
 
 
@@ -271,7 +280,7 @@ static const uint32_t emptyCategory      =  0x1 << 1;
         self.nextNodesPhys = [[NSMutableArray alloc] init];
         self.blockSizeUnit = self.linesContainer.blockSize * 0.99;
 //        self.updateWorldTreeCounter = 5;
-        self.PhysicsUpdateRequiredTime = 0.083;
+        self.PhysicsUpdateRequiredTime = 0.05; //0.083
         self.prevPhysicsUpdateTime = 0;
 //        self.firstdraw = YES;
 //        self.fixedTimeBetweenFrames = 1/60;
@@ -311,6 +320,11 @@ static const uint32_t emptyCategory      =  0x1 << 1;
         self.ball.physicsBody.collisionBitMask = /*emptyCategory;*/ lineCategory;
         [self.ball.physicsBody setFriction:0.4];
         
+        #ifdef DEBUGPHYSICS
+        self.debugNode = [[SKNode alloc] init];
+        [self addChild:self.debugNode];
+        #endif
+        
         if (lpaths != NULL) {
             
 //            NSMutableArray * linesNodes = [[NSMutableArray alloc] init];
@@ -331,7 +345,10 @@ static const uint32_t emptyCategory      =  0x1 << 1;
                 currNode.strokeColor = [SKColor blackColor];
                 currNodePhys.strokeColor = [SKColor clearColor];
                 currNode.fillColor = [SKColor clearColor];
-                currNodePhys.fillColor = [SKColor /*colorWithCalibratedRed:1 green:1 blue:1 alpha:0.3*/clearColor];
+                currNodePhys.fillColor = [SKColor clearColor];
+                #ifdef DEBUGPHYSICS
+                currNodePhys.fillColor = [SKColor colorWithCalibratedRed:1 green:0 blue:0 alpha:0.3];
+                #endif
                 
                 [currNodePhys setPhysicsBody:[SKPhysicsBody bodyWithEdgeChainFromPath:currNodePhys.path]];
 //                currNode.physicsBody.restitution = 0.3;
@@ -454,33 +471,61 @@ static const uint32_t emptyCategory      =  0x1 << 1;
                 [self.world addChild:node];
             }];
             
+            #ifdef DEBUGPHYSICS
+            [self.debugNode removeAllChildren];
+            SKShapeNode * physRect = [[SKShapeNode alloc] init];
+            CGMutablePathRef pP = CGPathCreateMutable();
+            CGPathAddRect(pP, NULL, self.screenRect_world_phys);
+            physRect.path = pP;
+            pP = NULL;
+            physRect.lineWidth = 0.5;
+            physRect.strokeColor = [SKColor redColor];
+            physRect.name = @"physRect";
+            [self.debugNode addChild:physRect];
+            #endif
+            
         }
         else {
             self.firstdraw = NO;
 //            self.sceneView = (DRRSceneView *) self.view;
         }
         
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^(void) {
             
             NSInteger ballDirRight = -1;
             NSInteger ballDirUp = -1;
+//            CGVector vel = self.ball.physicsBody.velocity;
             if (self.ball.physicsBody.velocity.dx > 0)
                 ballDirRight = 1;
             if (self.ball.physicsBody.velocity.dy > 0)
                 ballDirUp = 1;
             
+            CGFloat modWidth = fabs(self.ball.physicsBody.velocity.dx / 1250);
+            if (modWidth < 1) modWidth = 1;
+            else if (modWidth > 2) modWidth = 2;
+            
+            CGFloat modHeight = fabs(self.ball.physicsBody.velocity.dy / 1250);
+            if (modHeight < 1) modHeight = 1;
+            else if (modHeight > 2) modHeight = 2;
+            
             CGPoint newOrigin;
-            if (ballDirUp == 1)
-                newOrigin = CGPointMake(self.ball.position.x - ballDirRight,
-                                        self.ball.position.y - ballDirUp);
+            if (ballDirUp == 1 && ballDirRight == 1)
+                newOrigin = CGPointMake(self.ball.position.x - 1,
+                                        self.ball.position.y - 1);
+            else if (ballDirUp == 1)
+                newOrigin = CGPointMake(self.ball.position.x + 1 - self.blockSizeUnit * modWidth,
+                                        self.ball.position.y - 1);
+            else if (ballDirRight == 1)
+                newOrigin = CGPointMake(self.ball.position.x - 1,
+                                        self.ball.position.y + 1 - self.blockSizeUnit * modHeight);
             else
-                newOrigin = CGPointMake(self.ball.position.x - ballDirRight,
-                                        self.ball.position.y - ballDirUp - self.blockSizeUnit);
+                newOrigin = CGPointMake(self.ball.position.x + 1 - self.blockSizeUnit * modWidth,
+                                        self.ball.position.y + 1 - self.blockSizeUnit * modHeight);
             
             self.screenRect_world_phys = CGRectMake(newOrigin.x,
                                                     newOrigin.y,
-                                                    self.blockSizeUnit,
-                                                    self.blockSizeUnit);
+                                                    self.blockSizeUnit * modWidth,
+                                                    self.blockSizeUnit * modHeight);
             NSMutableSet * nextKeysPhys = [self.linesContainer keysInBlocksThatContainsRect:self.screenRect_world_phys];
             [self.nextNodesPhys removeAllObjects];
             [nextKeysPhys enumerateObjectsUsingBlock:^(NSString * key, BOOL *stop) {
@@ -490,10 +535,10 @@ static const uint32_t emptyCategory      =  0x1 << 1;
             
             if (self.sceneView == nil)
                 self.sceneView = (DRRSceneView *) self.view; // TODO: trovare un punto migliore
-            self.screenRect_world = CGRectMake(self.ball.position.x - self.blockSizeUnit * 3 / self.sceneView.scale,
-                                               self.ball.position.y - self.blockSizeUnit * 1.5 / self.sceneView.scale,
-                                               self.blockSizeUnit * 6 / self.sceneView.scale,
-                                               self.blockSizeUnit * 3 / self.sceneView.scale);
+            self.screenRect_world = CGRectMake(self.ball.position.x - self.blockSizeUnit * 4 / self.sceneView.scale,
+                                               self.ball.position.y - self.blockSizeUnit * 3 / self.sceneView.scale,
+                                               self.blockSizeUnit * 8 / self.sceneView.scale,
+                                               self.blockSizeUnit * 6 / self.sceneView.scale);
 
             NSMutableSet * nextKeys = [self.linesContainer keysInBlocksThatContainsRect:self.screenRect_world];
             [self.nextNodes removeAllObjects];
@@ -528,7 +573,7 @@ static const uint32_t emptyCategory      =  0x1 << 1;
     
     if (self.ball.position.x != 0 || self.ball.position.y != 0) {
 //        DRRSceneView * sceneView = (DRRSceneView *) self.view;
-        CGFloat myScale = ((DRRSceneView *) self.view).scale * 1.01;
+        CGFloat myScale = ((DRRSceneView *) self.view).scale * 1.015;
         
         CGVector move = CGVectorMake((self.prevBallPos.x - self.ball.position.x),
                                      (self.prevBallPos.y - self.ball.position.y));
@@ -571,12 +616,14 @@ static const uint32_t emptyCategory      =  0x1 << 1;
     self = [super initWithFrame:frameRect];
     if (self) {
         
-        [self setItemPropertiesToDefault];
-        
         [self setWantsLayer:YES];
         
-        DRRScene * tempScene = [[DRRScene alloc] initWithSize:self.bounds.size];
-        [self presentScene:tempScene];
+//        DRRScene * tempScene = [[DRRScene alloc] initWithSize:self.bounds.size];
+        [self presentScene:nil];
+        
+        self.pan = NSMakePoint(0, 0);
+        self.scale = 1;
+        [self setItemPropertiesToDefault];
         
         #ifdef DEBUGSCENE
         self.showsFPS = YES;
@@ -590,12 +637,23 @@ static const uint32_t emptyCategory      =  0x1 << 1;
 }
 
 - (void)setItemPropertiesToDefault {
-    self.scale = 1;
-    self.pan = NSMakePoint(0, 0);
-    self.panRuntime = NSMakePoint(0, 0);
+    self.maxLenLine = 5;
+//    self.pan = NSMakePoint(0, 0);
+    self.panRuntime = self.pan;
 //    self.initMove = CGVectorMake(0, 0);
+
     [self.scene setPaused:YES];
     [self setHidden:YES];
+}
+
+- (void)clearScene {
+    [((DRRScene *) self.scene).linesContainer freeContainer];
+    
+//    DRRScene * tempScene = [[DRRScene alloc] initWithSize:self.bounds.size];
+    [self presentScene:nil];
+    
+    self.pan = NSMakePoint(0, 0);
+    self.scale = 1;
 }
 
 
@@ -608,20 +666,36 @@ static const uint32_t emptyCategory      =  0x1 << 1;
 
         // Creo i path delle linee per la scena
         NSMutableArray * linesPaths = [[NSMutableArray alloc] init];
+        NSPoint pv = NSMakePoint(0, 0);
+        NSPoint * p = &pv;
+        __block CGMutablePathRef linesMutPath;
         
+        // Creo un CGPath per ogni linea dell'array linesContainer in cui ho disegnato. Se le linee sono troppo grandi, le spezzo in più segmenti, così da poterle scaricare dalla simulazione se troppo lontane dalla palla
         [lines enumerateObjectsUsingBlock:^(NSMutableArray * line, NSUInteger idx, BOOL *stop) {
-            CGMutablePathRef linesMutPath = CGPathCreateMutable();
             
             [line enumerateObjectsUsingBlock:^(NSValue * vpoint, NSUInteger idx, BOOL *stop) {
-                NSPoint p = [vpoint pointValue];
+                *p = [vpoint pointValue];
                 
-                if (idx == 0)
-                    CGPathMoveToPoint(linesMutPath, NULL, p.x, p.y);
+                if (idx == 0) {
+                    linesMutPath = CGPathCreateMutable();
+                    CGPathMoveToPoint(linesMutPath, NULL, p->x, p->y);
+                }
+                else if ((idx % self.maxLenLine) == 0) {
+                    CGPathAddLineToPoint(linesMutPath, NULL, p->x, p->y);
+                    [linesPaths addObject:[NSValue valueWithPointer:CGPathCreateCopy(linesMutPath)]];
+                    CGPathRelease(linesMutPath);
+                    
+                    linesMutPath = CGPathCreateMutable();
+                    CGPathMoveToPoint(linesMutPath, NULL, p->x, p->y);
+                }
                 else
-                    CGPathAddLineToPoint(linesMutPath, NULL, p.x, p.y);
+                    CGPathAddLineToPoint(linesMutPath, NULL, p->x, p->y);
+                
             }];
             
-            [linesPaths addObject:[NSValue valueWithPointer:CGPathCreateCopy(linesMutPath)]];
+            NSInteger idxLast = [line count] - 1;
+            if (!((idxLast % self.maxLenLine) == 0))
+                [linesPaths addObject:[NSValue valueWithPointer:CGPathCreateCopy(linesMutPath)]];
             
             CGPathRelease(linesMutPath);
         }];
@@ -661,9 +735,9 @@ static const uint32_t emptyCategory      =  0x1 << 1;
     // Creo la fisica globale
     nextScene.physicsWorld.gravity = CGVectorMake(0.0,-9.8);
 
-//    nextScene.physicsWorld.speed = 1;
+    nextScene.physicsWorld.speed = 1;
     [self presentScene:nextScene];
-//    nextScene = NULL; // FIXME
+    nextScene = nil; // FIXME
     
 }
 
@@ -696,8 +770,6 @@ static const uint32_t emptyCategory      =  0x1 << 1;
 }
 
 - (void)moveUpdate:(NSSize)move useRuntime:(BOOL)flag {
-    
-    
     
     if (flag)
         self.panRuntime = NSMakePoint(self.panRuntime.x + move.width,
