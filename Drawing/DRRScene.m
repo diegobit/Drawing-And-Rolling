@@ -653,6 +653,7 @@ static const uint32_t emptyCategory      =  0x1 << 1;
     [self presentScene:nil];
     
     self.pan = NSMakePoint(0, 0);
+    self.panRuntime = self.pan;
     self.scale = 1;
 }
 

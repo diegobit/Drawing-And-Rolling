@@ -143,6 +143,12 @@ typedef enum customcursor {PANWAIT, PANACTIVE, PANBALL, ZOOM, ZOOMIN, ZOOMOUT, D
 @property NSBezierPath * pathSinglePoint; //, * pathNearPoint;
 @property NSBezierPath * pathBall;
 
+/// Handler eventi
+@property NSEvent * eventMonitor;
+
+/// Timer 
+@property NSTimer * timer;
+
 - (id)initWithFrame:(NSRect)frameRect;
 - (id)initWithCoder:(NSCoder *)aDecoder;
 - (void)awakeFromNib;

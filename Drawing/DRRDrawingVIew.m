@@ -101,7 +101,6 @@
     
     [super awakeFromNib];
     [self setWantsLayer:YES];
-//    [self setAcceptsTouchEvents:YES];
     self.ball = [[DRRBall alloc] initWithRadius:15];
     
     // Dimensione bottoni della dock, spessore line del disegno interno. Rotondità tasti.
@@ -110,12 +109,6 @@
     if (self.linewidth < 1) self.linewidth = 1;
     self.roundness = (self.cellsize.width + self.cellsize.height) / 8;
     
-    // Creo la barra che conterrà la matrice (per disegnarne lo sfondo e il contorno)
-//    dockBar = [[DRRDockBar alloc] initWithFrame:NSMakeRect(self.frame.origin.x,
-//                                                                self.frame.origin.y,
-//                                                                self.cellsize.width * 19/18,
-//                                                                self.frame.size.height)];
-//    
     [self setItemPropertiesToDefault];
     
     self.linesContainerHasChanged = NO;
@@ -123,24 +116,6 @@
     // nome base salvataggio file. Estensioni
     self.filesavename = @"map";
     self.fileTypes = [NSArray arrayWithObjects:@"sav", nil];
-    
-//    dockBar.layer.shouldRasterize = YES;
-//    CGMutablePathRef shad = CGPathCreateMutable();
-//    CGPathMoveToPoint(shad,
-//                      NULL,
-//                      dockBar.bounds.origin.x + dockBar.bounds.size.width,
-//                      dockBar.bounds.origin.y);
-//    CGPathAddLineToPoint(shad,
-//                         NULL,
-//                         dockBar.bounds.origin.x + dockBar.bounds.size.width,
-//                         dockBar.bounds.origin.y + dockBar.bounds.size.height);
-    
-//    [shad moveToPoint:NSMakePoint(,
-//                                  )];
-//    [shad lineToPoint:NSMakePoint(,
-//                                  )];
-//    [dockBar setWantsLayer:YES];
-//    [dockBar.layer setShadowPath:shad];
     
     // Creo la dock e i bottoni
     self.dock = [[DRRDock alloc] initWithFrame:NSMakeRect(1, 0, 1, 1)
@@ -155,21 +130,18 @@
     NSMutableArray * panModes = [[NSMutableArray alloc] init];
     makePanButton(NSMakeRect(self.dock.frame.origin.x, self.dock.frame.origin.y, self.dock.cellSize.width, self.dock.cellSize.height), panPaths, panModes);
     self.btnPan = [[DRRButton alloc] initWithPaths:panPaths typeOfDrawing:panModes];
-//    self.btnPan.celltag = (NSInteger) btnPAN;
     [self.dock putCell:self.btnPan atRow:0 column:0];
     
     NSMutableArray * zoomPaths = [[NSMutableArray alloc] init];
     NSMutableArray * zoomModes = [[NSMutableArray alloc] init];
     makeZoomButton(NSMakeRect(self.dock.frame.origin.x, self.dock.frame.origin.y + 1 + (1 * self.dock.cellSize.height), self.dock.cellSize.width, self.dock.cellSize.height), zoomPaths, zoomModes);
     self.btnZoom = [[DRRButton alloc] initWithPaths:zoomPaths typeOfDrawing:zoomModes];
-//    self.btnZoom.celltag = (NSInteger) ZOOM;
     [self.dock putCell:self.btnZoom atRow:1 column:0];
     
     NSMutableArray * drawFreePaths = [[NSMutableArray alloc] init];
     NSMutableArray * drawFreeModes = [[NSMutableArray alloc] init];
     makeDrawFreeButton(NSMakeRect(self.dock.frame.origin.x, self.dock.frame.origin.y + 2 + (2 * self.dock.cellSize.height), self.dock.cellSize.width, self.dock.cellSize.height), self.roundness, drawFreePaths, drawFreeModes);
     self.btnDrawFree = [[DRRButton alloc] initWithPaths:drawFreePaths typeOfDrawing:drawFreeModes];
-//    self.btnDrawFree.celltag = (NSInteger) btnDRAWFREE;
     [self.dock putCell:self.btnDrawFree atRow:2 column:0];
     [self.dock setState:NSOnState atRow:2 column:0];
     self.dock.prevSelectCell = [self.dock selectedCell];
@@ -180,14 +152,12 @@
     NSMutableArray * drawLineModes = [[NSMutableArray alloc] init];
     makeDrawLineButton(NSMakeRect(self.dock.frame.origin.x, self.dock.frame.origin.y + 3 + (3 * self.dock.cellSize.height), self.dock.cellSize.width, self.dock.cellSize.height), self.roundness, drawLinePaths, drawLineModes);
     self.btnDrawLine = [[DRRButton alloc] initWithPaths:drawLinePaths typeOfDrawing:drawLineModes];
-//    self.btnDrawLine.celltag = (NSInteger) btnDRAWLINE;
     [self.dock putCell:self.btnDrawLine atRow:3 column:0];
     
     NSMutableArray * backPaths = [[NSMutableArray alloc] init];
     NSMutableArray * backModes = [[NSMutableArray alloc] init];
     makeBackButton(NSMakeRect(self.dock.frame.origin.x, self.dock.frame.origin.y + 4 + (4 * self.dock.cellSize.height), self.dock.cellSize.width, self.dock.cellSize.height), self.roundness, backPaths, backModes);
     self.btnBack = [[DRRActionButton alloc] initWithPaths:backPaths typeOfDrawing:backModes];
-//    self.btnBack.tag = (NSInteger) btnBACK;
     SEL undo = @selector(removeLatestLine);
     [self.btnBack setAction:undo];
     [self.btnBack setTarget:self];
@@ -197,7 +167,6 @@
     NSMutableArray * saveModes = [[NSMutableArray alloc] init];
     makeSaveButton(NSMakeRect(self.dock.frame.origin.x, self.dock.frame.origin.y + 5 + (5 * self.dock.cellSize.height), self.dock.cellSize.width, self.dock.cellSize.height), self.roundness, savePaths, saveModes);
     self.btnSave = [[DRRActionButton alloc] initWithPaths:savePaths typeOfDrawing:saveModes];
-//    self.btnSave.tag = (NSInteger) btnSAVE;
     SEL save = @selector(saveToFile);
     [self.btnSave setAction:save];
     [self.btnSave setTarget:self];
@@ -207,7 +176,6 @@
     NSMutableArray * loadModes = [[NSMutableArray alloc] init];
     makeLoadButton(NSMakeRect(self.dock.frame.origin.x, self.dock.frame.origin.y + 6 + (6 * self.dock.cellSize.height), self.dock.cellSize.width, self.dock.cellSize.height), self.roundness, loadPaths, loadModes);
     self.btnLoad = [[DRRActionButton alloc] initWithPaths:loadPaths typeOfDrawing:loadModes];
-//    self.btnLoad.tag = (NSInteger) btnLOAD;
     SEL load = @selector(loadFromFile);
     [self.btnLoad setAction:load];
     [self.btnLoad setTarget:self];
@@ -226,7 +194,6 @@
     NSMutableArray * playModes = [[NSMutableArray alloc] init];
     makePlayButton(NSMakeRect(self.dock.frame.origin.x, self.dock.frame.origin.y + 8 + (8 * self.dock.cellSize.height), self.dock.cellSize.width, self.dock.cellSize.height), self.roundness, playPaths, playModes);
     self.btnPlay = [[DRRActionButton alloc] initWithPaths:playPaths typeOfDrawing:playModes];
-//    self.btnPlay.tag = (NSInteger) btnPLAY;
     SEL play_pause = @selector(startOrPauseScene);
     [self.btnPlay setAction:play_pause];
     [self.btnPlay setTarget:self];
@@ -236,7 +203,6 @@
     NSMutableArray * stopModes = [[NSMutableArray alloc] init];
     makeStopButton(NSMakeRect(self.dock.frame.origin.x, self.dock.frame.origin.y + 9 + (9 * self.dock.cellSize.height), self.dock.cellSize.width, self.dock.cellSize.height), self.roundness, stopPaths, stopModes);
     self.btnStop = [[DRRActionButton alloc] initWithPaths:stopPaths typeOfDrawing:stopModes];
-//    self.btnStop.tag = (NSInteger) btnSTOP;
     SEL stop = @selector(stopScene);
     [self.btnStop setAction:stop];
     [self.btnStop setTarget:self];
@@ -259,6 +225,51 @@
     [self.sceneView.scene setPaused:YES];
     [self.sceneView setHidden:YES];
     [self addSubview:self.sceneView];
+    
+    // Aggiungo l'handler degli eventi della tastiera
+    self.eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSKeyDownMask
+                                                              handler:^NSEvent * (NSEvent * theEvent) {
+                                                                  int found = NO;
+                                                                  
+                                                                  switch ([theEvent keyCode]) {
+                                                                      case 123:             // Freccia sinistra
+                                                                          [self move:NSMakeSize(-20, 0) invalidate:YES];
+                                                                          found = YES;
+                                                                          break;
+                                                                      case 124:             // Freccia destra
+                                                                          [self move:NSMakeSize(20, 0) invalidate:YES];
+                                                                          found = YES;
+                                                                          break;
+                                                                      case 125:             // Freccia giù
+                                                                          [self move:NSMakeSize(0, -20) invalidate:YES];
+                                                                          found = YES;
+                                                                          break;
+                                                                      case 126:             // Freccia su
+                                                                          [self move:NSMakeSize(0, 20) invalidate:YES];
+                                                                          found = YES;
+                                                                          break;
+                                                                          
+                                                                      case 51:              // delete
+                                                                          [self removeLatestLine];
+                                                                          found = YES;
+                                                                          break;
+                                                                      case 49:              // barra spazio
+                                                                          [self startOrPauseScene];
+                                                                          found = YES;
+                                                                          break;
+                                                                      case 53:              // esc
+                                                                          [self stopScene];
+                                                                          found = YES;
+                                                                          break;
+                                                                      default:
+                                                                          break;
+                                                                  }
+                                                                  
+                                                                  if (found)
+                                                                      return nil; // NON invio l'evento se ho premuto un tasto
+                                                                  else
+                                                                      return theEvent;
+                                                              }];
 }
 
 - (void)setItemPropertiesToDefault {
@@ -446,6 +457,7 @@
             
             [self stopScene];
             [self.sceneView setItemPropertiesToDefault];
+            [self.sceneView clearScene];
             [self setItemPropertiesToDefault];
             
 //            self.sceneView = [[DRRSceneView alloc] initWithFrame:self.bounds];
@@ -941,8 +953,6 @@
         [self.sceneView buildSceneContent:self.linesContainer
                              ballPosition:ballCenter
                                ballRadius:self.ball.radius];
-                                     /*move:self.w2vTransFactor
-                                    scale:self.w2vScaleFactor*/
         
         [self.sceneView setHidden:NO];
         
@@ -950,15 +960,9 @@
         // Sposto la camera sulla palla
         if (self.ball.isAlreadyPlaced) {
             CGPoint ballCenterView = NSPointToCGPoint([self.w2vScale transformPoint:[self.w2vTrans transformPoint:self.ball.center]]);
-//            CGRect viewReduced = CGRectMake(self.sceneView.bounds.origin.x + self.sceneView.bounds.size.width / 3,
-//                                            self.sceneView.bounds.origin.y + self.sceneView.bounds.size.height / 3,
-//                                            self.sceneView.bounds.size.width / 3,
-//                                            self.sceneView.bounds.size.height / 3);
-//            if (!CGRectContainsPoint(viewReduced, ballCenterView)) {
                 NSPoint centerView = NSMakePoint(self.sceneView.bounds.origin.x + self.sceneView.bounds.size.width / 2,
                                                  self.sceneView.bounds.origin.y + self.sceneView.bounds.size.height / 2);
                 self.initMove = CGVectorMake(centerView.x - ballCenterView.x, centerView.y - ballCenterView.y);
-//                self.sceneView.initMove = self.initMove;
                 [self.sceneView.scene runAction:[SKAction moveBy:self.initMove duration:0.5]];
                 [self.sceneView moveUpdate:NSMakeSize(self.initMove.dx, self.initMove.dy) useRuntime:YES]; // TEST: è una prova!
 //            }
@@ -1485,21 +1489,8 @@
 
 - (void)scrollWheel:(NSEvent *)theEvent {
     NSLog(@"user scrolled %f horizontally and %f vertically", [theEvent deltaX], [theEvent deltaY]);
-//    CGFloat scroll = [theEvent deltaY];
-    CGFloat myDeltaX = [theEvent deltaX];
-    if (fabs(myDeltaX) > 15)
-        myDeltaX = 0;
-    [self move:NSMakeSize(myDeltaX, - [theEvent deltaY]) invalidate:YES];
+    [self move:NSMakeSize([theEvent deltaX], - [theEvent deltaY]) invalidate:YES];
 //    [self scale:([theEvent deltaY] / 1) maxZoom:self.maxZoomFactor minZoom:self.minZoomFactor];
-}
-
-- (void)magnifyWithEvent:(NSEvent *)event {
-    NSLog(@"mag!");
-    [self scale:([event magnification] + 1) maxZoom:self.maxZoomFactor minZoom:self.minZoomFactor];
-}
-- (void)touchesBeganWithEvent:(NSEvent *)event {
-//    CGFloat a = [event ]
-    NSLog(@"touch generico");
 }
 
 
