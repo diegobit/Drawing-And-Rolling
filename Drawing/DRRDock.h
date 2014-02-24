@@ -15,7 +15,6 @@
 //#define DEBUGDOCKMOUSECORR
 
 typedef enum drawingmodes {STROKENORMAL, STROKEALT, STROKEBOTH, FILLNORMAL, FILLALT, FILLBOTH} drawingmode_t;
-//typedef enum buttons {btnPAN, btnZOOM, btnDRAWFREE, btnDRAWLINE, btnBACK, btnSAVE, btnLOAD, btnPLAY, btnSTOP} buttons_t;
 
 @interface DRRPathObj : NSObject
 
@@ -56,8 +55,6 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 @interface DRRDockBar : NSView
 
 - (BOOL)preservesContentDuringLiveResize;
-
-//- (void)setFrameSize:(NSSize)newSize;
 
 - (void)drawRect:(NSRect)dirtyRect;
 

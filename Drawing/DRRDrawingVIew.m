@@ -253,6 +253,10 @@
                                                                           [self removeLatestLine];
                                                                           found = YES;
                                                                           break;
+                                                                      case 48:              // TAB
+                                                                          [self switchToLastButton];
+                                                                          found = YES;
+                                                                          break;
                                                                       case 49:              // barra spazio
                                                                           [self startOrPauseScene];
                                                                           found = YES;
@@ -537,6 +541,22 @@
     
     return d;
     
+}
+
+
+
+- (void)switchToLastButton {
+    if (self.dock.selectedCell != self.btnPan) {
+        self.dock.prevSelectCell_RMouse = self.dock.selectedCell;
+        [self.dock selectCell:self.btnPan];
+    }
+    else {
+        DRRButton * temp = self.dock.selectedCell;
+        [self.dock selectCell:self.dock.prevSelectCell_RMouse];
+        self.dock.prevSelectCell_RMouse = temp;
+    }
+    
+    [self updateCursor:self];
 }
 
 
@@ -1472,25 +1492,14 @@
     #endif
     
     if (self.rightpressed) {
-        if (self.dock.selectedCell != self.btnPan) {
-            self.dock.prevSelectCell_RMouse = self.dock.selectedCell;
-            [self.dock selectCell:self.btnPan];
-        }
-        else {
-            DRRButton * temp = self.dock.selectedCell;
-            [self.dock selectCell:self.dock.prevSelectCell_RMouse];
-            self.dock.prevSelectCell_RMouse = temp;
-        }
-        
-        [self updateCursor:self];
+        [self switchToLastButton];
         self.rightpressed = NO;
     }
 }
 
 - (void)scrollWheel:(NSEvent *)theEvent {
-    NSLog(@"user scrolled %f horizontally and %f vertically", [theEvent deltaX], [theEvent deltaY]);
-    [self move:NSMakeSize([theEvent deltaX], - [theEvent deltaY]) invalidate:YES];
-//    [self scale:([theEvent deltaY] / 1) maxZoom:self.maxZoomFactor minZoom:self.minZoomFactor];
+//    NSLog(@"user scrolled %f horizontally and %f vertically", [theEvent deltaX], [theEvent deltaY]);
+    [self move:NSMakeSize([theEvent deltaX] * 4, -3 * [theEvent deltaY]) invalidate:YES]; //TODO: Brutto, basato su driver del tuo touchpad
 }
 
 

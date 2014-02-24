@@ -110,6 +110,8 @@ typedef enum dir {LEFT, UP, DOWN, RIGHT, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT} d
 @property CGFloat PhysicsUpdateRequiredTime;
 @property CGFloat blockSizeUnit;
 @property BOOL firstdraw;
+@property BOOL isComputingScene;
+
 #ifdef DEBUGPHYSICS
 @property SKNode * debugNode;
 #endif

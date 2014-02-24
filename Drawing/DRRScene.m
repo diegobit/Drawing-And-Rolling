@@ -451,104 +451,110 @@ static const uint32_t emptyCategory      =  0x1 << 1;
 - (void)update:(NSTimeInterval)currentTime {
 //    [super update:currentTime];
     
-    // Ogni 10 frame aggiorno il sottoalbero del mondo che contiene le linee
-//    if (self.updateWorldTreeCounter == 5) {
-//        self.updateWorldTreeCounter = 0;
+    // Ogni qualche frame (PhysicsUpdateRequiredTime è il tempo che deve passare da un update all'altro)
+    // aggiorno il sottoalbero del mondo che contiene le linee
     if (currentTime - self.prevPhysicsUpdateTime > self.PhysicsUpdateRequiredTime) {
-//        NSLog(@"%f - %f", currentTime, self.prevPhysicsUpdateTime);
         self.prevPhysicsUpdateTime = currentTime;
         
+        // Se non sono al primo update aggiorno la scena (solo se il thread che calcola le prossime linee da disegnare e da calcolarne la fisica ha finito)
         if (!self.firstdraw) {
-            
-            [self.worldWithPhysics removeAllChildren];
-            [self.nextNodesPhys enumerateObjectsUsingBlock:^(SKShapeNode * node, NSUInteger idx, BOOL *stop) {
-                [self.worldWithPhysics addChild:node];
-                [node.physicsBody setResting:YES];
-            }];
-            
-            [self.world removeAllChildren]; // TODO fare meglio
-            [self.nextNodes enumerateObjectsUsingBlock:^(SKShapeNode * node, NSUInteger idx, BOOL *stop) {
-                [self.world addChild:node];
-            }];
-            
-            #ifdef DEBUGPHYSICS
-            [self.debugNode removeAllChildren];
-            SKShapeNode * physRect = [[SKShapeNode alloc] init];
-            CGMutablePathRef pP = CGPathCreateMutable();
-            CGPathAddRect(pP, NULL, self.screenRect_world_phys);
-            physRect.path = pP;
-            pP = NULL;
-            physRect.lineWidth = 0.5;
-            physRect.strokeColor = [SKColor redColor];
-            physRect.name = @"physRect";
-            [self.debugNode addChild:physRect];
-            #endif
-            
+            if (!self.isComputingScene) {
+                [self.worldWithPhysics removeAllChildren];
+                [self.nextNodesPhys enumerateObjectsUsingBlock:^(SKShapeNode * node, NSUInteger idx, BOOL *stop) {
+                    [self.worldWithPhysics addChild:node];
+                    [node.physicsBody setResting:YES];
+                }];
+                
+                [self.world removeAllChildren]; // TODO fare meglio
+                [self.nextNodes enumerateObjectsUsingBlock:^(SKShapeNode * node, NSUInteger idx, BOOL *stop) {
+                    [self.world addChild:node];
+                }];
+                
+                #ifdef DEBUGPHYSICS
+                [self.debugNode removeAllChildren];
+                SKShapeNode * physRect = [[SKShapeNode alloc] init];
+                CGMutablePathRef pP = CGPathCreateMutable();
+                CGPathAddRect(pP, NULL, self.screenRect_world_phys);
+                physRect.path = pP;
+                pP = NULL;
+                physRect.lineWidth = 0.5;
+                physRect.strokeColor = [SKColor redColor];
+                physRect.name = @"physRect";
+                [self.debugNode addChild:physRect];
+                #endif
+            }
         }
         else {
             self.firstdraw = NO;
 //            self.sceneView = (DRRSceneView *) self.view;
         }
         
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^(void) {
+        // Calcolo le prossime linee in backgroud, solo se non le sto già calcolando
+        if (!self.isComputingScene) {
+            self.isComputingScene = YES;
             
-            NSInteger ballDirRight = -1;
-            NSInteger ballDirUp = -1;
-//            CGVector vel = self.ball.physicsBody.velocity;
-            if (self.ball.physicsBody.velocity.dx > 0)
-                ballDirRight = 1;
-            if (self.ball.physicsBody.velocity.dy > 0)
-                ballDirUp = 1;
-            
-            CGFloat modWidth = fabs(self.ball.physicsBody.velocity.dx / 1250);
-            if (modWidth < 1) modWidth = 1;
-            else if (modWidth > 2) modWidth = 2;
-            
-            CGFloat modHeight = fabs(self.ball.physicsBody.velocity.dy / 1250);
-            if (modHeight < 1) modHeight = 1;
-            else if (modHeight > 2) modHeight = 2;
-            
-            CGPoint newOrigin;
-            if (ballDirUp == 1 && ballDirRight == 1)
-                newOrigin = CGPointMake(self.ball.position.x - 1,
-                                        self.ball.position.y - 1);
-            else if (ballDirUp == 1)
-                newOrigin = CGPointMake(self.ball.position.x + 1 - self.blockSizeUnit * modWidth,
-                                        self.ball.position.y - 1);
-            else if (ballDirRight == 1)
-                newOrigin = CGPointMake(self.ball.position.x - 1,
-                                        self.ball.position.y + 1 - self.blockSizeUnit * modHeight);
-            else
-                newOrigin = CGPointMake(self.ball.position.x + 1 - self.blockSizeUnit * modWidth,
-                                        self.ball.position.y + 1 - self.blockSizeUnit * modHeight);
-            
-            self.screenRect_world_phys = CGRectMake(newOrigin.x,
-                                                    newOrigin.y,
-                                                    self.blockSizeUnit * modWidth,
-                                                    self.blockSizeUnit * modHeight);
-            NSMutableSet * nextKeysPhys = [self.linesContainer keysInBlocksThatContainsRect:self.screenRect_world_phys];
-            [self.nextNodesPhys removeAllObjects];
-            [nextKeysPhys enumerateObjectsUsingBlock:^(NSString * key, BOOL *stop) {
-                SKShapeNode * node = [self.linesContainer nodeByKey:[key integerValue] wantsPhysics:YES];
-                [self.nextNodesPhys addObject:node];
-            }];
-            
-            if (self.sceneView == nil)
-                self.sceneView = (DRRSceneView *) self.view; // TODO: trovare un punto migliore
-            self.screenRect_world = CGRectMake(self.ball.position.x - self.blockSizeUnit * 4 / self.sceneView.scale,
-                                               self.ball.position.y - self.blockSizeUnit * 3 / self.sceneView.scale,
-                                               self.blockSizeUnit * 8 / self.sceneView.scale,
-                                               self.blockSizeUnit * 6 / self.sceneView.scale);
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(void) {
+                
+                NSInteger ballDirRight = -1;
+                NSInteger ballDirUp = -1;
+        //            CGVector vel = self.ball.physicsBody.velocity;
+                if (self.ball.physicsBody.velocity.dx > 0)
+                    ballDirRight = 1;
+                if (self.ball.physicsBody.velocity.dy > 0)
+                    ballDirUp = 1;
+                
+                CGFloat modWidth = fabs(self.ball.physicsBody.velocity.dx / 1250);
+                if (modWidth < 1) modWidth = 1;
+                else if (modWidth > 2) modWidth = 2;
+                
+                CGFloat modHeight = fabs(self.ball.physicsBody.velocity.dy / 1250);
+                if (modHeight < 1) modHeight = 1;
+                else if (modHeight > 2) modHeight = 2;
+                
+                CGPoint newOrigin;
+                if (ballDirUp == 1 && ballDirRight == 1)
+                    newOrigin = CGPointMake(self.ball.position.x - 1,
+                                            self.ball.position.y - 1);
+                else if (ballDirUp == 1)
+                    newOrigin = CGPointMake(self.ball.position.x + 1 - self.blockSizeUnit * modWidth,
+                                            self.ball.position.y - 1);
+                else if (ballDirRight == 1)
+                    newOrigin = CGPointMake(self.ball.position.x - 1,
+                                            self.ball.position.y + 1 - self.blockSizeUnit * modHeight);
+                else
+                    newOrigin = CGPointMake(self.ball.position.x + 1 - self.blockSizeUnit * modWidth,
+                                            self.ball.position.y + 1 - self.blockSizeUnit * modHeight);
+                
+                self.screenRect_world_phys = CGRectMake(newOrigin.x,
+                                                        newOrigin.y,
+                                                        self.blockSizeUnit * modWidth,
+                                                        self.blockSizeUnit * modHeight);
+                NSMutableSet * nextKeysPhys = [self.linesContainer keysInBlocksThatContainsRect:self.screenRect_world_phys];
+                [self.nextNodesPhys removeAllObjects];
+                [nextKeysPhys enumerateObjectsUsingBlock:^(NSString * key, BOOL *stop) {
+                    SKShapeNode * node = [self.linesContainer nodeByKey:[key integerValue] wantsPhysics:YES];
+                    [self.nextNodesPhys addObject:node];
+                }];
+                
+                if (self.sceneView == nil)
+                    self.sceneView = (DRRSceneView *) self.view; // TODO: trovare un punto migliore
+                self.screenRect_world = CGRectMake(self.ball.position.x - self.blockSizeUnit * 4 / self.sceneView.scale,
+                                                   self.ball.position.y - self.blockSizeUnit * 3 / self.sceneView.scale,
+                                                   self.blockSizeUnit * 8 / self.sceneView.scale,
+                                                   self.blockSizeUnit * 6 / self.sceneView.scale);
 
-            NSMutableSet * nextKeys = [self.linesContainer keysInBlocksThatContainsRect:self.screenRect_world];
-            [self.nextNodes removeAllObjects];
-            [nextKeys enumerateObjectsUsingBlock:^(NSString * key, BOOL *stop) {
-                SKShapeNode * node = [self.linesContainer nodeByKey:[key integerValue] wantsPhysics:NO];
-                [self.nextNodes addObject:node];
-            }];
+                NSMutableSet * nextKeys = [self.linesContainer keysInBlocksThatContainsRect:self.screenRect_world];
+                [self.nextNodes removeAllObjects];
+                [nextKeys enumerateObjectsUsingBlock:^(NSString * key, BOOL *stop) {
+                    SKShapeNode * node = [self.linesContainer nodeByKey:[key integerValue] wantsPhysics:NO];
+                    [self.nextNodes addObject:node];
+                }];
+                
+                self.isComputingScene = NO;
+            });
             
-        });
-            
+        }
+        
 //        }
         
     }

@@ -179,6 +179,8 @@ typedef enum customcursor {PANWAIT, PANACTIVE, PANBALL, ZOOM, ZOOMIN, ZOOMOUT, D
  */
 - (CGFloat)distanceBetweenPoint:(NSPoint)p1 andPoint:(NSPoint)p2;
 
+- (void)switchToLastButton;
+
 /** Metodi per aggiungere linee da disegnare e rimuoverle */
 - (void)addEmptyLine;
 - (void)addPointToLatestLine:(NSPoint*)p;
