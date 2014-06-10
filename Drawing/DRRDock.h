@@ -11,7 +11,7 @@
 #define llGray colorWithCalibratedRed:0.89 green:0.89 blue:0.89 alpha:1
 #define ddBlue colorWithCalibratedRed:0.05 green:0.05 blue:0.1 alpha:1
 
-//#define DEBUGDOCKDRAW
+#define DEBUGDOCKDRAW
 //#define DEBUGDOCKMOUSECORR
 
 typedef enum drawingmodes {STROKENORMAL, STROKEALT, STROKEBOTH, FILLNORMAL, FILLALT, FILLBOTH} drawingmode_t;

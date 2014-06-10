@@ -24,6 +24,7 @@
 //#define ARGERROR -10    // parametro non valido
 
 #define PTDISTANCE 12.0 // distanza tra due punti per essere considerati adiacenti
+#define BALLRADIUS 15 // raggio di default della palla
 
 
 
@@ -62,7 +63,7 @@ typedef enum customcursor {PANWAIT, PANACTIVE, PANBALL, ZOOM, ZOOMIN, ZOOMOUT, D
 
 
 
-@interface DRRDrawingView : NSView <dockToView/*, NSWindowDelegate*/> {
+@interface DRRDrawingView : NSView <dockToView> {
     IBOutlet __weak DRRDockBar * dockBar;
 }
     
@@ -95,7 +96,7 @@ typedef enum customcursor {PANWAIT, PANACTIVE, PANBALL, ZOOM, ZOOMIN, ZOOMOUT, D
 @property CGFloat maxZoomFactor;
 @property CGFloat minZoomFactor;
 
-// Matrice che gestisce i bottoni dell'interfaccia. Grandezza controllo. Rotondità del bordo dei tasti.
+// View che gestisce i bottoni dell'interfaccia. Grandezza controllo. Rotondità del bordo dei tasti.
 // Spessore linea del disegno interno dei controlli.
 @property DRRDock * dock;
 @property NSSize cellsize;

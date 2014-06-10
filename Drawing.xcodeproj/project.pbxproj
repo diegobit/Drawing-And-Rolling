@@ -20,7 +20,7 @@
 		F11DFEB018560DE9001A17AA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F11DFE8F18560DE8001A17AA /* Cocoa.framework */; };
 		F11DFEB818560DE9001A17AA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = F11DFEB618560DE9001A17AA /* InfoPlist.strings */; };
 		F11DFEBA18560DE9001A17AA /* DrawingTests.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFEB918560DE9001A17AA /* DrawingTests.m */; };
-		F11DFEC518560E36001A17AA /* DRRDrawingVIew.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFEC418560E36001A17AA /* DRRDrawingVIew.m */; };
+		F11DFEC518560E36001A17AA /* DRRDrawingView.m in Sources */ = {isa = PBXBuildFile; fileRef = F11DFEC418560E36001A17AA /* DRRDrawingView.m */; };
 		F1877A8E188C7FD5001760B6 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F1877A8D188C7FD5001760B6 /* Images.xcassets */; };
 		F1A93DD2188B26D3007A5BAD /* DRRMenuController.m in Sources */ = {isa = PBXBuildFile; fileRef = F1A93DD1188B26D3007A5BAD /* DRRMenuController.m */; };
 /* End PBXBuildFile section */
@@ -60,7 +60,7 @@
 		F11DFEB718560DE9001A17AA /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		F11DFEB918560DE9001A17AA /* DrawingTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DrawingTests.m; sourceTree = "<group>"; };
 		F11DFEC318560E36001A17AA /* DRRDrawingView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRDrawingView.h; sourceTree = "<group>"; };
-		F11DFEC418560E36001A17AA /* DRRDrawingVIew.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRDrawingVIew.m; sourceTree = "<group>"; };
+		F11DFEC418560E36001A17AA /* DRRDrawingView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DRRDrawingView.m; sourceTree = "<group>"; };
 		F139D7ED1875DFDC005C4511 /* Drawing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Drawing.entitlements; sourceTree = "<group>"; };
 		F1877A8D188C7FD5001760B6 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		F1A93DD0188B26D3007A5BAD /* DRRMenuController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DRRMenuController.h; sourceTree = "<group>"; };
@@ -136,7 +136,7 @@
 				F11DFEA118560DE8001A17AA /* DRRAppDelegate.h */,
 				F11DFEA218560DE8001A17AA /* DRRAppDelegate.m */,
 				F11DFEC318560E36001A17AA /* DRRDrawingView.h */,
-				F11DFEC418560E36001A17AA /* DRRDrawingVIew.m */,
+				F11DFEC418560E36001A17AA /* DRRDrawingView.m */,
 				F10F0B46187F4372009AABA7 /* DRRScene.h */,
 				F10F0B47187F4372009AABA7 /* DRRScene.m */,
 				F108A7AB185C9EE900AE183A /* DRRDock.h */,
@@ -288,7 +288,7 @@
 			files = (
 				F11DFE9C18560DE8001A17AA /* main.m in Sources */,
 				F108A7AD185C9EE900AE183A /* DRRDock.m in Sources */,
-				F11DFEC518560E36001A17AA /* DRRDrawingVIew.m in Sources */,
+				F11DFEC518560E36001A17AA /* DRRDrawingView.m in Sources */,
 				F1A93DD2188B26D3007A5BAD /* DRRMenuController.m in Sources */,
 				F11DFEA318560DE8001A17AA /* DRRAppDelegate.m in Sources */,
 				F10F0B48187F4372009AABA7 /* DRRScene.m in Sources */,

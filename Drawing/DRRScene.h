@@ -10,8 +10,8 @@
 #import "DRRDock.h"
 #include <dispatch/dispatch.h>
 
-//#define DEBUGSCENE
-//#define DEBUGPHYSICS
+#define DEBUGSCENE
+#define DEBUGPHYSICS
 
 #define lGreen colorWithCalibratedRed:0.35 green:0.88 blue:0.11 alpha:1 // 88 224 12
 typedef enum dir {LEFT, UP, DOWN, RIGHT, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT} dir_t;
@@ -64,7 +64,6 @@ typedef enum dir {LEFT, UP, DOWN, RIGHT, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT} d
 
 - (void)freeContainer;
 
-//- (void)addKeyToBlock:(NSPoint);
 - (void)addNode:(SKShapeNode *)node andWithPhysics:(SKShapeNode *)nodeWithPhysics;
 - (SKShapeNode *)nodeByKey:(NSInteger)key wantsPhysics:(BOOL)flag;
 /** Ritorna un array che contiene gli SKShapeNode che appaiono nei blocchi che contengono il rettangolo dato.

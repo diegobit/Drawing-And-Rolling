@@ -10,7 +10,6 @@
 
 static const uint32_t ballCategory      =  0x1 << 0;
 static const uint32_t lineCategory      =  0x1 << 1;
-static const uint32_t emptyCategory      =  0x1 << 1;
 
 
 
@@ -317,7 +316,7 @@ static const uint32_t emptyCategory      =  0x1 << 1;
         self.prevBallPos = self.ball.position;
         [self.ball setPhysicsBody:[SKPhysicsBody bodyWithCircleOfRadius:rad]];
         self.ball.physicsBody.categoryBitMask = ballCategory;
-        self.ball.physicsBody.collisionBitMask = /*emptyCategory;*/ lineCategory;
+        self.ball.physicsBody.collisionBitMask = lineCategory;
         [self.ball.physicsBody setFriction:0.4];
         
         #ifdef DEBUGPHYSICS
@@ -355,7 +354,7 @@ static const uint32_t emptyCategory      =  0x1 << 1;
                 currNodePhys.physicsBody.dynamic = NO;
                 currNodePhys.physicsBody.resting = YES;
                 currNodePhys.physicsBody.categoryBitMask = lineCategory;
-                currNodePhys.physicsBody.collisionBitMask = /*emptyCategory;*/ ballCategory;
+                currNodePhys.physicsBody.collisionBitMask = ballCategory;
                 
                 // Aggiungo il nodo al contenitore di linee per aggiungere all'albero della scena solo quelle che servono
                 [self.linesContainer addNode:currNode andWithPhysics:currNodePhys];
@@ -454,11 +453,12 @@ static const uint32_t emptyCategory      =  0x1 << 1;
     // Ogni qualche frame (PhysicsUpdateRequiredTime è il tempo che deve passare da un update all'altro)
     // aggiorno il sottoalbero del mondo che contiene le linee
     if (currentTime - self.prevPhysicsUpdateTime > self.PhysicsUpdateRequiredTime) {
-        self.prevPhysicsUpdateTime = currentTime;
         
         // Se non sono al primo update aggiorno la scena (solo se il thread che calcola le prossime linee da disegnare e da calcolarne la fisica ha finito)
         if (!self.firstdraw) {
             if (!self.isComputingScene) {
+                self.prevPhysicsUpdateTime = currentTime; // Sto aggiornando la fisica nella scena, resetto l'updateTime
+                
                 [self.worldWithPhysics removeAllChildren];
                 [self.nextNodesPhys enumerateObjectsUsingBlock:^(SKShapeNode * node, NSUInteger idx, BOOL *stop) {
                     [self.worldWithPhysics addChild:node];
@@ -624,7 +624,6 @@ static const uint32_t emptyCategory      =  0x1 << 1;
         
         [self setWantsLayer:YES];
         
-//        DRRScene * tempScene = [[DRRScene alloc] initWithSize:self.bounds.size];
         [self presentScene:nil];
         
         self.pan = NSMakePoint(0, 0);

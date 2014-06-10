@@ -101,7 +101,7 @@
     
     [super awakeFromNib];
     [self setWantsLayer:YES];
-    self.ball = [[DRRBall alloc] initWithRadius:15];
+    self.ball = [[DRRBall alloc] initWithRadius:BALLRADIUS];
     
     // Dimensione bottoni della dock, spessore line del disegno interno. Rotondità tasti.
     self.cellsize = NSMakeSize(40, 40);
@@ -115,7 +115,7 @@
     
     // nome base salvataggio file. Estensioni
     self.filesavename = @"map";
-    self.fileTypes = [NSArray arrayWithObjects:@"sav", nil];
+    self.fileTypes = [NSArray arrayWithObjects:@"dsf", nil];
     
     // Creo la dock e i bottoni
     self.dock = [[DRRDock alloc] initWithFrame:NSMakeRect(1, 0, 1, 1)
@@ -198,6 +198,7 @@
     [self.btnPlay setAction:play_pause];
     [self.btnPlay setTarget:self];
     [self.dock putCell:self.btnPlay atRow:8 column:0];
+    [self.dock setKeyCell:self.btnPlay]; // Cella da premere con la barra spazio
     
     NSMutableArray * stopPaths = [[NSMutableArray alloc] init];
     NSMutableArray * stopModes = [[NSMutableArray alloc] init];
@@ -227,53 +228,56 @@
     [self addSubview:self.sceneView];
     
     // Aggiungo l'handler degli eventi della tastiera
-    self.eventMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:NSKeyDownMask
-                                                              handler:^NSEvent * (NSEvent * theEvent) {
-                                                                  int found = NO;
-                                                                  
-                                                                  switch ([theEvent keyCode]) {
-                                                                      case 123:             // Freccia sinistra
-                                                                          [self move:NSMakeSize(-20, 0) invalidate:YES];
-                                                                          found = YES;
-                                                                          break;
-                                                                      case 124:             // Freccia destra
-                                                                          [self move:NSMakeSize(20, 0) invalidate:YES];
-                                                                          found = YES;
-                                                                          break;
-                                                                      case 125:             // Freccia giù
-                                                                          [self move:NSMakeSize(0, -20) invalidate:YES];
-                                                                          found = YES;
-                                                                          break;
-                                                                      case 126:             // Freccia su
-                                                                          [self move:NSMakeSize(0, 20) invalidate:YES];
-                                                                          found = YES;
-                                                                          break;
-                                                                          
-                                                                      case 51:              // delete
-                                                                          [self removeLatestLine];
-                                                                          found = YES;
-                                                                          break;
-                                                                      case 48:              // TAB
-                                                                          [self switchToLastButton];
-                                                                          found = YES;
-                                                                          break;
-                                                                      case 49:              // barra spazio
-                                                                          [self startOrPauseScene];
-                                                                          found = YES;
-                                                                          break;
-                                                                      case 53:              // esc
-                                                                          [self stopScene];
-                                                                          found = YES;
-                                                                          break;
-                                                                      default:
-                                                                          break;
-                                                                  }
-                                                                  
-                                                                  if (found)
-                                                                      return nil; // NON invio l'evento se ho premuto un tasto
-                                                                  else
-                                                                      return theEvent;
-                                                              }];
+    self.eventMonitor =
+    [NSEvent addLocalMonitorForEventsMatchingMask:NSKeyDownMask
+                                          handler:^NSEvent * (NSEvent * theEvent) {
+                                              int found = NO;
+                                              
+                                              switch ([theEvent keyCode]) {
+                                                  case 123:             // Freccia sinistra
+                                                      [self move:NSMakeSize(-20, 0) invalidate:YES];
+                                                      found = YES;
+                                                      break;
+                                                  case 124:             // Freccia destra
+                                                      [self move:NSMakeSize(20, 0) invalidate:YES];
+                                                      found = YES;
+                                                      break;
+                                                  case 125:             // Freccia giù
+                                                      [self move:NSMakeSize(0, -20) invalidate:YES];
+                                                      found = YES;
+                                                      break;
+                                                  case 126:             // Freccia su
+                                                      [self move:NSMakeSize(0, 20) invalidate:YES];
+                                                      found = YES;
+                                                      break;
+                                                      
+                                                  case 51:              // delete
+                                                      [self removeLatestLine];
+                                                      found = YES;
+                                                      break;
+                                                  case 48:              // TAB
+                                                      [self switchToLastButton];
+                                                      found = YES;
+                                                      break;
+                                                  case 49:              // barra spazio
+                                                      [self startOrPauseScene];
+//                                                      [self.dock selectCell:self.btnPlay]
+//                                                      self.btnPlay setAltMode:YES;
+                                                      found = YES;
+                                                      break;
+                                                  case 53:              // esc
+                                                      [self stopScene];
+                                                      found = YES;
+                                                      break;
+                                                  default:
+                                                      break;
+                                              }
+                                              
+                                              if (found)
+                                                  return nil; // NON invio l'evento se ho premuto un tasto
+                                              else
+                                                  return theEvent;
+                                          }];
 }
 
 - (void)setItemPropertiesToDefault {
@@ -408,7 +412,8 @@
                 [self.linesContainer addObject:line];
             }];
             
-            // Ricostruisco l'array della history
+            // Ricostruisco l'history
+            // Prima divido le linee dalla palla
             NSArray * rawhistory = [filecontentdivided[1] componentsSeparatedByString:@"\n"];
             [rawhistory enumerateObjectsUsingBlock:^(NSString * entry, NSUInteger idx, BOOL *stop) {
                 DRRSegmentIdx * indexes = [[DRRSegmentIdx alloc] init];
@@ -484,35 +489,35 @@
     if ([self.linesContainer count] > 0) {
         // comincio il ciclo: per ogni oggetto dell'array (NSMutableArray di NSPoint)...
         [self.linesContainer enumerateObjectsWithOptions:NSEnumerationReverse
-                                   usingBlock:^(id line, NSUInteger idx, BOOL *stop) {
-                                       
-                                       // ...cerco i punti i cui indici sono il primo e l'ultimo della linea
-                                       NSInteger endidx = [line count] - 1;
-                                       NSPoint startp = [line[0] pointValue];
-                                       NSPoint endp = [line[endidx] pointValue];
-                                       
-                                       // e controllo la loro distanza dal mio punto: punto finale...
-                                       if ((abs(endp.x - pt.x) <= PTDISTANCE) && (abs(endp.y - pt.y) <= PTDISTANCE) && !((abs(endp.x - pt.x) > PTDISTANCE*0.7) && (abs(endp.y - pt.y) > PTDISTANCE*0.7))) {
-                                           *stop = YES; found = YES;
-                                           doubleidx = NSMakePoint(idx, endidx);
-                                       }
-                                       // ...e punto iniziale
-                                       else if ((abs(startp.x - pt.x) <= PTDISTANCE) && (abs(startp.y - pt.y) <= PTDISTANCE) && !((abs(startp.x - pt.x) > PTDISTANCE*0.7) && (abs(startp.y - pt.y) > PTDISTANCE*0.7))) {
-                                           *stop = YES; found = YES;
-                                           
-                                           // rigiro l'array in modo da poter continuare la linea aggiungendo punti alla fine
-                                           //                                            DRRPointObj * temp;
-                                           NSValue * temp;
-                                           NSInteger i, j;
-                                           for (i = 0, j = [line count] - 1; i < j; i++, j--) {
-                                               temp = line[i];
-                                               line[i] = line[j];
-                                               line[j] = temp;
-                                           }
-                                           
-                                           doubleidx = NSMakePoint(idx, endidx);
-                                       }
-                                   }];
+                                              usingBlock:^(id line, NSUInteger idx, BOOL *stop) {
+                                                  
+                                                  // ...cerco i punti i cui indici sono il primo e l'ultimo della linea
+                                                  NSInteger endidx = [line count] - 1;
+                                                  NSPoint startp = [line[0] pointValue];
+                                                  NSPoint endp = [line[endidx] pointValue];
+                                                  
+                                                  // e controllo la loro distanza dal mio punto: punto finale...
+                                                  if ((abs(endp.x - pt.x) <= PTDISTANCE) && (abs(endp.y - pt.y) <= PTDISTANCE) && !((abs(endp.x - pt.x) > PTDISTANCE*0.7) && (abs(endp.y - pt.y) > PTDISTANCE*0.7))) {
+                                                      *stop = YES; found = YES;
+                                                      doubleidx = NSMakePoint(idx, endidx);
+                                                  }
+                                                  // ...e punto iniziale
+                                                  else if ((abs(startp.x - pt.x) <= PTDISTANCE) && (abs(startp.y - pt.y) <= PTDISTANCE) && !((abs(startp.x - pt.x) > PTDISTANCE*0.7) && (abs(startp.y - pt.y) > PTDISTANCE*0.7))) {
+                                                      *stop = YES; found = YES;
+                                                      
+                                                      // rigiro l'array in modo da poter continuare la linea aggiungendo punti alla fine
+                                                      // TODO: brutto sistema...
+                                                      NSValue * temp;
+                                                      NSInteger i, j;
+                                                      for (i = 0, j = [line count] - 1; i < j; i++, j--) {
+                                                          temp = line[i];
+                                                          line[i] = line[j];
+                                                          line[j] = temp;
+                                                      }
+                                                      
+                                                      doubleidx = NSMakePoint(idx, endidx);
+                                                  }
+                                              }];
     }
     
     // arrivo qui solo se l'array delle linee è vuoto oppure se non ho trovato un punto adiacente al mio
@@ -537,7 +542,7 @@
 
     CGFloat dX = abs(p1.x - p2.x);
     CGFloat dY = abs(p1.y - p2.y);
-    CGFloat d = sqrt((dX*dX) + (dY*dY)); ///// TODO migliora!
+    CGFloat d = sqrt((dX*dX) + (dY*dY)); // TODO: si può migliorare?
     
     return d;
     
