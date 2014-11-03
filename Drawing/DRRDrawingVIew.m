@@ -988,7 +988,9 @@
                 NSPoint centerView = NSMakePoint(self.sceneView.bounds.origin.x + self.sceneView.bounds.size.width / 2,
                                                  self.sceneView.bounds.origin.y + self.sceneView.bounds.size.height / 2);
                 self.initMove = CGVectorMake(centerView.x - ballCenterView.x, centerView.y - ballCenterView.y);
-                [self.sceneView.scene runAction:[SKAction moveBy:self.initMove duration:0.5]];
+//                [self.sceneView.scene runAction:[SKAction moveBy:self.initMove duration:0.5]];
+            [((DRRScene *) self.sceneView.scene) moveWorld:self.initMove withDuration:0.5];
+            
                 [self.sceneView moveUpdate:NSMakeSize(self.initMove.dx, self.initMove.dy) useRuntime:YES]; // TEST: è una prova!
 //            }
             

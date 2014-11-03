@@ -91,7 +91,8 @@ typedef enum dir {LEFT, UP, DOWN, RIGHT, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT} d
 @property (weak) DRRSceneView * sceneView;
 @property CGMutablePathRef pathLines;
 @property SKNode * world;
-@property SKNode * worldWithPhysics;
+@property SKNode * lines;
+@property SKNode * linesWithPhysics;
 @property SKShapeNode * ball;
 @property CGPoint prevPrevBallPos;
 @property CGPoint prevBallPos;
@@ -122,6 +123,7 @@ typedef enum dir {LEFT, UP, DOWN, RIGHT, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT} d
 - (void)update:(NSTimeInterval)currentTime;
 - (void)didEvaluateActions;
 - (void)didSimulatePhysics;
+- (void)moveWorld:(CGVector)diff withDuration:(NSTimeInterval)dur;
 
 - (void)mouseDown:(NSEvent *)theEvent;
 - (void)mouseDragged:(NSEvent *)theEvent;
@@ -154,6 +156,7 @@ typedef enum dir {LEFT, UP, DOWN, RIGHT, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT} d
 - (void)scaleScene:(DRRScene *)scene;
 - (void)moveUpdate:(NSSize)move useRuntime:(BOOL)flag;
 - (void)moveScene:(DRRScene *)scene /*useRuntime:(BOOL)flag*/;
+//- (void)moveSceneOneTimeOnly:(DRRScene *)scene by:(NSPoint)diff withDuration:(NSTimeInterval)dur;
 //- (BOOL)isOpaque;
 
 - (void)mouseDown:(NSEvent *)theEvent;

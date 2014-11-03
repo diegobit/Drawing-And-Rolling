@@ -77,6 +77,7 @@ static const uint32_t lineCategory      =  0x1 << 1;
     [self.linesLeftUp removeAllObjects];
     [self.linesLeftDown removeAllObjects];
     [self.linesRightDown removeAllObjects];
+    //TODO: e il presenceArray?
 }
 
 
@@ -281,6 +282,8 @@ static const uint32_t lineCategory      =  0x1 << 1;
 //        self.updateWorldTreeCounter = 5;
         self.PhysicsUpdateRequiredTime = 0.05; //0.083
         self.prevPhysicsUpdateTime = 0;
+        self.world = [[SKNode alloc] init];
+        [self addChild:self.world];
 //        self.firstdraw = YES;
 //        self.fixedTimeBetweenFrames = 1/60;
     }
@@ -296,6 +299,8 @@ static const uint32_t lineCategory      =  0x1 << 1;
 //        self.distEdge = CGSizeMake(self.frame.size.width / 2, self.size.height / 2);
 //        self.fixedTimeBetweenFrames = 1/60;
         
+        self.world = [[SKNode alloc] init];
+        [self addChild:self.world];
         self.ball = [[SKShapeNode alloc] init];
         CGMutablePathRef bpath = CGPathCreateMutable();
         CGPathAddEllipseInRect(bpath, NULL, CGRectMake(-rad, -rad, rad*2, rad*2));
@@ -304,33 +309,34 @@ static const uint32_t lineCategory      =  0x1 << 1;
         CGPathMoveToPoint(bpath, NULL, 0, -rad/2);
         CGPathAddLineToPoint(bpath, NULL, 0, rad/2);
         
-        
         self.ball.path = bpath;
         CGPathRelease(bpath);
         self.ball.lineWidth = 0.5;
         self.ball.fillColor = [SKColor llGray];
         self.ball.strokeColor = [SKColor blackColor];
         
-        [self addChild:self.ball];
+        [self.world addChild:self.ball];
         [self.ball setPosition:ballPos];
         self.prevBallPos = self.ball.position;
         [self.ball setPhysicsBody:[SKPhysicsBody bodyWithCircleOfRadius:rad]];
         self.ball.physicsBody.categoryBitMask = ballCategory;
         self.ball.physicsBody.collisionBitMask = lineCategory;
         [self.ball.physicsBody setFriction:0.4];
+        [self.ball.physicsBody setDensity:0.1];
+        [self.ball.physicsBody setMass:0.1];
         
         #ifdef DEBUGPHYSICS
         self.debugNode = [[SKNode alloc] init];
-        [self addChild:self.debugNode];
+        [self.world addChild:self.debugNode];
         #endif
         
         if (lpaths != NULL) {
             
 //            NSMutableArray * linesNodes = [[NSMutableArray alloc] init];
-            self.world = [[SKNode alloc] init];
-            self.worldWithPhysics = [[SKNode alloc] init];
-            [self addChild:self.world];
-            [self addChild:self.worldWithPhysics];
+            self.lines = [[SKNode alloc] init];
+            self.linesWithPhysics = [[SKNode alloc] init];
+            [self.world addChild:self.lines];
+            [self.world addChild:self.linesWithPhysics];
             
             [lpaths enumerateObjectsUsingBlock:^(NSValue * pathVal, NSUInteger idx, BOOL *stop) {
 //                [linesNodes addObject:[[SKShapeNode alloc] init]];
@@ -359,7 +365,7 @@ static const uint32_t lineCategory      =  0x1 << 1;
                 // Aggiungo il nodo al contenitore di linee per aggiungere all'albero della scena solo quelle che servono
                 [self.linesContainer addNode:currNode andWithPhysics:currNodePhys];
                 
-//                [self.world addChild:currNode];
+//                [self.lines addChild:currNode];
             }];
             
             self.screenRect_world_phys = CGRectMake(self.ball.position.x - self.blockSizeUnit,
@@ -369,7 +375,7 @@ static const uint32_t lineCategory      =  0x1 << 1;
             NSMutableSet * nextKeysPhys = [self.linesContainer keysInBlocksThatContainsRect:self.screenRect_world_phys];
             [nextKeysPhys enumerateObjectsUsingBlock:^(NSString * key, BOOL *stop) {
                 SKShapeNode * node = [self.linesContainer nodeByKey:[key integerValue] wantsPhysics:YES];
-                [self.worldWithPhysics addChild:node];
+                [self.linesWithPhysics addChild:node];
                 [node.physicsBody setResting:YES];
             }];
             
@@ -379,7 +385,7 @@ static const uint32_t lineCategory      =  0x1 << 1;
                                                self.blockSizeUnit * 3);
             NSMutableSet * nextKeys = [self.linesContainer keysInBlocksThatContainsRect:self.screenRect_world];
             [nextKeys enumerateObjectsUsingBlock:^(NSString * key, BOOL *stop) {
-                [self.world addChild:[self.linesContainer nodeByKey:[key integerValue] wantsPhysics:NO]];
+                [self.lines addChild:[self.linesContainer nodeByKey:[key integerValue] wantsPhysics:NO]];
             }];
             
             self.firstdraw = YES;
@@ -459,15 +465,15 @@ static const uint32_t lineCategory      =  0x1 << 1;
             if (!self.isComputingScene) {
                 self.prevPhysicsUpdateTime = currentTime; // Sto aggiornando la fisica nella scena, resetto l'updateTime
                 
-                [self.worldWithPhysics removeAllChildren];
+                [self.linesWithPhysics removeAllChildren];
                 [self.nextNodesPhys enumerateObjectsUsingBlock:^(SKShapeNode * node, NSUInteger idx, BOOL *stop) {
-                    [self.worldWithPhysics addChild:node];
+                    [self.linesWithPhysics addChild:node];
                     [node.physicsBody setResting:YES];
                 }];
                 
-                [self.world removeAllChildren]; // TODO fare meglio
+                [self.lines removeAllChildren]; // TODO fare meglio
                 [self.nextNodes enumerateObjectsUsingBlock:^(SKShapeNode * node, NSUInteger idx, BOOL *stop) {
-                    [self.world addChild:node];
+                    [self.lines addChild:node];
                 }];
                 
                 #ifdef DEBUGPHYSICS
@@ -584,12 +590,16 @@ static const uint32_t lineCategory      =  0x1 << 1;
         CGVector move = CGVectorMake((self.prevBallPos.x - self.ball.position.x),
                                      (self.prevBallPos.y - self.ball.position.y));
         
-        [self runAction:[SKAction moveBy:CGVectorMake(move.dx * myScale,
+        [self.world runAction:[SKAction moveBy:CGVectorMake(move.dx * myScale,
                                                       move.dy * myScale)
                                 duration:0.3]];
         [(DRRSceneView *)self.view moveUpdate:NSMakeSize(move.dx, move.dy) useRuntime:YES];
     }
     
+}
+
+- (void)moveWorld:(CGVector)diff withDuration:(NSTimeInterval)dur {
+    [self.world runAction:[SKAction moveTo:CGPointMake(diff.dx, diff.dy) duration:dur]];
 }
 
 
@@ -771,7 +781,7 @@ static const uint32_t lineCategory      =  0x1 << 1;
 
 - (void)scaleScene:(DRRScene *)scene {
 
-    [scene runAction:[SKAction scaleTo:self.scale duration:0]];
+    [scene.world runAction:[SKAction scaleTo:self.scale duration:0]];
     
 }
 
@@ -796,9 +806,13 @@ static const uint32_t lineCategory      =  0x1 << 1;
 //    else
     NSPoint diff = NSMakePoint(self.panRuntime.x * self.scale, self.panRuntime.y * self.scale);
     
-    [scene runAction:[SKAction moveTo:diff duration:0]];
+    [scene.world runAction:[SKAction moveTo:diff duration:0]];
     
 }
+
+//- (void)moveSceneOneTimeOnly(NSPoint)diff withDuration:(NSTimeInterval)dur {
+//    [self.scene. runAction:[SKAction moveTo:diff duration:dur]];
+//}
 
 
 
