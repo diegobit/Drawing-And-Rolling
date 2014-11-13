@@ -660,31 +660,35 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="ESX-2k-6oY" customClass="DRRDrawingView">
-                        <rect key="frame" x="43" y="0.0" width="757" height="450"/>
+                        <rect key="frame" x="44" y="0.0" width="756" height="450"/>
                         <connections>
-                            <outlet property="dockBar" destination="CaD-fk-kFr" id="eHf-2B-sTZ"/>
+                            <outlet property="dockBar" destination="PcJ-NE-j0b" id="OHO-zP-cLM"/>
                         </connections>
                     </customView>
-                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="CaD-fk-kFr" customClass="DRRDockBar">
-                        <rect key="frame" x="0.0" y="0.0" width="43" height="450"/>
+                    <visualEffectView appearanceType="vibrantLight" blendingMode="behindWindow" material="appearanceBased" state="followsWindowActiveState" translatesAutoresizingMaskIntoConstraints="NO" id="ScO-Pg-Q2S">
+                        <rect key="frame" x="0.0" y="0.0" width="44" height="450"/>
+                        <subviews>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="PcJ-NE-j0b" customClass="DRRDockBar">
+                                <rect key="frame" x="0.0" y="0.0" width="44" height="450"/>
+                            </customView>
+                        </subviews>
                         <constraints>
-                            <constraint firstAttribute="width" constant="43" id="o9C-U5-CJt"/>
+                            <constraint firstAttribute="bottom" secondItem="PcJ-NE-j0b" secondAttribute="bottom" id="96s-5u-Z3S"/>
+                            <constraint firstItem="PcJ-NE-j0b" firstAttribute="top" secondItem="ScO-Pg-Q2S" secondAttribute="top" id="M8h-ls-9r8"/>
+                            <constraint firstAttribute="trailing" secondItem="PcJ-NE-j0b" secondAttribute="trailing" id="MBL-5M-LLy"/>
+                            <constraint firstItem="PcJ-NE-j0b" firstAttribute="leading" secondItem="ScO-Pg-Q2S" secondAttribute="leading" id="S6N-mb-r3q"/>
+                            <constraint firstAttribute="width" constant="44" id="SRt-Z2-Tgc"/>
                         </constraints>
-                        <shadow key="shadow" blurRadius="7">
-                            <size key="offset" width="-5" height="0.0"/>
-                            <color key="color" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                        </shadow>
-                        <animations/>
-                    </customView>
+                    </visualEffectView>
                 </subviews>
                 <constraints>
-                    <constraint firstAttribute="trailing" secondItem="ESX-2k-6oY" secondAttribute="trailing" priority="500" id="4tb-a7-f9p"/>
-                    <constraint firstAttribute="bottom" secondItem="CaD-fk-kFr" secondAttribute="bottom" id="9KE-bb-bFK"/>
-                    <constraint firstItem="ESX-2k-6oY" firstAttribute="top" secondItem="372" secondAttribute="top" priority="500" id="Njb-he-F4v"/>
-                    <constraint firstItem="ESX-2k-6oY" firstAttribute="leading" secondItem="CaD-fk-kFr" secondAttribute="trailing" id="Tg4-rX-7ZW"/>
-                    <constraint firstItem="CaD-fk-kFr" firstAttribute="top" secondItem="372" secondAttribute="top" id="VnT-OU-toL"/>
-                    <constraint firstAttribute="bottom" secondItem="ESX-2k-6oY" secondAttribute="bottom" priority="500" id="aTv-Cy-LZY"/>
-                    <constraint firstItem="CaD-fk-kFr" firstAttribute="leading" secondItem="372" secondAttribute="leading" id="heT-ik-wqN"/>
+                    <constraint firstItem="ESX-2k-6oY" firstAttribute="top" secondItem="372" secondAttribute="top" id="216-l8-a2g"/>
+                    <constraint firstAttribute="bottom" secondItem="ESX-2k-6oY" secondAttribute="bottom" id="3ZU-Kf-khN"/>
+                    <constraint firstItem="ScO-Pg-Q2S" firstAttribute="leading" secondItem="372" secondAttribute="leading" id="FWp-vv-eMM"/>
+                    <constraint firstAttribute="trailing" secondItem="ESX-2k-6oY" secondAttribute="trailing" id="QeE-6x-Sgz"/>
+                    <constraint firstItem="ScO-Pg-Q2S" firstAttribute="top" secondItem="372" secondAttribute="top" id="XW6-v6-t5K"/>
+                    <constraint firstItem="ESX-2k-6oY" firstAttribute="leading" secondItem="372" secondAttribute="leading" constant="44" id="doe-DQ-pV7"/>
+                    <constraint firstAttribute="bottom" secondItem="ScO-Pg-Q2S" secondAttribute="bottom" id="v6s-cG-GNr"/>
                 </constraints>
             </view>
         </window>

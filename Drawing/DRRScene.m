@@ -599,7 +599,7 @@ static const uint32_t lineCategory      =  0x1 << 1;
 }
 
 - (void)moveWorld:(CGVector)diff withDuration:(NSTimeInterval)dur {
-    [self.world runAction:[SKAction moveTo:CGPointMake(diff.dx, diff.dy) duration:dur]];
+    [self.world runAction:[SKAction moveBy:diff duration:dur]];
 }
 
 

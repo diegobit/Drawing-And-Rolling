@@ -92,7 +92,7 @@ void makeDrawFreeButton(NSRect frame, CGFloat roundness, NSMutableArray * paths,
     
     // Aggiungo i paths all'array paths e imposto le preferenze di disegno in modes
     [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
-    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor llGray] drawingMode:FILLNORMAL]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor clearColor] drawingMode:FILLNORMAL]];
     
     [paths addObject:[[DRRPathObj alloc] initWithPath:innerborder]];
     [modes addObject:[DRRDrawingProperties initWithColor:[NSColor ddBlue] drawingMode:FILLNORMAL]];
@@ -130,7 +130,7 @@ void makeDrawLineButton(NSRect frame, CGFloat roundness, NSMutableArray * paths,
 
     // Aggiungo i paths all'array paths e ad impostare le preferenze di disegno in modes
     [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
-    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor llGray] drawingMode:FILLNORMAL]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor clearColor] drawingMode:FILLNORMAL]];
     
     [paths addObject:[[DRRPathObj alloc] initWithPath:innerborder]];
     [modes addObject:[DRRDrawingProperties initWithColor:[NSColor ddBlue] drawingMode:FILLNORMAL]];
@@ -199,7 +199,7 @@ void makePanButton(NSRect frame, NSMutableArray * paths, NSMutableArray * modes)
     
     // Aggiungo i paths all'array paths e ad impostare le preferenze di disegno in modes
     [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
-    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor llGray] drawingMode:FILLBOTH]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor clearColor] drawingMode:FILLBOTH]];
     
     [paths addObject:[[DRRPathObj alloc] initWithPath:innerborder]];
     [modes addObject:[DRRDrawingProperties initWithColor:[NSColor ddBlue] drawingMode:FILLBOTH]];
@@ -258,7 +258,7 @@ void makeZoomButton(NSRect frame, NSMutableArray * paths, NSMutableArray * modes
     
     // Aggiungo i paths all'array paths e ad impostare le preferenze di disegno in modes
     [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
-    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor llGray] drawingMode:FILLBOTH]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor clearColor] drawingMode:FILLBOTH]];
     
     [paths addObject:[[DRRPathObj alloc] initWithPath:innerborder]];
     [modes addObject:[DRRDrawingProperties initWithColor:[NSColor ddBlue] drawingMode:FILLBOTH]];
@@ -320,7 +320,7 @@ void makeBackButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     
     // Aggiungo i paths all'array paths e imposto le preferenze di disegno in modes
     [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
-    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor llGray] drawingMode:FILLNORMAL]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor clearColor] drawingMode:FILLNORMAL]];
     
     [paths addObject:[[DRRPathObj alloc] initWithPath:innerborder]];
     [modes addObject:[DRRDrawingProperties initWithColor:[NSColor ddBlue] drawingMode:FILLNORMAL]];
@@ -399,7 +399,7 @@ void makeSaveButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     
     // Aggiungo i paths all'array paths e imposto le preferenze di disegno in modes
     [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
-    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor llGray] drawingMode:FILLBOTH]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor clearColor] drawingMode:FILLBOTH]];
     
     [paths addObject:[[DRRPathObj alloc] initWithPath:innerborder]];
     [modes addObject:[DRRDrawingProperties initWithColor:[NSColor ddBlue] drawingMode:FILLBOTH]];
@@ -481,7 +481,7 @@ void makeLoadButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     
     // Aggiungo i paths all'array paths e imposto le preferenze di disegno in modes
     [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
-    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor llGray] drawingMode:FILLBOTH]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor clearColor] drawingMode:FILLBOTH]];
     
     [paths addObject:[[DRRPathObj alloc] initWithPath:innerborder]];
     [modes addObject:[DRRDrawingProperties initWithColor:[NSColor ddBlue] drawingMode:FILLBOTH]];
@@ -611,7 +611,7 @@ void makeTrashButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NS
     
     // Aggiungo i paths all'array paths e imposto le preferenze di disegno in modes
     [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
-    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor llGray] drawingMode:FILLBOTH]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor clearColor] drawingMode:FILLBOTH]];
     
     [paths addObject:[[DRRPathObj alloc] initWithPath:innerborder]];
     [modes addObject:[DRRDrawingProperties initWithColor:[NSColor ddBlue] drawingMode:FILLNORMAL]];
@@ -692,7 +692,7 @@ void makePlayButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     
     // Aggiungo i paths all'array paths e imposto le preferenze di disegno in modes
     [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
-    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor llGray] drawingMode:FILLBOTH]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor clearColor] drawingMode:FILLBOTH]];
     
     [paths addObject:[[DRRPathObj alloc] initWithPath:innerborder]];
     [modes addObject:[DRRDrawingProperties initWithColor:[NSColor ddBlue] drawingMode:FILLBOTH]];
@@ -741,7 +741,7 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     
     // Aggiungo i paths all'array paths e imposto le preferenze di disegno in modes
     [paths addObject:[[DRRPathObj alloc] initWithPath:border]];
-    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor llGray] drawingMode:FILLBOTH]];
+    [modes addObject:[DRRDrawingProperties initWithColor:[NSColor clearColor] drawingMode:FILLBOTH]];
     
     [paths addObject:[[DRRPathObj alloc] initWithPath:innerborder]];
     [modes addObject:[DRRDrawingProperties initWithColor:[NSColor ddBlue] drawingMode:FILLBOTH]];
@@ -779,6 +779,10 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 //- (void) awakeF
 
+- (BOOL)allowsVibrancy {
+    return YES;
+}
+
 - (BOOL)preservesContentDuringLiveResize {
     return YES;
 }
@@ -815,11 +819,19 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     #endif
     
     // Coloro lo sfondo
-    [[NSColor llGray] set];
-    NSRectFill(NSMakeRect(dirtyRect.origin.x,
+//    [[NSColor llGray] set];
+//    NSRectFill(NSMakeRect(dirtyRect.origin.x,
+//                          dirtyRect.origin.y,
+//                          dirtyRect.size.width - 1,
+//                          dirtyRect.size.height));
+    
+    // Disegno una linea a destra
+    [[NSColor colorWithDeviceWhite:0.85 alpha:1.0] set];
+    NSRectFill(NSMakeRect(dirtyRect.origin.x + dirtyRect.size.width - 1,
                           dirtyRect.origin.y,
-                          dirtyRect.size.width,
+                          1,
                           dirtyRect.size.height));
+
     
 //    // Coloro la linea del bordo a destra
 //    [[NSColor lightGrayColor] set];
@@ -885,6 +897,10 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
     self.prevSelectCell = [self selectedCell];
     self.prevSelectCell_RMouse = [self selectedCell];
     [self setWantsLayer:YES];
+}
+
+- (BOOL)allowsVibrancy {
+    return NO;
 }
 
 

@@ -218,7 +218,7 @@
     [dockBar addSubview:self.dock];
     [self.dock.dockdelegate updateCursor:self];
     
-    [self.window setMinSize:NSMakeSize(self.dock.frame.size.height / 2,
+    [self.window setMinSize:NSMakeSize(self.dock.frame.size.height / 4,
                                        self.dock.frame.size.height + self.dock.cellSize.height)];
     
     // Ora inizializzo e aggiungo la vista che gestirà la scena.
@@ -315,6 +315,10 @@
     self.w2vScale = [NSAffineTransform transform];
     self.initMove = CGVectorMake(0, 0);
     
+}
+
+- (BOOL)allowsVibrancy {
+    return YES;
 }
 
 
@@ -974,7 +978,7 @@
         NSPoint ballCenter = NSMakePoint(0, 0);
         if (self.ball.isAlreadyPlaced)
             ballCenter = self.ball.center;
-        
+
         [self.sceneView buildSceneContent:self.linesContainer
                              ballPosition:ballCenter
                                ballRadius:self.ball.radius];
@@ -984,16 +988,28 @@
         
         // Sposto la camera sulla palla
         if (self.ball.isAlreadyPlaced) {
-            CGPoint ballCenterView = NSPointToCGPoint([self.w2vScale transformPoint:[self.w2vTrans transformPoint:self.ball.center]]);
-                NSPoint centerView = NSMakePoint(self.sceneView.bounds.origin.x + self.sceneView.bounds.size.width / 2,
-                                                 self.sceneView.bounds.origin.y + self.sceneView.bounds.size.height / 2);
-                self.initMove = CGVectorMake(centerView.x - ballCenterView.x, centerView.y - ballCenterView.y);
-//                [self.sceneView.scene runAction:[SKAction moveBy:self.initMove duration:0.5]];
+//            CGPoint ballCenterView = NSPointToCGPoint([self.w2vScale transformPoint:[self.w2vTrans transformPoint:self.ball.center]]);
+//            NSPoint centerView = NSMakePoint(self.sceneView.bounds.origin.x + self.sceneView.bounds.size.width / 2,
+//                                             self.sceneView.bounds.origin.y + self.sceneView.bounds.size.height / 2);
+//            self.initMove = CGVectorMake(centerView.x - ballCenterView.x, centerView.y - ballCenterView.y);
+////            [self.sceneView.scene runAction:[SKAction moveBy:self.initMove duration:0.5]];
+//            [((DRRScene *) self.sceneView.scene) moveWorld:self.initMove withDuration:0.5];
+            NSPoint viewCenter = NSMakePoint(self.sceneView.bounds.origin.x + self.sceneView.bounds.size.width / 2,
+                                             self.sceneView.bounds.origin.y + self.sceneView.bounds.size.height / 2);
+            NSPoint viewCenter_world = [self.v2wTrans transformPoint:[self.v2wScale transformPoint:viewCenter]];
+            self.initMove = CGVectorMake(viewCenter_world.x - self.ball.center.x, viewCenter_world.y - self.ball.center.y);
+//            [self.sceneView.scene runAction:[SKAction moveBy:self.initMove duration:0.5]];
             [((DRRScene *) self.sceneView.scene) moveWorld:self.initMove withDuration:0.5];
             
-                [self.sceneView moveUpdate:NSMakeSize(self.initMove.dx, self.initMove.dy) useRuntime:YES]; // TEST: è una prova!
+            [self.sceneView moveUpdate:NSMakeSize(self.initMove.dx, self.initMove.dy) useRuntime:YES]; // TEST: è una prova!
 //            }
             
+            NSLog(@"x:%f-y:%f w:%f h:%f", self.sceneView.bounds.origin.x, self.sceneView.bounds.origin.y, self.sceneView.bounds.size.width, self.sceneView.bounds.size.height);
+            NSLog(@"ballCenterW x:%f-y:%f", self.ball.center.x, self.ball.center.y);
+            NSLog(@"centerView x:%f-y:%f", viewCenter.x, viewCenter.y);
+            NSLog(@"centerView_wordl x:%f-y:%f", viewCenter_world.x, viewCenter_world.y);
+            NSLog(@"move x:%f-y:%f", self.initMove.dx, self.initMove.dy);
+            NSLog(@"....................");
         }
         
         
@@ -1179,7 +1195,7 @@
             NSPoint prevmouseXYworld = [self.v2wTrans transformPoint:[self.v2wScale transformPoint:self.prevmouseXY]];
             CGFloat d = [self distanceBetweenPoint:prevmouseXYworld andPoint:pworld];
             
-            if (d > 20) {
+            if (d > SEGLENGTH) {
                 if (!self.ball.isAlreadyPlaced) {
                     CGFloat bX = prevmouseXYworld.x;
                     if (pworld.x - prevmouseXYworld.x > 0)
@@ -1222,7 +1238,7 @@
             
             NSPoint prevmouseXYworld = [self.v2wTrans transformPoint:[self.v2wScale transformPoint:self.prevmouseXY]];
             CGFloat d = [self distanceBetweenPoint:prevmouseXYworld andPoint:pworld];
-            if (d > 20) {
+            if (d > SEGLENGTH) {
                 self.prevTempPoint = self.tempPoint;
                 self.tempPoint = pworld;
                 self.validLine = YES;

@@ -23,7 +23,8 @@
 #define NOTFOUND -11    // non ha trovato l'elemento cercato
 //#define ARGERROR -10    // parametro non valido
 
-#define PTDISTANCE 12.0 // distanza tra due punti per essere considerati adiacenti
+#define PTDISTANCE 10 // distanza tra due punti per essere considerati adiacenti
+#define SEGLENGTH 10 // lunghezza minima di un tratto di linea quando disegno
 #define BALLRADIUS 15 // raggio di default della palla
 
 
@@ -65,6 +66,7 @@ typedef enum customcursor {PANWAIT, PANACTIVE, PANBALL, ZOOM, ZOOMIN, ZOOMOUT, D
 
 @interface DRRDrawingView : NSView <dockToView> {
     IBOutlet __weak DRRDockBar * dockBar;
+    IBOutlet __weak NSVisualEffectView * dockEffectBar;
 }
     
 /// Indica se il tasto sinistro del mouse è premuto nel momento del controllo.

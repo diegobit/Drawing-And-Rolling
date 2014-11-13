@@ -10,6 +10,7 @@
 
 #define llGray colorWithCalibratedRed:0.89 green:0.89 blue:0.89 alpha:1
 #define ddBlue colorWithCalibratedRed:0.05 green:0.05 blue:0.1 alpha:1
+#define ddBlue_legacy colorWithCalibratedRed:0.05 green:0.05 blue:0.1 alpha:1
 
 //#define DEBUGDOCKDRAW
 //#define DEBUGDOCKMOUSECORR
@@ -54,6 +55,8 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 
 @interface DRRDockBar : NSView
 
+- (BOOL)allowsVibrancy;
+
 - (BOOL)preservesContentDuringLiveResize;
 
 - (void)drawRect:(NSRect)dirtyRect;
@@ -76,6 +79,7 @@ void makeStopButton(NSRect frame, CGFloat roundness, NSMutableArray * paths, NSM
 @property (weak) id prevSelectCell_RMouse;
 @property (weak) id prevSelectCell_playPause;
 @property (weak) id <dockToView> dockdelegate;
+
 
 - (id)init;
 - (id)initWithFrame:(NSRect)frameRect;
