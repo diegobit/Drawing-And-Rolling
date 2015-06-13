@@ -501,12 +501,12 @@
                                                   NSPoint endp = [line[endidx] pointValue];
                                                   
                                                   // e controllo la loro distanza dal mio punto: punto finale...
-                                                  if ((abs(endp.x - pt.x) <= PTDISTANCE) && (abs(endp.y - pt.y) <= PTDISTANCE) && !((abs(endp.x - pt.x) > PTDISTANCE*0.7) && (abs(endp.y - pt.y) > PTDISTANCE*0.7))) {
+                                                  if ((fabs(endp.x - pt.x) <= PTDISTANCE) && (fabs(endp.y - pt.y) <= PTDISTANCE) && !((fabs(endp.x - pt.x) > PTDISTANCE*0.7) && (fabs(endp.y - pt.y) > PTDISTANCE*0.7))) {
                                                       *stop = YES; found = YES;
                                                       doubleidx = NSMakePoint(idx, endidx);
                                                   }
                                                   // ...e punto iniziale
-                                                  else if ((abs(startp.x - pt.x) <= PTDISTANCE) && (abs(startp.y - pt.y) <= PTDISTANCE) && !((abs(startp.x - pt.x) > PTDISTANCE*0.7) && (abs(startp.y - pt.y) > PTDISTANCE*0.7))) {
+                                                  else if ((fabs(startp.x - pt.x) <= PTDISTANCE) && (fabs(startp.y - pt.y) <= PTDISTANCE) && !((fabs(startp.x - pt.x) > PTDISTANCE*0.7) && (fabs(startp.y - pt.y) > PTDISTANCE*0.7))) {
                                                       *stop = YES; found = YES;
                                                       
                                                       // rigiro l'array in modo da poter continuare la linea aggiungendo punti alla fine
@@ -544,8 +544,8 @@
 
 - (CGFloat)distanceBetweenPoint:(NSPoint)p1 andPoint:(NSPoint)p2 {
 
-    CGFloat dX = abs(p1.x - p2.x);
-    CGFloat dY = abs(p1.y - p2.y);
+    CGFloat dX = fabs(p1.x - p2.x);
+    CGFloat dY = fabs(p1.y - p2.y);
     CGFloat d = sqrt((dX*dX) + (dY*dY)); // TODO: si può migliorare?
     
     return d;
@@ -1003,13 +1003,6 @@
             
             [self.sceneView moveUpdate:NSMakeSize(self.initMove.dx, self.initMove.dy) useRuntime:YES]; // TEST: è una prova!
 //            }
-            
-            NSLog(@"x:%f-y:%f w:%f h:%f", self.sceneView.bounds.origin.x, self.sceneView.bounds.origin.y, self.sceneView.bounds.size.width, self.sceneView.bounds.size.height);
-            NSLog(@"ballCenterW x:%f-y:%f", self.ball.center.x, self.ball.center.y);
-            NSLog(@"centerView x:%f-y:%f", viewCenter.x, viewCenter.y);
-            NSLog(@"centerView_wordl x:%f-y:%f", viewCenter_world.x, viewCenter_world.y);
-            NSLog(@"move x:%f-y:%f", self.initMove.dx, self.initMove.dy);
-            NSLog(@"....................");
         }
         
         
@@ -1075,6 +1068,7 @@
         [self.dock getRow:&row column:&col ofCell:self.dock.prevSelectCell_playPause];
 //        [self.dock selectCellAtRow:row column:col];
         [self.dock setState:NSOnState atRow:row column:col];
+        
         
         [self setNeedsDisplay:YES];
     }
@@ -1335,7 +1329,7 @@
             CGFloat diff = pview.y - self.prevmouseXY.y;
             CGFloat s = 1;
             
-            if (abs(diff) > 1) {
+            if (fabs(diff) > 1) {
                 
                 if (diff > 0) {
                     if (self.customCursor != ZOOMIN) {
