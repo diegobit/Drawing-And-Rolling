@@ -5,3 +5,5 @@ Made for the finalterm project of Interazione Uomo Macchina (IUM).
 
 **How to build**  
 This repository contains everything necessary to build it with XCode 6.
+
+![Screenshot](/screenshots/1.png)
