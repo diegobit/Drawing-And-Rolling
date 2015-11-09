@@ -460,10 +460,10 @@
 
     if ([self.sceneView isHidden]) {
         NSAlert * alert = [[NSAlert alloc] init];
-        [alert setMessageText:@"Eliminare ogni modifica?"];
-        [alert setInformativeText:@"Non potrai tornare indietro."];
-        [alert addButtonWithTitle:@"Elimina"];
-        [alert addButtonWithTitle:@"Annulla"];
+        [alert setMessageText:@"Reset current map?"];
+        [alert setInformativeText:@"You can't undo this."];
+        [alert addButtonWithTitle:@"Delete"];
+        [alert addButtonWithTitle:@"Abort"];
         [alert setAlertStyle:NSWarningAlertStyle];
         
         if ([alert runModal] == NSAlertFirstButtonReturn) {
