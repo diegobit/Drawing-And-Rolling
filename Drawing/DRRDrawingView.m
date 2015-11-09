@@ -261,8 +261,8 @@
                                                       break;
                                                   case 49:              // barra spazio
                                                       [self startOrPauseScene];
-//                                                      [self.dock selectCell:self.btnPlay]
-//                                                      self.btnPlay setAltMode:YES;
+//                                                      [self.dock selectCell:self.btnPlay];
+//                                                      [self.btnPlay setAltMode:YES];
                                                       found = YES;
                                                       break;
                                                   case 53:              // esc
