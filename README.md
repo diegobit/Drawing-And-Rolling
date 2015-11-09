@@ -1,4 +1,4 @@
-# Drawing
+# Drawing and Rolling
 In this little game a ball moved by gravity runs on the lines you draw.  
 It's written in Objective-C with the physics framework SpriteKit. Tested on OS X El Capitan.
 

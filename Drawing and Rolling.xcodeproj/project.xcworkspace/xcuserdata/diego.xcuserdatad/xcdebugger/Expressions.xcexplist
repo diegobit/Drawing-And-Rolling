@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "-[DRRScene update:]:DRRScene.m">
+      </ContextState>
+      <ContextState
+         contextName = "-[DRRLinesContainer blockOfCoordinate:]:DRRScene.m">
+      </ContextState>
+      <ContextState
+         contextName = "-[DRRLinesContainer blocksCoordFromRect:]:DRRScene.m">
+      </ContextState>
+      <ContextState
+         contextName = "-[DRRDrawingView drawRect:]:DRRDrawingVIew.m">
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>
